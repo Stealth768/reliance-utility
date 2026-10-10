@@ -8,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
@@ -26,6 +26,23 @@ from src.metrics import (
 )
 from src.synthetic.data import degrade_A, make_data, null_A
 from src.synthetic.models import FixedModel, GatedModel, PartialGatedModel
+from src.synthetic.models_v03 import OracleGatedModel, SharpGatedModel
+
+
+def get_default_v03_models() -> List[Tuple[str, Any]]:
+    """Return the set of models evaluated in synthetic benchmark iteration v0.3."""
+    return [
+        ("FixedModel", FixedModel),
+        ("GatedModel", GatedModel),
+        ("PartialGatedModel", PartialGatedModel),
+        ("OracleGatedModel", OracleGatedModel),
+        ("SharpGatedModel_0.5", lambda: SharpGatedModel(0.5)),
+        ("SharpGatedModel_1.0", lambda: SharpGatedModel(1.0)),
+        ("SharpGatedModel_2.0", lambda: SharpGatedModel(2.0)),
+        ("SharpGatedModel_4.0", lambda: SharpGatedModel(4.0)),
+        ("SharpGatedModel_8.0", lambda: SharpGatedModel(8.0)),
+        ("SharpGatedModel_16.0", lambda: SharpGatedModel(16.0)),
+    ]
 
 
 def run_experiment(
@@ -35,8 +52,9 @@ def run_experiment(
     n_boot: int = 1000,
     seeds: Optional[List[int]] = None,
     null_kinds: Optional[List[str]] = None,
-    output_raw_dir: str = "results/raw/synthetic_v02",
-    output_summary_csv: str = "results/derived/synthetic_summary_v02.csv",
+    models: Optional[List[Tuple[str, Any]]] = None,
+    output_raw_dir: str = "results/raw/synthetic_v03",
+    output_summary_csv: str = "results/derived/synthetic_summary_v03.csv",
 ) -> pd.DataFrame:
     """Execute synthetic validation benchmark across models, null kinds, and seeds.
 
@@ -54,6 +72,8 @@ def run_experiment(
         List of data seeds. Defaults to [0, 1, 2, 3, 4].
     null_kinds : Optional[List[str]], default=None
         Null variants. Defaults to ['removed', 'zeros', 'mean'].
+    models : Optional[List[Tuple[str, Any]]], default=None
+        List of (model_name, model_class_or_factory) pairs.
     output_raw_dir : str
         Directory to store immutable raw output files.
     output_summary_csv : str
@@ -70,6 +90,9 @@ def run_experiment(
     if null_kinds is None:
         null_kinds = ["removed", "zeros", "mean"]
 
+    if models is None:
+        models = get_default_v03_models()
+
     raw_path = Path(output_raw_dir)
     raw_path.mkdir(parents=True, exist_ok=True)
 
@@ -77,11 +100,6 @@ def run_experiment(
     summary_path.parent.mkdir(parents=True, exist_ok=True)
 
     S_grid = np.linspace(0.0, 1.0, 21)
-    models = [
-        ("FixedModel", FixedModel),
-        ("GatedModel", GatedModel),
-        ("PartialGatedModel", PartialGatedModel),
-    ]
 
     summary_rows = []
 
@@ -104,6 +122,9 @@ def run_experiment(
                 raw_file = raw_path / raw_filename
 
                 # 1. Null baseline predictions
+                if hasattr(model, "set_severity"):
+                    model.set_severity(None)
+
                 X_null = null_A(null_kind, test.X_A, dataset_mean=np.mean(train.X_A, axis=0))
                 p_null = model.predict_proba(X_null, test.X_B)
                 acc_null_per_item = (np.argmax(p_null, axis=1) == y_test).astype(int)
@@ -120,6 +141,9 @@ def run_experiment(
                         seed=1000 * seed + int(round(S * 100)),
                         tau=tau,
                     )
+                    if hasattr(model, "set_severity"):
+                        model.set_severity(S)
+
                     ps = model.predict_proba(Xs, test.X_B)
                     acc_matrix[step_idx] = (np.argmax(ps, axis=1) == y_test).astype(int)
 
@@ -135,6 +159,9 @@ def run_experiment(
                     )
                     jsd_matrix[step_idx] = np.clip(0.5 * (kl_p + kl_null), 0.0, 1.0)
 
+                if hasattr(model, "set_severity"):
+                    model.set_severity(None)
+
                 # 3. Full-sample point estimates
                 acc_deg = [float(np.mean(acc_matrix[s])) for s in range(len(S_grid))]
                 U = utility(acc_deg, acc_null)
@@ -144,7 +171,7 @@ def run_experiment(
                 S_star = utility_crossing(U, S_grid, window=3)
                 MI = misalignment_index(R_hat, S_grid, S_star)
 
-                # 4. Bootstrap CI over test items
+                # 4. Bootstrap CI over test items (single seed)
                 def eval_resample(indices: np.ndarray):
                     acc_d_b = np.mean(acc_matrix[:, indices], axis=1)
                     acc_n_b = float(np.mean(acc_null_per_item[indices]))
@@ -231,9 +258,9 @@ def run_experiment(
                     }
                 )
 
-    # Generate pooled summary
+    # Generate pooled and hierarchical summary
     df_pooled = generate_pooled_summary(raw_path, summary_path, S_grid=S_grid, n_boot=n_boot)
-    print(f"Pooled summary written to {summary_path}")
+    print(f"Summary written to {summary_path}")
     return df_pooled
 
 
@@ -244,12 +271,15 @@ def generate_pooled_summary(
     n_boot: int = 1000,
     seed: int = 42,
 ) -> pd.DataFrame:
-    """Aggregate raw evaluation results using pooled bootstrap across all seeds.
+    """Aggregate raw evaluation results using pooled and hierarchical bootstrap across all seeds.
 
-    Fixes the aggregation anomaly where point estimates lay outside averaged CIs
-    by computing point estimates and bootstrap distributions on the pooled
-    sample of all evaluations across seeds. Reports across-seed standard
-    deviation in separate columns.
+    Computes:
+    - Pooled point estimates
+    - Pooled bootstrap confidence intervals
+    - Hierarchical bootstrap confidence intervals (resample seeds, then items within chosen seeds)
+    - Per-seed point estimate statistics (min, max, std)
+    - Bootstrap stability (std of S* across resamples)
+    - Non-crossing fraction
 
     Parameters
     ----------
@@ -260,14 +290,14 @@ def generate_pooled_summary(
     S_grid : Optional[np.ndarray], default=None
         Severity grid. Defaults to np.linspace(0, 1, 21).
     n_boot : int, default=1000
-        Number of pooled bootstrap resamples.
+        Number of bootstrap resamples.
     seed : int, default=42
-        Random seed for the pooled bootstrap.
+        Random seed for the bootstrap.
 
     Returns
     -------
     pd.DataFrame
-        Pooled summary dataframe.
+        Summary dataframe.
     """
     raw_path = Path(raw_dir)
     summary_path = Path(output_summary_csv)
@@ -276,7 +306,6 @@ def generate_pooled_summary(
     if S_grid is None:
         S_grid = np.linspace(0.0, 1.0, 21)
 
-    # Discover all models and null kinds present in raw directory
     json_files = sorted(raw_path.glob("*.json"))
     records_by_group: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
 
@@ -292,9 +321,19 @@ def generate_pooled_summary(
 
     pooled_rows = []
 
-    # Sort groups: model order, then null_kind ('removed', 'zeros', 'mean')
     null_order = {"removed": 0, "zeros": 1, "mean": 2}
-    model_order = {"FixedModel": 0, "PartialGatedModel": 1, "GatedModel": 2}
+    model_order = {
+        "FixedModel": 0,
+        "PartialGatedModel": 1,
+        "GatedModel": 2,
+        "OracleGatedModel": 3,
+        "SharpGatedModel_0.5": 4,
+        "SharpGatedModel_1.0": 5,
+        "SharpGatedModel_2.0": 6,
+        "SharpGatedModel_4.0": 7,
+        "SharpGatedModel_8.0": 8,
+        "SharpGatedModel_16.0": 9,
+    }
 
     sorted_keys = sorted(
         records_by_group.keys(),
@@ -312,15 +351,17 @@ def generate_pooled_summary(
         per_seed_clean = [e["clean_acc"] for e in entries]
         per_seed_null = [e["acc_null"] for e in entries]
 
-        # Concatenate per-item arrays across seeds
-        acc_deg_list = [np.array(e["per_item_acc_degraded"]) for e in entries]  # (21, N)
-        acc_null_list = [np.array(e["per_item_acc_null"]) for e in entries]      # (N,)
-        jsd_list = [np.array(e["per_item_jsd"]) for e in entries]                # (21, N)
+        # Per-seed arrays
+        acc_deg_by_seed = [np.array(e["per_item_acc_degraded"]) for e in entries]  # list of (21, N)
+        acc_null_by_seed = [np.array(e["per_item_acc_null"]) for e in entries]    # list of (N,)
+        jsd_by_seed = [np.array(e["per_item_jsd"]) for e in entries]              # list of (21, N)
 
-        acc_deg_pooled = np.concatenate(acc_deg_list, axis=1)  # (21, n_seeds * N)
-        acc_null_pooled = np.concatenate(acc_null_list)        # (n_seeds * N,)
-        jsd_pooled = np.concatenate(jsd_list, axis=1)          # (21, n_seeds * N)
+        n_items_per_seed = acc_null_by_seed[0].shape[0]
 
+        # Pooled arrays
+        acc_deg_pooled = np.concatenate(acc_deg_by_seed, axis=1)  # (21, n_seeds * N)
+        acc_null_pooled = np.concatenate(acc_null_by_seed)        # (n_seeds * N,)
+        jsd_pooled = np.concatenate(jsd_by_seed, axis=1)          # (21, n_seeds * N)
         n_pooled = acc_deg_pooled.shape[1]
 
         # 1. Pooled point estimates
@@ -333,7 +374,7 @@ def generate_pooled_summary(
         R_hat_pool = normalized_reliance(R_pool)
         MI_pool = misalignment_index(R_hat_pool, S_grid, S_star_pool)
 
-        # 2. Check if U(S) approaches zero without clearly crossing
+        # 2. Check if U(S) approaches zero without crossing
         U_smooth = smooth(U_pool, window=3)
         min_u_sm = float(np.min(U_smooth))
         approaches_zero = bool(min_u_sm > 0.0 and min_u_sm <= 0.05)
@@ -341,7 +382,7 @@ def generate_pooled_summary(
         # 3. Pooled bootstrap
         boot_s_samples: List[float] = []
         boot_mi_samples: List[float] = []
-        none_count = 0
+        pooled_none_count = 0
 
         for b in range(n_boot):
             b_idx = rng.integers(0, n_pooled, size=n_pooled)
@@ -351,7 +392,7 @@ def generate_pooled_summary(
             b_s = utility_crossing(b_u, S_grid, window=3)
 
             if b_s is None:
-                none_count += 1
+                pooled_none_count += 1
             else:
                 boot_s_samples.append(float(b_s))
                 b_r = np.mean(jsd_pooled[:, b_idx], axis=1)
@@ -360,42 +401,115 @@ def generate_pooled_summary(
                 if b_mi is not None:
                     boot_mi_samples.append(float(b_mi))
 
-        no_crossing_fraction = none_count / n_boot
+        pooled_no_crossing_frac = pooled_none_count / n_boot
 
-        # Bootstrap CIs and stability
-        if len(boot_s_samples) == 0:
-            s_lo, s_hi, s_boot_std = np.nan, np.nan, np.nan
-        else:
-            s_lo = float(np.percentile(boot_s_samples, 2.5))
-            s_hi = float(np.percentile(boot_s_samples, 97.5))
-            s_boot_std = float(np.std(boot_s_samples))
+        # 4. Hierarchical bootstrap (resample seeds, then items within chosen seeds)
+        hier_s_samples: List[float] = []
+        hier_mi_samples: List[float] = []
+        hier_none_count = 0
 
-        if len(boot_mi_samples) == 0:
-            mi_lo, mi_hi = np.nan, np.nan
-        else:
-            mi_lo = float(np.percentile(boot_mi_samples, 2.5))
-            mi_hi = float(np.percentile(boot_mi_samples, 97.5))
+        for b in range(n_boot):
+            chosen_seeds = rng.integers(0, n_seeds, size=n_seeds)
+            deg_means = []
+            null_means = []
+            jsd_means = []
 
-        # Across-seed standard deviations
+            for s_idx in chosen_seeds:
+                item_idx = rng.integers(0, n_items_per_seed, size=n_items_per_seed)
+                deg_means.append(np.mean(acc_deg_by_seed[s_idx][:, item_idx], axis=1))
+                null_means.append(np.mean(acc_null_by_seed[s_idx][item_idx]))
+                jsd_means.append(np.mean(jsd_by_seed[s_idx][:, item_idx], axis=1))
+
+            b_h_deg = np.mean(deg_means, axis=0)
+            b_h_null = float(np.mean(null_means))
+            b_h_jsd = np.mean(jsd_means, axis=0)
+
+            b_h_u = utility(b_h_deg, b_h_null)
+            b_h_s = utility_crossing(b_h_u, S_grid, window=3)
+
+            if b_h_s is None:
+                hier_none_count += 1
+            else:
+                hier_s_samples.append(float(b_h_s))
+                b_h_r = reliance(b_h_jsd)
+                b_h_rh = normalized_reliance(b_h_r)
+                b_h_mi = misalignment_index(b_h_rh, S_grid, b_h_s)
+                if b_h_mi is not None:
+                    hier_mi_samples.append(float(b_h_mi))
+
+        hier_no_crossing_frac = hier_none_count / n_boot
+
+        # Bounds computation
+        # Pooled CIs
+        s_pool_lo = float(np.percentile(boot_s_samples, 2.5)) if boot_s_samples else np.nan
+        s_pool_hi = float(np.percentile(boot_s_samples, 97.5)) if boot_s_samples else np.nan
+        s_boot_std = float(np.std(boot_s_samples)) if boot_s_samples else np.nan
+
+        mi_pool_lo = float(np.percentile(boot_mi_samples, 2.5)) if boot_mi_samples else np.nan
+        mi_pool_hi = float(np.percentile(boot_mi_samples, 97.5)) if boot_mi_samples else np.nan
+
+        # Hierarchical CIs
+        s_hier_lo = float(np.percentile(hier_s_samples, 2.5)) if hier_s_samples else np.nan
+        s_hier_hi = float(np.percentile(hier_s_samples, 97.5)) if hier_s_samples else np.nan
+
+        mi_hier_lo = float(np.percentile(hier_mi_samples, 2.5)) if hier_mi_samples else np.nan
+        mi_hier_hi = float(np.percentile(hier_mi_samples, 97.5)) if hier_mi_samples else np.nan
+
+        # Per-seed stats
         valid_seed_s = [s for s in per_seed_s if s is not None]
         valid_seed_mi = [m for m in per_seed_mi if m is not None]
+
+        s_seed_min = float(np.min(valid_seed_s)) if valid_seed_s else np.nan
+        s_seed_max = float(np.max(valid_seed_s)) if valid_seed_s else np.nan
         s_seed_std = float(np.std(valid_seed_s)) if len(valid_seed_s) > 1 else np.nan
+
+        mi_seed_min = float(np.min(valid_seed_mi)) if valid_seed_mi else np.nan
+        mi_seed_max = float(np.max(valid_seed_mi)) if valid_seed_mi else np.nan
         mi_seed_std = float(np.std(valid_seed_mi)) if len(valid_seed_mi) > 1 else np.nan
+
+        # Formatted string representations for reporting
+        def fmt_ci(lo: float, hi: float) -> str:
+            if np.isnan(lo) or np.isnan(hi):
+                return "no crossing"
+            return f"[{lo:.2f}, {hi:.2f}]"
+
+        def fmt_min_max(mn: float, mx: float) -> str:
+            if np.isnan(mn) or np.isnan(mx):
+                return "no crossing"
+            return f"({mn:.2f}, {mx:.2f})"
 
         pooled_rows.append(
             {
                 "model": model_name,
                 "null_kind": null_kind,
+                # S* metrics
                 "S_star": S_star_pool if S_star_pool is not None else np.nan,
-                "S_star_lo": s_lo,
-                "S_star_hi": s_hi,
+                "S_star_lo": s_pool_lo,
+                "S_star_hi": s_pool_hi,
+                "S_star_pooled_CI": fmt_ci(s_pool_lo, s_pool_hi),
+                "S_star_hier_lo": s_hier_lo,
+                "S_star_hier_hi": s_hier_hi,
+                "S_star_hier_CI": fmt_ci(s_hier_lo, s_hier_hi),
+                "S_star_seed_min": s_seed_min,
+                "S_star_seed_max": s_seed_max,
+                "S_star_seed_min_max": fmt_min_max(s_seed_min, s_seed_max),
                 "S_star_seed_std": s_seed_std,
                 "S_star_boot_std": s_boot_std,
+                # MI metrics
                 "MI": MI_pool if MI_pool is not None else np.nan,
-                "MI_lo": mi_lo,
-                "MI_hi": mi_hi,
+                "MI_lo": mi_pool_lo,
+                "MI_hi": mi_pool_hi,
+                "MI_pooled_CI": fmt_ci(mi_pool_lo, mi_pool_hi),
+                "MI_hier_lo": mi_hier_lo,
+                "MI_hier_hi": mi_hier_hi,
+                "MI_hier_CI": fmt_ci(mi_hier_lo, mi_hier_hi),
+                "MI_seed_min": mi_seed_min,
+                "MI_seed_max": mi_seed_max,
+                "MI_seed_min_max": fmt_min_max(mi_seed_min, mi_seed_max),
                 "MI_seed_std": mi_seed_std,
-                "no_crossing_fraction": no_crossing_fraction,
+                # Quality & diagnostic metrics
+                "no_crossing_fraction": pooled_no_crossing_frac,
+                "no_crossing_fraction_hier": hier_no_crossing_frac,
                 "approaches_zero_without_crossing": approaches_zero,
                 "clean_acc": float(np.mean(per_seed_clean)),
                 "null_acc": float(np.mean(per_seed_null)),
@@ -408,19 +522,8 @@ def generate_pooled_summary(
 
 
 if __name__ == "__main__":
-    # Generate fixed v0.1 summary from existing results/raw/synthetic
-    print("Generating synthetic_summary_v01_fixed.csv...")
-    df_v01_fixed = generate_pooled_summary(
-        raw_dir="results/raw/synthetic",
-        output_summary_csv="results/derived/synthetic_summary_v01_fixed.csv",
+    df_sum = run_experiment(
+        output_raw_dir="results/raw/synthetic_v03",
+        output_summary_csv="results/derived/synthetic_summary_v03.csv",
     )
-    print("v0.1 fixed summary generated successfully.")
-
-    # Run v0.2 benchmark across 3 models x 3 nulls x 5 seeds
-    print("\nRunning v0.2 benchmark into results/raw/synthetic_v02/...")
-    df_v02 = run_experiment(
-        null_kinds=["removed", "zeros", "mean"],
-        output_raw_dir="results/raw/synthetic_v02",
-        output_summary_csv="results/derived/synthetic_summary_v02.csv",
-    )
-    print("\nv0.2 benchmark complete.")
+    print(df_sum)

@@ -1,0 +1,7 @@
+{
+  "git_commit": "c7254151edf0f89e2855b2ece0f0abf0d257ae85",
+  "config_sha256": "fc5ee70f39269bde83cbf409028202a46b1452810c357abba23149f76b99ea42",
+  "seed": 4,
+  "model_name": "SharpGatedModel_16.0",
+  "timestamp_utc": "2026-10-10T15:18:11.062561+00:00"
+}

@@ -135,3 +135,95 @@ def test_pooled_bootstrap_point_within_ci():
         if test_summary_path.exists():
             test_summary_path.unlink()
 
+
+def test_oracle_gated_model_mi():
+    """OracleGatedModel has MI < 0.05 under null 'removed' (or explained due to smoothing)."""
+    from src.synthetic.models_v03 import OracleGatedModel
+    from src.metrics.metrics import (
+        jsd,
+        misalignment_index,
+        normalized_reliance,
+        reliance,
+        utility,
+        utility_crossing,
+    )
+
+    train_data = make_data(n=2000, k=4, d=8, seed=40)
+    test_data = make_data(
+        n=2000, k=4, d=8, seed=41, mu_A=train_data.mu_A, mu_B=train_data.mu_B
+    )
+    tau = float(np.std(train_data.X_A))
+
+    oracle = OracleGatedModel(cutoff=0.65)
+    oracle.fit(train_data.X_A, train_data.X_B, train_data.y)
+
+    S_grid = np.linspace(0.0, 1.0, 21)
+    p_null = oracle.predict_proba(None, test_data.X_B)
+    acc_null = float(np.mean(np.argmax(p_null, axis=1) == test_data.y))
+
+    acc_deg = []
+    jsd_list = []
+    for S in S_grid:
+        Xs = degrade_A(test_data.X_A, S=S, seed=500 + int(round(S * 100)), tau=tau)
+        oracle.set_severity(S)
+        ps = oracle.predict_proba(Xs, test_data.X_B)
+        acc = float(np.mean(np.argmax(ps, axis=1) == test_data.y))
+        acc_deg.append(acc)
+        jsd_list.append(float(np.mean(jsd(ps, p_null))))
+
+    U = utility(acc_deg, acc_null)
+    R = reliance(jsd_list)
+    R_hat = normalized_reliance(R)
+    s_star = utility_crossing(U, S_grid, window=3)
+    mi = misalignment_index(R_hat, S_grid, s_star)
+
+    assert mi is not None
+    assert mi < 0.05, f"Expected OracleGatedModel MI < 0.05, got {mi:.4f} (S*={s_star})"
+
+
+def test_v03_sweep_results_present():
+    """All 10 models and 3 null kinds are present in synthetic_summary_v03.csv with valid CIs."""
+    from pathlib import Path
+    import pandas as pd
+
+    summary_file = Path("results/derived/synthetic_summary_v03.csv")
+    assert summary_file.exists(), "results/derived/synthetic_summary_v03.csv does not exist"
+
+    df = pd.read_csv(summary_file)
+    expected_models = {
+        "FixedModel",
+        "GatedModel",
+        "PartialGatedModel",
+        "OracleGatedModel",
+        "SharpGatedModel_0.5",
+        "SharpGatedModel_1.0",
+        "SharpGatedModel_2.0",
+        "SharpGatedModel_4.0",
+        "SharpGatedModel_8.0",
+        "SharpGatedModel_16.0",
+    }
+    expected_nulls = {"removed", "zeros", "mean"}
+
+    found_models = set(df["model"].unique())
+    found_nulls = set(df["null_kind"].unique())
+
+    assert expected_models.issubset(found_models), f"Missing models: {expected_models - found_models}"
+    assert expected_nulls.issubset(found_nulls), f"Missing nulls: {expected_nulls - found_nulls}"
+    assert len(df) == 30, f"Expected 30 rows in v0.3 summary, got {len(df)}"
+
+    # Check that hierarchical CI and pooled CI columns exist
+    required_cols = [
+        "S_star",
+        "S_star_pooled_CI",
+        "S_star_hier_CI",
+        "S_star_seed_min",
+        "S_star_seed_max",
+        "MI",
+        "MI_pooled_CI",
+        "MI_hier_CI",
+        "MI_seed_min",
+        "MI_seed_max",
+    ]
+    for col in required_cols:
+        assert col in df.columns, f"Missing required column {col} in summary CSV"
+
