@@ -4,16 +4,26 @@ Run these cells in a Kaggle Notebook with a GPU accelerator (e.g. **GPU T4 x2** 
 
 ---
 
-### Cell 1: Clone Repository and Install Dependencies
+### Cell 1: Clone Repository and Checkout Tag
 
-```bash
-%%bash
-# Clone the research repository
-git clone https://github.com/Stealth768/reliance-utility.git
-cd reliance-utility
+> **Note on Private Repositories**: If the GitHub repository is private, add your GitHub Personal Access Token to Kaggle via **Add-ons -> Secrets** with the label `GITHUB_TOKEN`.
 
-# Install required VLM and dataset dependencies
-pip install -U transformers accelerate datasets pillow
+```python
+import os
+from kaggle_secrets import UserSecretsClient
+
+try:
+    user_secrets = UserSecretsClient()
+    github_token = user_secrets.get_secret("GITHUB_TOKEN")
+    clone_url = f"https://{github_token}@github.com/Stealth768/reliance-utility.git"
+    print("Using GITHUB_TOKEN secret from Kaggle.")
+except Exception:
+    clone_url = "https://github.com/Stealth768/reliance-utility.git"
+    print("Attempting public clone.")
+
+!git clone {clone_url}
+!cd reliance-utility && git checkout v0.5-vlm-pilot-code
+!pip install -U transformers accelerate datasets pillow
 ```
 
 ---
