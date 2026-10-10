@@ -123,17 +123,18 @@ def null_A(
     dataset_mean: Optional[np.ndarray] = None,
     n: Optional[int] = None,
     d: Optional[int] = None,
-) -> np.ndarray:
+) -> Optional[np.ndarray]:
     """Generate null baseline input for modality A.
 
     Variants:
+    - 'removed': None (modality A omitted from model input entirely).
     - 'zeros': all-zero tensor of same shape as X_A.
     - 'mean': constant tensor populated by dataset-level mean of X_A.
 
     Parameters
     ----------
     kind : str
-        Null variant, must be either 'zeros' or 'mean'.
+        Null variant, must be 'removed', 'zeros', or 'mean'.
     X_A : Optional[np.ndarray], default=None
         Reference feature tensor to extract shape or mean from.
     dataset_mean : Optional[np.ndarray], default=None
@@ -145,11 +146,16 @@ def null_A(
 
     Returns
     -------
-    np.ndarray
-        Null feature tensor for modality A.
+    Optional[np.ndarray]
+        Null feature tensor for modality A, or None for kind='removed'.
     """
-    if kind not in ("zeros", "mean"):
-        raise ValueError(f"Unknown null kind '{kind}'. Expected 'zeros' or 'mean'.")
+    if kind not in ("removed", "zeros", "mean"):
+        raise ValueError(
+            f"Unknown null kind '{kind}'. Expected 'removed', 'zeros', or 'mean'."
+        )
+
+    if kind == "removed":
+        return None
 
     if X_A is not None:
         target_n, target_d = X_A.shape

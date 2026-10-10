@@ -1,0 +1,7 @@
+{
+  "git_commit": "170243eb3bd3d77c46b211184951e74f4d8e929a",
+  "config_sha256": "8ef05b105db153a1393cccea75643bb2a8f068ddf94e242ebcb9031fffc44504",
+  "seed": 0,
+  "model_name": "PartialGatedModel",
+  "timestamp_utc": "2026-10-10T14:48:29.290912+00:00"
+}

@@ -26,8 +26,13 @@ def test_data_generator_reproducibility_and_shapes():
 
 
 def test_null_A_variants():
-    """null_A generates correct zeros and dataset mean shapes and values."""
+    """null_A generates correct zeros, dataset mean, and removed variants."""
     d = make_data(n=100, k=4, d=8, seed=42)
+
+    # 'removed' returns None
+    assert null_A("removed", d.X_A) is None
+    assert null_A("removed") is None
+
     zeros = null_A("zeros", d.X_A)
     assert zeros.shape == (100, 8)
     assert np.all(zeros == 0.0)
@@ -94,3 +99,39 @@ def test_gate_decreases_on_average_as_s_increases():
     slope, _ = np.polyfit(S_grid, mean_gates, 1)
     assert slope < 0.0, f"Expected negative slope for gate as S increases, got slope={slope:.3f}"
     assert mean_gates[0] > mean_gates[-1], f"Expected gate(0) > gate(1), got {mean_gates[0]:.3f} vs {mean_gates[-1]:.3f}"
+
+
+def test_pooled_bootstrap_point_within_ci():
+    """Assert point estimate lies within its own pooled bootstrap confidence interval (lo <= point <= hi)."""
+    from src.synthetic.run_validation import generate_pooled_summary
+    from pathlib import Path
+
+    raw_dir = Path("results/raw/synthetic")
+    if not raw_dir.exists() or len(list(raw_dir.glob("*.json"))) == 0:
+        pytest.skip("No synthetic raw files to test aggregation on.")
+
+    # Aggregate using pooled bootstrap into a temp or test file
+    test_summary_path = Path("results/derived/.test_pooled_summary.csv")
+    df = generate_pooled_summary(raw_dir, test_summary_path, n_boot=200, seed=123)
+
+    try:
+        for idx, row in df.iterrows():
+            if not np.isnan(row["S_star"]) and not np.isnan(row["S_star_lo"]):
+                assert row["S_star_lo"] <= row["S_star"] + 1e-9, (
+                    f"Row {idx} ({row['model']}/{row['null_kind']}): S_star {row['S_star']} < lo {row['S_star_lo']}"
+                )
+                assert row["S_star"] <= row["S_star_hi"] + 1e-9, (
+                    f"Row {idx} ({row['model']}/{row['null_kind']}): S_star {row['S_star']} > hi {row['S_star_hi']}"
+                )
+
+            if not np.isnan(row["MI"]) and not np.isnan(row["MI_lo"]):
+                assert row["MI_lo"] <= row["MI"] + 1e-9, (
+                    f"Row {idx} ({row['model']}/{row['null_kind']}): MI {row['MI']} < lo {row['MI_lo']}"
+                )
+                assert row["MI"] <= row["MI_hi"] + 1e-9, (
+                    f"Row {idx} ({row['model']}/{row['null_kind']}): MI {row['MI']} > hi {row['MI_hi']}"
+                )
+    finally:
+        if test_summary_path.exists():
+            test_summary_path.unlink()
+
