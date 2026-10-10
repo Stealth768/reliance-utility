@@ -257,19 +257,27 @@ def misalignment_index(
 
     MI = (1 / (1 - S*)) * integral_{S*}^1 R_hat(S) dS using the trapezoid rule.
 
+    MI is NOT clipped at 1.0. Values exceeding 1.0 occur when reliance grows
+    past its clean-data baseline (R_hat(S) > 1 for S >= S*), indicating severe
+    and increasing dependence on a degraded modality. Callers should not assume
+    MI in [0, 1].
+
     Parameters
     ----------
     R_hat : array-like
-        Normalized reliance values over severity grid S_grid.
+        Normalized reliance values over severity grid S_grid.  Since R_hat =
+        R(S) / R(0) and R(S) >= 0, values are non-negative but may exceed 1.
     S_grid : array-like
         Severity grid values (strictly increasing from 0 to 1).
     S_star : Optional[float]
-        Utility crossing point S*. If None, returns None.
+        Utility crossing point S*.  If None, or if S_star equals the last grid
+        point (no usable integration interval remains), returns None.
 
     Returns
     -------
     Optional[float]
-        Misalignment index in [0, 1], or None if S_star is None.
+        Misalignment index (>= 0, possibly > 1), or None if S_star is None
+        or if S_star is at or beyond the last grid point.
     """
     if S_star is None:
         return None
@@ -282,11 +290,13 @@ def misalignment_index(
             f"Length mismatch: R_hat has length {len(R_arr)}, S_grid has length {len(S_arr)}."
         )
 
-    # Edge case: crossing point at or beyond 1.0
-    if S_star >= 1.0 or np.isclose(S_star, 1.0, atol=1e-12):
-        return 0.0
+    # Edge case: crossing point at or beyond the last grid point — no usable
+    # integration interval; treat as no crossing.
+    last_grid = float(S_arr[-1])
+    if S_star >= last_grid or np.isclose(S_star, last_grid, atol=1e-12):
+        return None
 
-    # Build evaluation segment from S* to 1.0
+    # Build evaluation segment from S* to end of grid
     # Interpolate R_hat at S* if S* does not lie exactly on a grid point
     mask_after = S_arr > S_star
     sub_S = S_arr[mask_after]
@@ -304,14 +314,15 @@ def misalignment_index(
         eval_R = np.concatenate(([r_star_interp], sub_R))
 
     if len(eval_S) < 2:
-        return float(np.clip(eval_R[0], 0.0, 1.0))
+        # Only one point — return its value unclipped (R_hat >= 0)
+        return float(eval_R[0])
 
-    # Numerical integration via trapezoid rule
+    # Numerical integration via trapezoid rule (no upper clip)
     integral = float(np.sum(0.5 * (eval_R[:-1] + eval_R[1:]) * np.diff(eval_S)))
     normalization_factor = 1.0 / (1.0 - S_star)
     mi = normalization_factor * integral
 
-    return float(np.clip(mi, 0.0, 1.0))
+    return float(mi)
 
 
 def bootstrap_ci(

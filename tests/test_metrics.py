@@ -160,3 +160,32 @@ def test_bootstrap_ci():
     pe, lo, hi = res
     assert hasattr(res, "no_crossing_fraction")
     assert 0.0 <= res.no_crossing_fraction <= 1.0
+
+
+def test_misalignment_index_exceeds_one():
+    """MI > 1 when R_hat > 1 everywhere after S* (reliance grows past clean level)."""
+    s_grid = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+    s_star = 0.5
+    # R_hat = 1.5 for all S >= S* → MI should be 1.5, not clipped to 1.0
+    r_hat = np.array([1.0, 1.0, 1.5, 1.5, 1.5])
+    mi = misalignment_index(r_hat, s_grid, s_star)
+    assert mi is not None
+    assert mi > 1.0, f"Expected MI > 1.0, got {mi}"
+    assert math.isclose(mi, 1.5, rel_tol=1e-6), f"Expected MI == 1.5, got {mi}"
+
+
+def test_misalignment_index_s_star_at_last_grid_point():
+    """S* at or beyond the last grid point returns None (no usable crossing)."""
+    s_grid = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+    r_hat = np.ones(5)
+
+    # S* exactly at last grid point
+    assert misalignment_index(r_hat, s_grid, 1.0) is None
+
+    # S* beyond the grid (e.g. 0.95 rounded up to nearest grid point = 1.0)
+    assert misalignment_index(r_hat, s_grid, 1.0 - 1e-14) is None
+
+    # S* strictly before last grid point should still work
+    mi = misalignment_index(r_hat, s_grid, 0.75)
+    assert mi is not None
+    assert math.isclose(mi, 1.0, abs_tol=1e-5)
