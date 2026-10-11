@@ -1,0 +1,7 @@
+{
+  "git_commit": "not_a_git_repo",
+  "config_sha256": "6a105da35410370a7c3b317a3cd05387a37240635c1b125a35e36587dc1450ec",
+  "seed": 0,
+  "model_name": "Qwen/Qwen2-VL-2B-Instruct",
+  "timestamp_utc": "2026-10-11T05:32:44.678380+00:00"
+}
