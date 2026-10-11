@@ -1,0 +1,21 @@
+{
+  "verdict": "NO-GO",
+  "python_version": "3.13.3",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "torch_version": null,
+  "cuda_available": false,
+  "cuda_version": "None",
+  "gpu_name": "None",
+  "mmcv_version": null,
+  "mmdet3d_version": null,
+  "mmengine_version": null,
+  "disk_free_gb": 269.08,
+  "nuscenes_found": false,
+  "reasons": [
+    "PyTorch is not installed in the current environment.",
+    "CUDA GPU accelerator is not available.",
+    "mmcv is not installed (required for BEVFusion).",
+    "mmdet3d is not installed (required for BEVFusion).",
+    "nuScenes-mini dataset directory not found locally or in /kaggle/input."
+  ]
+}

@@ -37,3 +37,8 @@ This document defines the research scope, tiers of evaluation, and resource cons
 - Single corruption sweep on nuScenes-mini dataset.
 - Clear computational limitation statement:
   > "Due to limited computational resources, the driving case study is restricted to nuScenes-mini and pretrained checkpoints, and we treat it as a proof of applicability rather than a full evaluation."
+
+---
+
+## 5. BEV Driving Study: Feasibility and Status
+No driving results exist in this study. If the `bev_feasibility_check` verdict is NO-GO, the driving study is future work only and will not be included in the submitted paper. If GO, it requires a separate experiment slot outside the frozen experiment list in FREEZE.md.
