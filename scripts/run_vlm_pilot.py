@@ -201,13 +201,29 @@ def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
     also prints the top-5 next-token probabilities for the clean forward pass on
     the first item, to diagnose letter mass failures.
     """
-    import torch
-
     check_items = examples[:10]
     print(f"\n==================================================")
     print(f"RUNNING MODEL CHECK ON {len(check_items)} ITEMS: {adapter.model_id}")
     if hasattr(adapter, "_prefix_str") and adapter._prefix_str:
         print(f"  Assistant prefix: '{adapter._prefix_str}'")
+
+    # Print choice letter token ID mapping if available
+    try:
+        from src.vlm.adapters import LlavaAdapter, get_llava_choice_token_ids, get_multivariant_choice_token_ids
+        if isinstance(adapter, LlavaAdapter):
+            id_map = get_llava_choice_token_ids(adapter.tokenizer)
+            print("  LLaVA Letter Token IDs:")
+            for ltr, ids in id_map.items():
+                tok_reprs = [repr(adapter.tokenizer.decode([tid])) for tid in ids]
+                print(f"    Letter {ltr}: IDs={ids} (tokens={tok_reprs})")
+        elif hasattr(adapter, "tokenizer") and adapter.tokenizer is not None:
+            id_map = get_multivariant_choice_token_ids(adapter.tokenizer)
+            print("  Multi-variant Letter Token IDs (bare, space):")
+            for ltr, (b_id, s_id) in id_map.items():
+                print(f"    Letter {ltr}: bare={b_id}, space={s_id}")
+    except Exception as e:
+        print(f"  [Note] Letter ID table inspection skipped: {e}")
+
     print(f"==================================================")
 
     clean_correct = 0
@@ -239,26 +255,30 @@ def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
         )
 
         # For adapters with _build_prompt_text (SmolVLM, LLaVA): print top-5 next tokens
-        if i == 0 and hasattr(adapter, "_build_prompt_text"):
-            print("\n  [DIAGNOSTIC] Top-5 next tokens after clean forward pass (item 1):")
-            ex0 = check_items[0]
-            prompt_text = adapter._build_prompt_text(ex0["question"], ex0["choices"], with_image=True)
-            inputs = adapter.processor(
-                text=prompt_text,
-                images=[ex0["image"]],
-                return_tensors="pt",
-            )
-            inputs = {k: v.to(adapter.model.device) for k, v in inputs.items()}
-            with torch.no_grad():
-                raw_logits = adapter.model(**inputs).logits[0, -1, :]
-            full_probs = torch.softmax(raw_logits, dim=-1)
-            topk = torch.topk(full_probs, 5)
-            for rank, (prob_val, tok_id) in enumerate(
-                zip(topk.values.tolist(), topk.indices.tolist()), start=1
-            ):
-                tok_str = repr(adapter.tokenizer.decode([tok_id]))
-                print(f"    #{rank}: {tok_str:20s} | ID: {tok_id:6d} | Prob: {prob_val:.4f}")
-            print()
+        if i == 0 and hasattr(adapter, "_build_prompt_text") and hasattr(adapter, "processor"):
+            try:
+                import torch
+                print("\n  [DIAGNOSTIC] Top-5 next tokens after clean forward pass (item 1):")
+                ex0 = check_items[0]
+                prompt_text = adapter._build_prompt_text(ex0["question"], ex0["choices"], with_image=True)
+                inputs = adapter.processor(
+                    text=prompt_text,
+                    images=[ex0["image"]],
+                    return_tensors="pt",
+                )
+                inputs = {k: v.to(adapter.model.device) for k, v in inputs.items()}
+                with torch.no_grad():
+                    raw_logits = adapter.model(**inputs).logits[0, -1, :]
+                full_probs = torch.softmax(raw_logits, dim=-1)
+                topk = torch.topk(full_probs, 5)
+                for rank, (prob_val, tok_id) in enumerate(
+                    zip(topk.values.tolist(), topk.indices.tolist()), start=1
+                ):
+                    tok_str = repr(adapter.tokenizer.decode([tok_id]))
+                    print(f"    #{rank}: {tok_str:20s} | ID: {tok_id:6d} | Prob: {prob_val:.4f}")
+                print()
+            except Exception as diag_err:
+                print(f"  [DIAGNOSTIC skipped: {diag_err}]")
 
     mean_mass = float(np.mean(letter_masses))
     clean_acc = clean_correct / len(check_items)
@@ -324,9 +344,18 @@ def run_benchmark():
 
     # 3. Check mode execution
     if args.check:
-        adapter.load(device="cuda", dtype="float16")
-        run_check_mode(adapter, all_examples)
-        return
+        try:
+            adapter.load(device="cuda", dtype="float16")
+            run_check_mode(adapter, all_examples)
+            return
+        except SystemExit as se:
+            # Re-raise explicit exit codes (e.g. sys.exit(1) on mass < 0.90)
+            raise se
+        except Exception as e:
+            print(f"\n[ERROR] --check failed with exception: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
 
     # 4. Filter needed shard tasks (NEW: seed included in filename)
     n_shards = (n_total + args.shard_size - 1) // args.shard_size

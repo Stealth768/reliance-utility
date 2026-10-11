@@ -280,3 +280,123 @@ def test_get_adapter_forwards_prefix_to_llava():
     # None prefix -> empty string
     adapter_none = get_adapter("llava-hf/llava-1.5-7b-hf", assistant_prefix=None)
     assert adapter_none._prefix_str == ""
+
+
+def test_llava_choice_token_ids_sentencepiece_mock():
+    """Verify get_llava_choice_token_ids handles SentencePiece-style [29871, 319] tokenization."""
+    from src.vlm.adapters import get_llava_choice_token_ids
+
+    class MockLlamaTokenizer:
+        unk_token_id = 0
+
+        def convert_tokens_to_ids(self, token_str: str):
+            # SentencePiece pieces
+            mapping = {
+                " A": 319, "A": 319,
+                " B": 350, "B": 350,
+                " C": 380, "C": 380,
+                " D": 410, "D": 410,
+            }
+            return mapping.get(token_str, None)
+
+        def encode(self, text: str, add_special_tokens: bool = False):
+            # Encodes " A" as [29871, 319]
+            encode_map = {
+                " A": [29871, 319],
+                " B": [29871, 350],
+                " C": [29871, 380],
+                " D": [29871, 410],
+            }
+            return encode_map.get(text, [999])
+
+        def decode(self, token_ids):
+            # Decode single token ID
+            decode_map = {
+                319: "A",
+                350: "B",
+                380: "C",
+                410: "D",
+                29871: " ",
+            }
+            return decode_map.get(token_ids[0], "")
+
+    tok = MockLlamaTokenizer()
+    token_map = get_llava_choice_token_ids(tok)
+
+    assert set(token_map.keys()) == {"A", "B", "C", "D"}
+    # Token 319 should be found for A, deduplicated
+    assert token_map["A"] == [319]
+    assert token_map["B"] == [350]
+    assert token_map["C"] == [380]
+    assert token_map["D"] == [410]
+
+    # Verify that all token IDs are distinct across choices
+    all_ids = [tid for ids in token_map.values() for tid in ids]
+    assert len(all_ids) == len(set(all_ids))
+
+
+def test_llava_choice_token_ids_distinct_variants():
+    """Verify get_llava_choice_token_ids collects both bare and prefixed IDs when distinct."""
+    from src.vlm.adapters import get_llava_choice_token_ids
+
+    class MockDistinctTokenizer:
+        unk_token_id = 0
+
+        def convert_tokens_to_ids(self, token_str: str):
+            mapping = {
+                " A": 10319, "A": 319,
+                " B": 10350, "B": 350,
+                " C": 10380, "C": 380,
+                " D": 10410, "D": 410,
+            }
+            return mapping.get(token_str, None)
+
+        def encode(self, text: str, add_special_tokens: bool = False):
+            encode_map = {
+                " A": [29871, 319],
+                " B": [29871, 350],
+                " C": [29871, 380],
+                " D": [29871, 410],
+            }
+            return encode_map.get(text, [999])
+
+        def decode(self, token_ids):
+            decode_map = {
+                319: "A", 10319: " A",
+                350: "B", 10350: " B",
+                380: "C", 10380: " C",
+                410: "D", 10410: " D",
+                29871: " ",
+            }
+            return decode_map.get(token_ids[0], "")
+
+    tok = MockDistinctTokenizer()
+    token_map = get_llava_choice_token_ids(tok)
+
+    # For A: 10319 (from convert_tokens_to_ids(" A")) and 319 (from convert_tokens_to_ids("A") / encode)
+    assert 10319 in token_map["A"]
+    assert 319 in token_map["A"]
+    all_ids = [tid for ids in token_map.values() for tid in ids]
+    assert len(all_ids) == len(set(all_ids))
+
+
+def test_run_vlm_pilot_check_mode_exits_nonzero_on_failure():
+    """run_check_mode raises SystemExit(1) when mean mass is below 0.90."""
+    from scripts.run_vlm_pilot import run_check_mode
+
+    class LowMassAdapter(BaseVLMAdapter):
+        def load(self, device="cuda", dtype="float16"):
+            pass
+
+        def letter_probs(self, img, q, choices):
+            return np.full(4, 0.25), 0.005  # mass 0.005 < 0.90 threshold
+
+    adapter = LowMassAdapter("low-mass-model")
+    fake_examples = [
+        {"question": f"Q{i}", "choices": ["A", "B", "C", "D"], "correct_choice_idx": 0, "image": None}
+        for i in range(10)
+    ]
+    with pytest.raises(SystemExit) as exc_info:
+        run_check_mode(adapter, fake_examples)
+    assert exc_info.value.code != 0
+

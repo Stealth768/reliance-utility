@@ -300,6 +300,89 @@ class InternVL2Adapter(BaseVLMAdapter):
 
 
 
+def get_llava_choice_token_ids(tokenizer: Any) -> Dict[str, List[int]]:
+    """Look up token IDs for LLaVA (Llama/SentencePiece) multiple-choice letters.
+
+    Llama/SentencePiece encodes ' A' as [29871, 319] where 29871 is the bare space
+    token ' ' and 319 is 'A'.
+
+    For each letter L in ['A', 'B', 'C', 'D'], candidate IDs are collected from:
+    1. tokenizer.convert_tokens_to_ids(" " + L)
+    2. tokenizer.convert_tokens_to_ids(L)
+    3. The LAST ID of tokenizer.encode(" " + L, add_special_tokens=False)
+       if decoding that single ID (or stripping whitespace) yields L.
+
+    Deduplicates candidates, drops unknown IDs (None or < 0 or unk_token_id),
+    asserts at least one ID per letter, and asserts that all token IDs are
+    strictly distinct across letters.
+
+    Returns
+    -------
+    Dict[str, List[int]]
+        Mapping letter -> list of unique token IDs for that letter.
+    """
+    letter_ids: Dict[str, List[int]] = {}
+    unk_id = getattr(tokenizer, "unk_token_id", None)
+
+    for letter in CHOICE_LETTERS:
+        candidates = []
+
+        # 1. convert_tokens_to_ids(" " + L)
+        if hasattr(tokenizer, "convert_tokens_to_ids"):
+            try:
+                t1 = tokenizer.convert_tokens_to_ids(" " + letter)
+                if t1 is not None and t1 != unk_id and t1 >= 0:
+                    candidates.append(t1)
+            except Exception:
+                pass
+
+            # 2. convert_tokens_to_ids(L)
+            try:
+                t2 = tokenizer.convert_tokens_to_ids(letter)
+                if t2 is not None and t2 != unk_id and t2 >= 0:
+                    candidates.append(t2)
+            except Exception:
+                pass
+
+        # 3. Last ID of encode(" " + L, add_special_tokens=False) if decoded piece is L
+        if hasattr(tokenizer, "encode"):
+            try:
+                enc = tokenizer.encode(f" {letter}", add_special_tokens=False)
+                if enc:
+                    last_id = enc[-1]
+                    if last_id is not None and last_id != unk_id and last_id >= 0:
+                        # Check decoded piece
+                        decoded = ""
+                        if hasattr(tokenizer, "decode"):
+                            decoded = tokenizer.decode([last_id]).strip()
+                        if decoded == letter or not decoded:
+                            candidates.append(last_id)
+            except Exception:
+                pass
+
+        # Deduplicate preserving order
+        unique_ids = []
+        for cid in candidates:
+            if cid not in unique_ids:
+                unique_ids.append(cid)
+
+        if not unique_ids:
+            raise ValueError(f"No valid token IDs found for letter '{letter}' in tokenizer")
+        letter_ids[letter] = unique_ids
+
+    # Assert all IDs are distinct across letters
+    seen_ids: Dict[int, str] = {}
+    for letter, ids in letter_ids.items():
+        for cid in ids:
+            if cid in seen_ids:
+                raise ValueError(
+                    f"Token ID {cid} is associated with both '{seen_ids[cid]}' and '{letter}'"
+                )
+            seen_ids[cid] = letter
+
+    return letter_ids
+
+
 class LlavaAdapter(BaseVLMAdapter):
     """Adapter for LLaVA-1.5 family (e.g. llava-hf/llava-1.5-7b-hf).
 
@@ -320,9 +403,9 @@ class LlavaAdapter(BaseVLMAdapter):
 
     Letter probs
     ------------
-    Sum over bare (``'A'``) and space-prefixed (``' A'``) token IDs
-    (both asserted single-token), renormalized over the 4 choices.
-    Total mass over all 8 IDs is reported as the mass value.
+    Computed via ``get_llava_choice_token_ids``. Sums full-vocab softmax probabilities
+    over each letter's token IDs, with total mass over all IDs reported and renormalized
+    over the 4 choices.
     """
 
     def __init__(self, model_id: str, assistant_prefix: Optional[str] = None):
@@ -403,14 +486,14 @@ class LlavaAdapter(BaseVLMAdapter):
             outputs = self.model(**inputs)
             last_logits = outputs.logits[0, -1, :]
 
-        # Sum bare ('A') and space-prefixed (' A') token IDs
-        variant_ids = get_multivariant_choice_token_ids(self.tokenizer)
+        # Look up letter token IDs via LLaVA specific lookup
+        token_id_map = get_llava_choice_token_ids(self.tokenizer)
         full_probs = torch.softmax(last_logits, dim=-1)
 
         letter_probs_unnorm = []
         for letter in CHOICE_LETTERS:
-            bare_id, space_id = variant_ids[letter]
-            prob_sum = float((full_probs[bare_id] + full_probs[space_id]).item())
+            ids = token_id_map[letter]
+            prob_sum = float(sum(full_probs[tid].item() for tid in ids))
             letter_probs_unnorm.append(prob_sum)
 
         total_mass = sum(letter_probs_unnorm)
