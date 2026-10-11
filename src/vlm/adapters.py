@@ -90,11 +90,16 @@ class SmolVLMAdapter(BaseVLMAdapter):
 
     def load(self, device: str = "cuda", dtype: str = "float16"):
         import torch
-        from transformers import AutoModelForVision2Seq, AutoProcessor
-
         torch_dtype = torch.float16 if dtype == "float16" else torch.bfloat16
         print(f"Loading SmolVLM model: {self.model_id} ({dtype}) on {device}...")
-        self.model = AutoModelForVision2Seq.from_pretrained(
+        try:
+            from transformers import AutoModelForImageTextToText, AutoProcessor
+            model_cls = AutoModelForImageTextToText
+        except ImportError:
+            from transformers import AutoModelForVision2Seq, AutoProcessor
+            model_cls = AutoModelForVision2Seq
+
+        self.model = model_cls.from_pretrained(
             self.model_id,
             torch_dtype=torch_dtype,
             device_map="auto" if device == "cuda" else None,
@@ -102,6 +107,7 @@ class SmolVLMAdapter(BaseVLMAdapter):
         self.model.eval()
         self.processor = AutoProcessor.from_pretrained(self.model_id)
         self.tokenizer = self.processor.tokenizer
+
 
     def letter_probs(
         self,
