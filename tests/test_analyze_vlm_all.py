@@ -136,7 +136,8 @@ def test_fake_shards_produce_summary_csv(fake_raw_dir: Path, tmp_path: Path):
         "clean_acc", "acc_s1", "acc_drop", "null_removed_acc",
         "null_black_acc", "swapped_acc", "mean_letter_mass",
         "S_star", "sig_S_star", "MI", "MI_ci_pooled", "MI_ci_hierarchical",
-        "no_crossing_frac", "n_resamples_dropped", "frac_resamples_dropped",
+        "R_hat_s1", "R_hat_s1_ci",
+        "no_crossing_frac", "n_no_usable_crossing", "frac_no_usable_crossing",
     ]
     for col in expected_cols:
         assert col in df.columns, f"Missing column: {col}"
@@ -324,15 +325,17 @@ def test_analyze_vlm_all_reports_dropped_resamples_when_r0_is_zero(tmp_path: Pat
 
     summary_df = pd.read_csv(out_dir / "vlm_main_summary.csv")
     row = summary_df.iloc[0]
-    assert "n_resamples_dropped" in row
-    assert "frac_resamples_dropped" in row
+    assert "n_no_usable_crossing" in row
+    assert "frac_no_usable_crossing" in row
+    assert "R_hat_s1" in row
+    assert "R_hat_s1_ci" in row
     # Because R(0) is strictly 0.0, any resample that found a crossing will have failed in normalized_reliance
-    assert row["n_resamples_dropped"] > 0
-    assert row["frac_resamples_dropped"] > 0.0
+    assert row["n_no_usable_crossing"] > 0
+    assert row["frac_no_usable_crossing"] > 0.0
 
 
 def test_dropped_resamples_cause_columns_present_and_sum(tmp_path: Path):
-    """Four cause columns are present in the CSV and their sum equals n_resamples_dropped."""
+    """Four cause columns are present in the CSV and their sum equals n_no_usable_crossing."""
     raw_dir = tmp_path / "raw_cause"
     raw_dir.mkdir()
 
@@ -388,16 +391,16 @@ def test_dropped_resamples_cause_columns_present_and_sum(tmp_path: Path):
     row = df.iloc[0]
 
     cause_cols = [
-        "n_dropped_no_crossing",
-        "n_dropped_edge_crossing",
-        "n_dropped_r0_zero",
-        "n_dropped_other",
+        "n_no_usable_crossing_no_cross",
+        "n_no_usable_crossing_edge",
+        "n_no_usable_crossing_r0_zero",
+        "n_no_usable_crossing_other",
     ]
     for col in cause_cols:
         assert col in df.columns, f"Missing column: {col}"
         assert int(row[col]) >= 0, f"{col} must be >= 0, got {row[col]}"
 
     total_causes = sum(int(row[c]) for c in cause_cols)
-    assert total_causes == int(row["n_resamples_dropped"]), (
-        f"Cause sum {total_causes} != n_resamples_dropped {row['n_resamples_dropped']}"
+    assert total_causes == int(row["n_no_usable_crossing"]), (
+        f"Cause sum {total_causes} != n_no_usable_crossing {row['n_no_usable_crossing']}"
     )

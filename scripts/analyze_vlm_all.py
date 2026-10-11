@@ -283,6 +283,7 @@ def analyze_model_corruption_all_seeds(
     rng = np.random.default_rng(seed)
     boot_s_list = []
     boot_mi_list = []
+    boot_rhat_s1_list: List[float] = []   # R_hat at S=1 (last grid) per valid resample
     boot_u_matrix = np.zeros((n_boot, n_S), dtype=float)
     no_crossing_count = 0
     # Cause sub-counters (sum = n_resamples_dropped)
@@ -314,6 +315,7 @@ def analyze_model_corruption_all_seeds(
             b_R = reliance(b_D)
             try:
                 b_R_hat = normalized_reliance(b_R)
+                boot_rhat_s1_list.append(float(b_R_hat[-1]))   # R_hat at S=1
                 b_mi = misalignment_index(b_R_hat, S_grid, b_s)
                 if b_mi is None or np.isnan(b_mi):
                     # MI is None when S_star is at the grid edge (degenerate interval)
@@ -339,6 +341,16 @@ def analyze_model_corruption_all_seeds(
         mi_ci_pooled = (float(np.percentile(valid_mi, 2.5)), float(np.percentile(valid_mi, 97.5)))
     else:
         mi_ci_pooled = (np.nan, np.nan)
+
+    # R_hat at S=1 point estimate and 95% CI
+    R_hat_s1_point = float(core["R_hat_S"][-1]) if core["R_hat_S"] is not None else np.nan
+    if len(boot_rhat_s1_list) >= 2:
+        rhat_s1_ci = (
+            float(np.percentile(boot_rhat_s1_list, 2.5)),
+            float(np.percentile(boot_rhat_s1_list, 97.5)),
+        )
+    else:
+        rhat_s1_ci = (np.nan, np.nan)
 
     # Significant crossing: first S where upper bootstrap CI of U(S) < 0
     u_ci_upper = np.percentile(boot_u_matrix, 97.5, axis=0)
@@ -405,6 +417,9 @@ def analyze_model_corruption_all_seeds(
         "MI_ci_pooled_high": mi_ci_pooled[1],
         "MI_ci_hier_low": mi_ci_hier[0],
         "MI_ci_hier_high": mi_ci_hier[1],
+        "R_hat_s1": R_hat_s1_point,
+        "R_hat_s1_ci_low": rhat_s1_ci[0],
+        "R_hat_s1_ci_high": rhat_s1_ci[1],
         "no_crossing_frac": no_crossing_frac,
         "n_resamples_dropped": n_resamples_dropped,
         "frac_resamples_dropped": frac_resamples_dropped,
@@ -656,13 +671,20 @@ def run_full_analysis(
             "MI": mi_str,
             "MI_ci_pooled": mi_ci_p_str,
             "MI_ci_hierarchical": mi_ci_h_str,
+            "R_hat_s1": round(res["R_hat_s1"], 4) if not np.isnan(res["R_hat_s1"]) else np.nan,
+            "R_hat_s1_ci": (
+                f"[{res['R_hat_s1_ci_low']:.4f}, {res['R_hat_s1_ci_high']:.4f}]"
+                if not np.isnan(res["R_hat_s1_ci_low"])
+                else "None"
+            ),
+            # Renamed from n/frac_resamples_dropped to no_usable_crossing_*
             "no_crossing_frac": round(res["no_crossing_frac"], 4),
-            "n_resamples_dropped": res["n_resamples_dropped"],
-            "frac_resamples_dropped": round(res["frac_resamples_dropped"], 4),
-            "n_dropped_no_crossing": res["n_dropped_no_crossing"],
-            "n_dropped_edge_crossing": res["n_dropped_edge_crossing"],
-            "n_dropped_r0_zero": res["n_dropped_r0_zero"],
-            "n_dropped_other": res["n_dropped_other"],
+            "n_no_usable_crossing": res["n_resamples_dropped"],
+            "frac_no_usable_crossing": round(res["frac_resamples_dropped"], 4),
+            "n_no_usable_crossing_no_cross": res["n_dropped_no_crossing"],
+            "n_no_usable_crossing_edge": res["n_dropped_edge_crossing"],
+            "n_no_usable_crossing_r0_zero": res["n_dropped_r0_zero"],
+            "n_no_usable_crossing_other": res["n_dropped_other"],
         }
         summary_rows.append(row)
 
