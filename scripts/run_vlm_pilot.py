@@ -93,6 +93,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run 10 questions clean validation check and verify mean letter mass >= 0.9",
     )
+    parser.add_argument(
+        "--assistant_prefix",
+        type=str,
+        default=None,
+        choices=["answer_colon", "the_answer_is"],
+        help=(
+            "SmolVLM only: named assistant pre-fill variant to append before reading logits. "
+            "'answer_colon' -> 'Answer:', 'the_answer_is' -> 'The answer is'. "
+            "Ignored for Qwen2-VL and InternVL2."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -119,10 +130,19 @@ def get_derangement(n: int, seed: int) -> np.ndarray:
 
 
 def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
-    """Run 10 questions clean and text-only, verify mean letter mass >= 0.9."""
+    """Run 10 questions clean and text-only, verify mean letter mass >= 0.9.
+
+    For SmolVLM adapters, also prints the top-5 next-token probabilities for
+    the clean forward pass on the first item, to diagnose letter mass failures.
+    """
+    from src.vlm.adapters import SmolVLMAdapter
+    import torch
+
     check_items = examples[:10]
     print(f"\n==================================================")
     print(f"RUNNING MODEL CHECK ON {len(check_items)} ITEMS: {adapter.model_id}")
+    if isinstance(adapter, SmolVLMAdapter) and adapter._prefix_str:
+        print(f"  Assistant prefix: '{adapter._prefix_str}'")
     print(f"==================================================")
 
     clean_correct = 0
@@ -152,6 +172,28 @@ def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
             f"clean_pred={np.argmax(p_clean)} (p={p_clean[target]:.3f}, mass={mass_clean:.4f}) | "
             f"text_pred={np.argmax(p_text)} (p={p_text[target]:.3f}, mass={mass_text:.4f})"
         )
+
+        # For SmolVLM: print top-5 next tokens after the clean forward pass on item 1
+        if i == 0 and isinstance(adapter, SmolVLMAdapter):
+            print("\n  [DIAGNOSTIC] Top-5 next tokens after clean forward pass (item 1):")
+            ex0 = check_items[0]
+            prompt_text = adapter._build_prompt_text(ex0["question"], ex0["choices"], with_image=True)
+            inputs = adapter.processor(
+                text=prompt_text,
+                images=[ex0["image"]],
+                return_tensors="pt",
+            )
+            inputs = {k: v.to(adapter.model.device) for k, v in inputs.items()}
+            with torch.no_grad():
+                raw_logits = adapter.model(**inputs).logits[0, -1, :]
+            full_probs = torch.softmax(raw_logits, dim=-1)
+            topk = torch.topk(full_probs, 5)
+            for rank, (prob_val, tok_id) in enumerate(
+                zip(topk.values.tolist(), topk.indices.tolist()), start=1
+            ):
+                tok_str = repr(adapter.tokenizer.decode([tok_id]))
+                print(f"    #{rank}: {tok_str:20s} | ID: {tok_id:6d} | Prob: {prob_val:.4f}")
+            print()
 
     mean_mass = float(np.mean(letter_masses))
     clean_acc = clean_correct / len(check_items)
@@ -197,7 +239,7 @@ def run_benchmark():
     S_grid = np.linspace(0.0, 1.0, args.grid).tolist()
 
     # 2. Model adapter initialization
-    adapter = get_adapter(args.model)
+    adapter = get_adapter(args.model, assistant_prefix=args.assistant_prefix)
     model_slug = args.model.split("/")[-1]
 
     # Pre-compute derangement permutation for swapblend corruption

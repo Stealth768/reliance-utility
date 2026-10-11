@@ -5,6 +5,11 @@ Exposes a unified interface:
 - `VLMAdapter.load_model()` loads the model and tokenizer/processor.
 - `VLMAdapter.letter_probs(image_or_None, question, choices)` returns (renorm_probs, mass_on_letters).
 - Clean CPU-only design with GPU execution protected under `torch` runtime.
+
+SmolVLM assistant prefix variants (passed as ``assistant_prefix`` constructor arg):
+- ``None`` (default): no prefix, generation prompt ends at the assistant turn start.
+- ``"answer_colon"``: appends ``"Answer:"`` before reading the next-token distribution.
+- ``"the_answer_is"``: appends ``"The answer is"`` before reading the next-token distribution.
 """
 
 from abc import ABC, abstractmethod
@@ -12,6 +17,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from src.vlm.scoring import CHOICE_LETTERS, build_prompt, get_choice_token_ids
+
+# Named prefix strings for SmolVLM assistant pre-fill
+SMOLVLM_PREFIXES: Dict[str, str] = {
+    "answer_colon": "Answer:",
+    "the_answer_is": "The answer is",
+}
 
 
 def get_multivariant_choice_token_ids(tokenizer: Any) -> Dict[str, Tuple[int, int]]:
@@ -110,12 +121,36 @@ class Qwen2VLAdapter(BaseVLMAdapter):
 
 
 class SmolVLMAdapter(BaseVLMAdapter):
-    """Adapter for SmolVLM family (e.g. HuggingFaceTB/SmolVLM-Instruct or 500M/2B)."""
+    """Adapter for SmolVLM family (e.g. HuggingFaceTB/SmolVLM-Instruct or 500M/2B).
+
+    Parameters
+    ----------
+    model_id : str
+        HuggingFace model identifier.
+    assistant_prefix : str or None, optional
+        Named assistant pre-fill variant. One of:
+        - None (default): no prefix appended.
+        - "answer_colon": appends "Answer:" to the assistant turn.
+        - "the_answer_is": appends "The answer is" to the assistant turn.
+        The prefix is applied identically for every condition (clean, removed, all corruptions).
+    """
+
+    def __init__(self, model_id: str, assistant_prefix: Optional[str] = None):
+        super().__init__(model_id)
+        if assistant_prefix is not None and assistant_prefix not in SMOLVLM_PREFIXES:
+            raise ValueError(
+                f"Unknown assistant_prefix '{assistant_prefix}'. "
+                f"Supported: {list(SMOLVLM_PREFIXES.keys())}"
+            )
+        self.assistant_prefix: Optional[str] = assistant_prefix
+        # Resolved string (e.g. "Answer:" or "The answer is") or empty string
+        self._prefix_str: str = SMOLVLM_PREFIXES[assistant_prefix] if assistant_prefix else ""
 
     def load(self, device: str = "cuda", dtype: str = "float16"):
         import torch
         torch_dtype = torch.float16 if dtype == "float16" else torch.bfloat16
-        print(f"Loading SmolVLM model: {self.model_id} ({dtype}) on {device}...")
+        prefix_info = f", prefix='{self._prefix_str}'" if self._prefix_str else ""
+        print(f"Loading SmolVLM model: {self.model_id} ({dtype}) on {device}{prefix_info}...")
         try:
             from transformers import AutoModelForImageTextToText, AutoProcessor
             model_cls = AutoModelForImageTextToText
@@ -132,6 +167,15 @@ class SmolVLMAdapter(BaseVLMAdapter):
         self.processor = AutoProcessor.from_pretrained(self.model_id)
         self.tokenizer = self.processor.tokenizer
 
+    def _build_prompt_text(self, question: str, choices: List[str], with_image: bool) -> str:
+        """Return the full prompt string, with assistant prefix appended if set."""
+        messages = build_prompt(question, choices, with_image=with_image)
+        prompt_text = self.processor.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=False
+        )
+        if self._prefix_str:
+            prompt_text = prompt_text + self._prefix_str
+        return prompt_text
 
     def letter_probs(
         self,
@@ -142,10 +186,7 @@ class SmolVLMAdapter(BaseVLMAdapter):
         import torch
 
         with_image = image_or_None is not None
-        messages = build_prompt(question, choices, with_image=with_image)
-        prompt_text = self.processor.apply_chat_template(
-            messages, add_generation_prompt=True, tokenize=False
-        )
+        prompt_text = self._build_prompt_text(question, choices, with_image=with_image)
 
         if with_image:
             inputs = self.processor(
@@ -181,7 +222,6 @@ class SmolVLMAdapter(BaseVLMAdapter):
             renorm = np.full(4, 0.25, dtype=np.float64)
 
         return renorm, float(total_mass)
-
 
 
 class InternVL2Adapter(BaseVLMAdapter):
@@ -272,13 +312,16 @@ MODEL_REGISTRY = {
 }
 
 
-def get_adapter(model_name_or_id: str) -> BaseVLMAdapter:
+def get_adapter(model_name_or_id: str, assistant_prefix: Optional[str] = None) -> BaseVLMAdapter:
     """Retrieve the corresponding adapter instance for a model identifier.
 
     Parameters
     ----------
     model_name_or_id : str
         Model name or HuggingFace repo path.
+    assistant_prefix : str or None, optional
+        Named assistant pre-fill variant for SmolVLM only. Ignored for other adapters.
+        One of None, "answer_colon", or "the_answer_is".
 
     Returns
     -------
@@ -286,16 +329,23 @@ def get_adapter(model_name_or_id: str) -> BaseVLMAdapter:
         Instantiated adapter.
     """
     normalized = model_name_or_id.strip()
-    # Check exact match
+    lower = normalized.lower()
+
+    def _smol(mid: str) -> SmolVLMAdapter:
+        return SmolVLMAdapter(mid, assistant_prefix=assistant_prefix)
+
+    # Check exact match first
     if normalized in MODEL_REGISTRY:
-        return MODEL_REGISTRY[normalized](normalized)
+        cls = MODEL_REGISTRY[normalized]
+        if cls is SmolVLMAdapter:
+            return _smol(normalized)
+        return cls(normalized)
 
     # Substring matching fallback
-    lower = normalized.lower()
     if "qwen2" in lower or "qwen" in lower:
         return Qwen2VLAdapter(normalized)
     elif "smol" in lower:
-        return SmolVLMAdapter(normalized)
+        return _smol(normalized)
     elif "internvl" in lower:
         return InternVL2Adapter(normalized)
 
