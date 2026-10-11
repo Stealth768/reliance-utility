@@ -175,3 +175,52 @@ def black_image(size: Tuple[int, int]) -> Image.Image:
     """
     width, height = size
     return Image.new("RGB", (int(width), int(height)), color=(0, 0, 0))
+
+
+def swap_blend(
+    img: Union[Image.Image, np.ndarray],
+    img_other: Union[Image.Image, np.ndarray],
+    S: float,
+) -> Union[Image.Image, np.ndarray]:
+    """Blend image with another question's image: (1 - S) * img + S * img_other.
+
+    img_other is resized to match img's spatial resolution if needed.
+    Returns uint8 array or PIL Image preserving input type and shape.
+    For S=0, returns the exact original image.
+    For S=1, returns img_other resized to img's dimensions.
+
+    Parameters
+    ----------
+    img : PIL.Image or np.ndarray
+        Original image.
+    img_other : PIL.Image or np.ndarray
+        Donor image from another question.
+    S : float
+        Blend severity parameter in [0, 1].
+
+    Returns
+    -------
+    PIL.Image or np.ndarray
+        Blended image preserving img's format, shape, and uint8 dtype.
+    """
+    arr, is_pil = _to_numpy_uint8(img)
+    if S <= 0.0:
+        return img if is_pil else arr.copy()
+
+    S_clamped = min(max(float(S), 0.0), 1.0)
+    H, W = arr.shape[:2]
+
+    # Convert img_other and resize if spatial dimensions differ
+    arr_other, _ = _to_numpy_uint8(img_other)
+    if arr_other.shape[:2] != (H, W):
+        pil_other = Image.fromarray(arr_other)
+        pil_other = pil_other.resize((W, H), Image.Resampling.BILINEAR)
+        arr_other = np.array(pil_other, dtype=np.uint8)
+
+    if S_clamped >= 1.0:
+        return _to_output(arr_other, is_pil)
+
+    # Linear blend: (1 - S) * img + S * img_other
+    blended = (1.0 - S_clamped) * arr.astype(float) + S_clamped * arr_other.astype(float)
+    return _to_output(blended, is_pil)
+

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from src.corruptions.image import black_image, gaussian_blend, patch_mask, swapped
+from src.corruptions.image import black_image, gaussian_blend, patch_mask, swap_blend, swapped
 
 
 @pytest.fixture
@@ -98,3 +98,48 @@ def test_black_image():
     arr = np.array(blk)
     assert arr.shape == (80, 100, 3)
     assert np.all(arr == 0)
+
+
+def test_swap_blend_s0_returns_img(sample_pil_image, sample_numpy_image):
+    """S=0 returns original image exactly for PIL and NumPy inputs."""
+    other_pil = Image.new("RGB", (112, 112), color=(0, 255, 0))
+    res_pil = swap_blend(sample_pil_image, other_pil, S=0.0)
+    assert np.array_equal(np.array(res_pil), np.array(sample_pil_image))
+
+    other_np = np.zeros_like(sample_numpy_image)
+    res_np = swap_blend(sample_numpy_image, other_np, S=0.0)
+    assert np.array_equal(res_np, sample_numpy_image)
+
+
+def test_swap_blend_s1_returns_other(sample_pil_image, sample_numpy_image):
+    """S=1 returns img_other (resized to img's dimensions if needed)."""
+    # Matching dimensions
+    other_pil = Image.new("RGB", (112, 112), color=(10, 20, 30))
+    res_pil = swap_blend(sample_pil_image, other_pil, S=1.0)
+    assert np.array_equal(np.array(res_pil), np.array(other_pil))
+
+    # Differing dimensions
+    other_diff = Image.new("RGB", (64, 48), color=(50, 100, 150))
+    res_diff = swap_blend(sample_pil_image, other_diff, S=1.0)
+    assert isinstance(res_diff, Image.Image)
+    assert res_diff.size == sample_pil_image.size
+    # Pixels should match the solid color (50, 100, 150)
+    arr = np.array(res_diff)
+    assert np.all(arr[:, :, 0] == 50)
+    assert np.all(arr[:, :, 1] == 100)
+    assert np.all(arr[:, :, 2] == 150)
+
+
+def test_swap_blend_shape_dtype_preserved(sample_pil_image, sample_numpy_image):
+    """swap_blend preserves shape, dtype (uint8), and PIL/NumPy format for S in (0, 1)."""
+    other_pil = Image.new("RGB", (80, 80), color=(128, 128, 128))
+    res_pil = swap_blend(sample_pil_image, other_pil, S=0.4)
+    assert isinstance(res_pil, Image.Image)
+    assert res_pil.size == sample_pil_image.size
+
+    other_np = np.ones((80, 80, 3), dtype=np.uint8) * 128
+    res_np = swap_blend(sample_numpy_image, other_np, S=0.4)
+    assert isinstance(res_np, np.ndarray)
+    assert res_np.shape == sample_numpy_image.shape
+    assert res_np.dtype == np.uint8
+
