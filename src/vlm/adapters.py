@@ -1,4 +1,4 @@
-"""Model adapters for multiple VLM architectures (Qwen2-VL, InternVL2, SmolVLM).
+"""Model adapters for multiple VLM architectures (Qwen2-VL, InternVL2, SmolVLM, LLaVA-1.5).
 
 Exposes a unified interface:
 - `get_adapter(model_id_or_name)` returning a `VLMAdapter` subclass.
@@ -6,8 +6,8 @@ Exposes a unified interface:
 - `VLMAdapter.letter_probs(image_or_None, question, choices)` returns (renorm_probs, mass_on_letters).
 - Clean CPU-only design with GPU execution protected under `torch` runtime.
 
-SmolVLM assistant prefix variants (passed as ``assistant_prefix`` constructor arg):
-- ``None`` (default): no prefix, generation prompt ends at the assistant turn start.
+Assistant prefix variants (SmolVLM and LLaVA), passed as ``assistant_prefix`` constructor arg:
+- ``None`` (default): no prefix appended after the generation prompt.
 - ``"answer_colon"``: appends ``"Answer:"`` before reading the next-token distribution.
 - ``"the_answer_is"``: appends ``"The answer is"`` before reading the next-token distribution.
 """
@@ -18,11 +18,13 @@ import numpy as np
 
 from src.vlm.scoring import CHOICE_LETTERS, build_prompt, get_choice_token_ids
 
-# Named prefix strings for SmolVLM assistant pre-fill
+# Named prefix strings shared by SmolVLM and LLaVA assistant pre-fill
 SMOLVLM_PREFIXES: Dict[str, str] = {
     "answer_colon": "Answer:",
     "the_answer_is": "The answer is",
 }
+# LLaVA uses the same set
+LLAVA_PREFIXES: Dict[str, str] = SMOLVLM_PREFIXES
 
 
 def get_multivariant_choice_token_ids(tokenizer: Any) -> Dict[str, Tuple[int, int]]:
@@ -297,6 +299,129 @@ class InternVL2Adapter(BaseVLMAdapter):
         return renorm, mass
 
 
+
+class LlavaAdapter(BaseVLMAdapter):
+    """Adapter for LLaVA-1.5 family (e.g. llava-hf/llava-1.5-7b-hf).
+
+    Loads the model in 4-bit NF4 quantisation via ``BitsAndBytesConfig``
+    (compute_dtype float16, device_map={"": 0}) to fit a 7B model on a T4 GPU.
+
+    Prompt format
+    -------------
+    With image:
+        ``USER: <image>\\n{question}\\nChoices:\\nA. ...\\nD. ...\\n\\n
+        Answer with the option's letter from the given choices directly. ASSISTANT:``
+    Text-only:
+        Same without the ``<image>\\n`` token.
+
+    The ``assistant_prefix`` (``"answer_colon"`` or ``"the_answer_is"``) is
+    appended *after* ``ASSISTANT:`` before reading the next-token distribution,
+    identically for every condition.
+
+    Letter probs
+    ------------
+    Sum over bare (``'A'``) and space-prefixed (``' A'``) token IDs
+    (both asserted single-token), renormalized over the 4 choices.
+    Total mass over all 8 IDs is reported as the mass value.
+    """
+
+    def __init__(self, model_id: str, assistant_prefix: Optional[str] = None):
+        super().__init__(model_id)
+        if assistant_prefix is not None and assistant_prefix not in LLAVA_PREFIXES:
+            raise ValueError(
+                f"Unknown assistant_prefix '{assistant_prefix}'. "
+                f"Supported: {list(LLAVA_PREFIXES.keys())}"
+            )
+        self.assistant_prefix: Optional[str] = assistant_prefix
+        self._prefix_str: str = LLAVA_PREFIXES[assistant_prefix] if assistant_prefix else ""
+
+    def load(self, device: str = "cuda", dtype: str = "float16"):
+        import torch
+        from transformers import LlavaForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
+
+        prefix_info = f", prefix='{self._prefix_str}'" if self._prefix_str else ""
+        print(f"Loading LLaVA model: {self.model_id} (4-bit NF4) on {device}{prefix_info}...")
+
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=False,
+        )
+        self.model = LlavaForConditionalGeneration.from_pretrained(
+            self.model_id,
+            quantization_config=bnb_config,
+            device_map={"": 0},
+        )
+        self.model.eval()
+        self.processor = AutoProcessor.from_pretrained(self.model_id)
+        self.tokenizer = self.processor.tokenizer
+
+    def _build_prompt_text(self, question: str, choices: List[str], with_image: bool) -> str:
+        """Build the LLaVA-style prompt string, with optional assistant prefix appended."""
+        options_text = "\n".join(
+            f"{letter}. {choice}" for letter, choice in zip(CHOICE_LETTERS, choices)
+        )
+        body = (
+            f"{question}\n\n"
+            f"Choices:\n{options_text}\n\n"
+            "Answer with the option's letter from the given choices directly."
+        )
+        if with_image:
+            prompt = f"USER: <image>\n{body} ASSISTANT:"
+        else:
+            prompt = f"USER: {body} ASSISTANT:"
+        if self._prefix_str:
+            prompt = prompt + self._prefix_str
+        return prompt
+
+    def letter_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        choices: List[str],
+    ) -> Tuple[np.ndarray, float]:
+        import torch
+
+        with_image = image_or_None is not None
+        prompt_text = self._build_prompt_text(question, choices, with_image=with_image)
+
+        if with_image:
+            inputs = self.processor(
+                text=prompt_text,
+                images=image_or_None,
+                return_tensors="pt",
+            )
+        else:
+            inputs = self.processor(
+                text=prompt_text,
+                return_tensors="pt",
+            )
+
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            last_logits = outputs.logits[0, -1, :]
+
+        # Sum bare ('A') and space-prefixed (' A') token IDs
+        variant_ids = get_multivariant_choice_token_ids(self.tokenizer)
+        full_probs = torch.softmax(last_logits, dim=-1)
+
+        letter_probs_unnorm = []
+        for letter in CHOICE_LETTERS:
+            bare_id, space_id = variant_ids[letter]
+            prob_sum = float((full_probs[bare_id] + full_probs[space_id]).item())
+            letter_probs_unnorm.append(prob_sum)
+
+        total_mass = sum(letter_probs_unnorm)
+        if total_mass > 0.0:
+            renorm = np.array([p / total_mass for p in letter_probs_unnorm], dtype=np.float64)
+        else:
+            renorm = np.full(4, 0.25, dtype=np.float64)
+
+        return renorm, float(total_mass)
+
+
 # Registry of supported models
 MODEL_REGISTRY = {
     # Qwen2-VL
@@ -309,6 +434,9 @@ MODEL_REGISTRY = {
     # InternVL2
     "OpenGVLab/InternVL2-2B": InternVL2Adapter,
     "internvl2-2b": InternVL2Adapter,
+    # LLaVA-1.5
+    "llava-hf/llava-1.5-7b-hf": LlavaAdapter,
+    "llava-1.5-7b": LlavaAdapter,
 }
 
 
@@ -320,8 +448,8 @@ def get_adapter(model_name_or_id: str, assistant_prefix: Optional[str] = None) -
     model_name_or_id : str
         Model name or HuggingFace repo path.
     assistant_prefix : str or None, optional
-        Named assistant pre-fill variant for SmolVLM only. Ignored for other adapters.
-        One of None, "answer_colon", or "the_answer_is".
+        Named assistant pre-fill variant for SmolVLM and LLaVA adapters.
+        One of None, "answer_colon", or "the_answer_is". Ignored for Qwen2-VL and InternVL2.
 
     Returns
     -------
@@ -334,11 +462,16 @@ def get_adapter(model_name_or_id: str, assistant_prefix: Optional[str] = None) -
     def _smol(mid: str) -> SmolVLMAdapter:
         return SmolVLMAdapter(mid, assistant_prefix=assistant_prefix)
 
+    def _llava(mid: str) -> LlavaAdapter:
+        return LlavaAdapter(mid, assistant_prefix=assistant_prefix)
+
     # Check exact match first
     if normalized in MODEL_REGISTRY:
         cls = MODEL_REGISTRY[normalized]
         if cls is SmolVLMAdapter:
             return _smol(normalized)
+        if cls is LlavaAdapter:
+            return _llava(normalized)
         return cls(normalized)
 
     # Substring matching fallback
@@ -348,7 +481,9 @@ def get_adapter(model_name_or_id: str, assistant_prefix: Optional[str] = None) -
         return _smol(normalized)
     elif "internvl" in lower:
         return InternVL2Adapter(normalized)
+    elif "llava" in lower:
+        return _llava(normalized)
 
     raise ValueError(
-        f"Unknown model identifier '{model_name_or_id}'. Supported families: Qwen2-VL, SmolVLM, InternVL2."
+        f"Unknown model identifier '{model_name_or_id}'. Supported families: Qwen2-VL, SmolVLM, InternVL2, LLaVA-1.5."
     )

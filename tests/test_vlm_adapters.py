@@ -6,6 +6,7 @@ import pytest
 from src.vlm.adapters import (
     BaseVLMAdapter,
     InternVL2Adapter,
+    LlavaAdapter,
     Qwen2VLAdapter,
     SmolVLMAdapter,
     get_adapter,
@@ -195,3 +196,87 @@ def test_smolvlm_prefix_the_answer_is_appended():
     adapter.processor = _MockProcessor()
     text = adapter._build_prompt_text("Q?", ["A", "B", "C", "D"], with_image=False)
     assert text.endswith("The answer is"), f"Got: {text!r}"
+
+
+# ---------------------------------------------------------------------------
+# Tests for LLaVA-1.5 adapter (CPU-only, no model loading)
+# ---------------------------------------------------------------------------
+
+def test_llava_dispatch():
+    """get_adapter returns LlavaAdapter for exact HF key and llava substring."""
+    adapter = get_adapter("llava-hf/llava-1.5-7b-hf")
+    assert isinstance(adapter, LlavaAdapter)
+    assert adapter.model_id == "llava-hf/llava-1.5-7b-hf"
+
+    # Substring fallback
+    adapter2 = get_adapter("my-llava-model")
+    assert isinstance(adapter2, LlavaAdapter)
+
+    # Short alias
+    adapter3 = get_adapter("llava-1.5-7b")
+    assert isinstance(adapter3, LlavaAdapter)
+
+
+def test_llava_prefix_valid():
+    """LlavaAdapter accepts None, 'answer_colon', and 'the_answer_is'."""
+    a_none = LlavaAdapter("test-llava", assistant_prefix=None)
+    assert a_none._prefix_str == ""
+    assert a_none.assistant_prefix is None
+
+    a_ac = LlavaAdapter("test-llava", assistant_prefix="answer_colon")
+    assert a_ac._prefix_str == "Answer:"
+    assert a_ac.assistant_prefix == "answer_colon"
+
+    a_tai = LlavaAdapter("test-llava", assistant_prefix="the_answer_is")
+    assert a_tai._prefix_str == "The answer is"
+    assert a_tai.assistant_prefix == "the_answer_is"
+
+
+def test_llava_prefix_invalid():
+    """LlavaAdapter raises ValueError for unknown prefix names."""
+    with pytest.raises(ValueError, match="Unknown assistant_prefix"):
+        LlavaAdapter("test-llava", assistant_prefix="bad_prefix_xyz")
+
+
+def test_llava_prompt_with_image():
+    """_build_prompt_text with_image=True contains 'USER: <image>\\n' and 'ASSISTANT:'."""
+    adapter = LlavaAdapter("test-llava", assistant_prefix=None)
+    prompt = adapter._build_prompt_text("What is shown?", ["Cat", "Dog", "Bird", "Fish"], with_image=True)
+    assert "USER: <image>\n" in prompt, f"Expected 'USER: <image>\\n' in prompt, got: {prompt!r}"
+    assert "ASSISTANT:" in prompt, f"Expected 'ASSISTANT:' in prompt, got: {prompt!r}"
+
+
+def test_llava_prompt_text_only():
+    """_build_prompt_text with_image=False does NOT contain '<image>' but contains 'USER:' and 'ASSISTANT:'."""
+    adapter = LlavaAdapter("test-llava", assistant_prefix=None)
+    prompt = adapter._build_prompt_text("What is shown?", ["Cat", "Dog", "Bird", "Fish"], with_image=False)
+    assert "<image>" not in prompt, f"Found '<image>' in text-only prompt: {prompt!r}"
+    assert "USER:" in prompt, f"Expected 'USER:' in prompt, got: {prompt!r}"
+    assert "ASSISTANT:" in prompt, f"Expected 'ASSISTANT:' in prompt, got: {prompt!r}"
+
+
+def test_llava_prefix_appended():
+    """Both with/without image prompts end with 'Answer:' for answer_colon variant."""
+    adapter = LlavaAdapter("test-llava", assistant_prefix="answer_colon")
+    choices = ["Cat", "Dog", "Bird", "Fish"]
+
+    prompt_with_img = adapter._build_prompt_text("What is shown?", choices, with_image=True)
+    assert prompt_with_img.endswith("Answer:"), (
+        f"Expected prompt to end with 'Answer:', got: {prompt_with_img!r}"
+    )
+
+    prompt_no_img = adapter._build_prompt_text("What is shown?", choices, with_image=False)
+    assert prompt_no_img.endswith("Answer:"), (
+        f"Expected prompt to end with 'Answer:', got: {prompt_no_img!r}"
+    )
+
+
+def test_get_adapter_forwards_prefix_to_llava():
+    """get_adapter passes assistant_prefix to LlavaAdapter."""
+    adapter = get_adapter("llava-hf/llava-1.5-7b-hf", assistant_prefix="answer_colon")
+    assert isinstance(adapter, LlavaAdapter)
+    assert adapter._prefix_str == "Answer:"
+
+    # None prefix -> empty string
+    adapter_none = get_adapter("llava-hf/llava-1.5-7b-hf", assistant_prefix=None)
+    assert adapter_none._prefix_str == ""

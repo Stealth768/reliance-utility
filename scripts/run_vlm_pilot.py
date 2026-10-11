@@ -132,16 +132,16 @@ def get_derangement(n: int, seed: int) -> np.ndarray:
 def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
     """Run 10 questions clean and text-only, verify mean letter mass >= 0.9.
 
-    For SmolVLM adapters, also prints the top-5 next-token probabilities for
-    the clean forward pass on the first item, to diagnose letter mass failures.
+    For adapters that have a ``_build_prompt_text`` method (SmolVLM, LLaVA),
+    also prints the top-5 next-token probabilities for the clean forward pass on
+    the first item, to diagnose letter mass failures.
     """
-    from src.vlm.adapters import SmolVLMAdapter
     import torch
 
     check_items = examples[:10]
     print(f"\n==================================================")
     print(f"RUNNING MODEL CHECK ON {len(check_items)} ITEMS: {adapter.model_id}")
-    if isinstance(adapter, SmolVLMAdapter) and adapter._prefix_str:
+    if hasattr(adapter, "_prefix_str") and adapter._prefix_str:
         print(f"  Assistant prefix: '{adapter._prefix_str}'")
     print(f"==================================================")
 
@@ -173,8 +173,8 @@ def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
             f"text_pred={np.argmax(p_text)} (p={p_text[target]:.3f}, mass={mass_text:.4f})"
         )
 
-        # For SmolVLM: print top-5 next tokens after the clean forward pass on item 1
-        if i == 0 and isinstance(adapter, SmolVLMAdapter):
+        # For adapters with _build_prompt_text (SmolVLM, LLaVA): print top-5 next tokens
+        if i == 0 and hasattr(adapter, "_build_prompt_text"):
             print("\n  [DIAGNOSTIC] Top-5 next tokens after clean forward pass (item 1):")
             ex0 = check_items[0]
             prompt_text = adapter._build_prompt_text(ex0["question"], ex0["choices"], with_image=True)

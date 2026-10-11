@@ -26,10 +26,10 @@ except Exception:
 # Immediately strip the token from git config so it is never saved to disk or exported
 !git -C /kaggle/working/reliance-utility remote set-url origin https://github.com/Stealth768/reliance-utility.git
 # Checkout the reproducible main code tag
-!git -C /kaggle/working/reliance-utility checkout v0.7.2-main-code
+!git -C /kaggle/working/reliance-utility checkout v0.8-llava-code
 
-# Install latest packages
-!pip install -q -U transformers accelerate datasets pillow torchvision
+# Install packages (bitsandbytes required for LLaVA-1.5 4-bit NF4 loading)
+!pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes
 ```
 
 ---
@@ -50,35 +50,71 @@ else:
 
 ---
 
-### Cell 3: Pre-Flight Model Checks (--check mode)
+### Cell 3a: Pre-Flight Check — Qwen2-VL-2B
 
-Runs 10 questions clean and text-only per model, prints mean letter mass, clean accuracy, and text-only accuracy. **Refuses to continue if letter mass < 0.90**.
+Runs 10 questions clean and text-only. **Refuses to continue if letter mass < 0.90**.
+
+```bash
+%%bash
+cd /kaggle/working/reliance-utility
+python scripts/run_vlm_pilot.py \
+    --model Qwen/Qwen2-VL-2B-Instruct \
+    --check
+```
+
+---
+
+### Cell 3b: Pre-Flight Check — SmolVLM-Instruct (two prefix variants)
+
+Try `answer_colon` first; if it passes (mass >= 0.90), use it for the full run.
+If it fails, try `the_answer_is`. If neither passes, SmolVLM is dropped.
 
 ```bash
 %%bash
 cd /kaggle/working/reliance-utility
 
-# 1. Check Qwen2-VL-2B
-python scripts/run_vlm_pilot.py \
-    --model Qwen/Qwen2-VL-2B-Instruct \
-    --check
-
-# 2. Check SmolVLM-Instruct
+echo "=== Variant 1: answer_colon ==="
 python scripts/run_vlm_pilot.py \
     --model HuggingFaceTB/SmolVLM-Instruct \
+    --assistant_prefix answer_colon \
     --check
 
-# 3. Check InternVL2-2B
+echo "=== Variant 2: the_answer_is (run only if variant 1 failed) ==="
+# python scripts/run_vlm_pilot.py \
+#     --model HuggingFaceTB/SmolVLM-Instruct \
+#     --assistant_prefix the_answer_is \
+#     --check
+```
+
+---
+
+### Cell 3c: Pre-Flight Check — LLaVA-1.5-7B-hf (two prefix variants)
+
+Try `answer_colon` first; if it passes (mass >= 0.90), use it for the full run.
+If it fails, try `the_answer_is`. If neither passes, LLaVA is dropped.
+
+```bash
+%%bash
+cd /kaggle/working/reliance-utility
+
+echo "=== Variant 1: answer_colon ==="
 python scripts/run_vlm_pilot.py \
-    --model OpenGVLab/InternVL2-2B \
+    --model llava-hf/llava-1.5-7b-hf \
+    --assistant_prefix answer_colon \
     --check
+
+echo "=== Variant 2: the_answer_is (run only if variant 1 failed) ==="
+# python scripts/run_vlm_pilot.py \
+#     --model llava-hf/llava-1.5-7b-hf \
+#     --assistant_prefix the_answer_is \
+#     --check
 ```
 
 ---
 
 ### Cell 4: Model 1 Execution — Qwen2-VL-2B-Instruct (N=500)
 
-Evaluates on disjoint N=500 sample across `gaussian`, `patch`, and `swapblend` corruptions (8 shards of 25 = 20 shards total):
+Evaluates on disjoint N=500 sample across `gaussian`, `patch`, and `swapblend` corruptions (20 shards of 25):
 
 ```bash
 %%bash
@@ -108,12 +144,15 @@ ls -lh vlm_main_raw_qwen.zip
 
 ### Cell 5: Model 2 Execution — SmolVLM-Instruct (N=500)
 
+> **NOTE**: Replace `--assistant_prefix answer_colon` with whichever variant passed in Cell 3b.
+
 ```bash
 %%bash
 cd /kaggle/working/reliance-utility
 
 python scripts/run_vlm_pilot.py \
     --model HuggingFaceTB/SmolVLM-Instruct \
+    --assistant_prefix answer_colon \
     --data_ids results/derived/main_ids.json \
     --n 500 \
     --grid 9 \
@@ -134,14 +173,19 @@ ls -lh vlm_main_raw_smolvlm.zip
 
 ---
 
-### Cell 6: Model 3 Execution — InternVL2-2B (N=500)
+### Cell 6: Model 3 Execution — LLaVA-1.5-7B-hf (N=500)
+
+> **NOTE**: InternVL2 was dropped due to remote-code incompatibility with transformers>=4.50 (see DEVIATIONS.md).
+> LLaVA-1.5-7B-hf replaces it, loaded in 4-bit NF4 quantisation via bitsandbytes.
+> Replace `--assistant_prefix answer_colon` with whichever variant passed in Cell 3c.
 
 ```bash
 %%bash
 cd /kaggle/working/reliance-utility
 
 python scripts/run_vlm_pilot.py \
-    --model OpenGVLab/InternVL2-2B \
+    --model llava-hf/llava-1.5-7b-hf \
+    --assistant_prefix answer_colon \
     --data_ids results/derived/main_ids.json \
     --n 500 \
     --grid 9 \
@@ -155,16 +199,25 @@ python scripts/run_vlm_pilot.py \
 ```bash
 %%bash
 cd /kaggle/working
-zip -r vlm_main_raw_internvl.zip results/raw/vlm_main/InternVL2-2B*.json results/raw/vlm_main/manifest_InternVL2-2B*
-ls -lh vlm_main_raw_internvl.zip
+zip -r vlm_main_raw_llava.zip results/raw/vlm_main/llava-1.5-7b-hf*.json results/raw/vlm_main/manifest_llava-1.5-7b-hf*
+ls -lh vlm_main_raw_llava.zip
 ```
-> **REMINDER**: Download `vlm_main_raw_internvl.zip` from the Kaggle Output viewer now.
+> **REMINDER**: Download `vlm_main_raw_llava.zip` from the Kaggle Output viewer now.
 
 ---
 
-### Local Execution After Downloads
-Once you extract the zip archives into your local `results/raw/vlm_main/`:
+### Cell 7: Local Merge & Analysis (run locally after downloads)
+
+> This cell is for reference only — run locally, not on Kaggle.
+
 ```bash
-python scripts/analyze_vlm_main.py --raw_dir results/raw/vlm_main
+# Merge shards from each model's zip into results/raw/vlm_main/
+python scripts/merge_shards.py \
+    --src vlm_main_raw_qwen.zip \
+    --src vlm_main_raw_smolvlm.zip \
+    --src vlm_main_raw_llava.zip \
+    --out results/raw/vlm_main
+
+# Run full analysis pipeline
+python scripts/make_all.py
 ```
-This generates the full cross-model summary table, exports `results/derived/vlm_main_summary.csv`, and produces vector PDFs in `figures/`.
