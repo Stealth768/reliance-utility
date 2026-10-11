@@ -26,7 +26,7 @@ except Exception:
 # Immediately strip the token from git config so it is never saved to disk or exported
 !git -C /kaggle/working/reliance-utility remote set-url origin https://github.com/Stealth768/reliance-utility.git
 # Checkout the reproducible main code tag
-!git -C /kaggle/working/reliance-utility checkout v0.7-main-code
+!git -C /kaggle/working/reliance-utility checkout v0.7.1-main-code
 
 # Install latest packages
 !pip install -q -U transformers accelerate datasets pillow torchvision
