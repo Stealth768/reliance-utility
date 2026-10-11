@@ -100,16 +100,28 @@ def run_probe():
 
     verdict = "GO" if go else "NO-GO"
 
+    hostname = platform.node()
+    is_kaggle = Path("/kaggle").exists()
+    env_disclaimer = (
+        "Note: This probe was executed on host '{hostname}' (Kaggle environment: {is_kaggle}, GPU detected: {has_gpu}). "
+        "A NO-GO verdict on a local development machine or CPU laptop indicates local execution impossibility, "
+        "and is NOT empirical evidence regarding feasibility in the target GPU cloud/Kaggle environment."
+    ).format(hostname=hostname, is_kaggle=is_kaggle, has_gpu=cuda_avail)
+
     print("\n" + "=" * 50)
     print(f"BEV FEASIBILITY VERDICT: {verdict}")
     print("=" * 50)
+    print(f"Host Environment       : {hostname} (Kaggle: {is_kaggle}, GPU: {cuda_avail})")
+    print(f"Scope Disclaimer       : {env_disclaimer}")
     if reasons:
-        print("Reasons:")
+        print("\nReasons:")
         for r in reasons:
             print(f"  - {r}")
 
     probe_result = {
         "verdict": verdict,
+        "hostname": hostname,
+        "is_kaggle": is_kaggle,
         "python_version": py_ver,
         "platform": platform.platform(),
         "torch_version": torch_ver,
@@ -122,6 +134,7 @@ def run_probe():
         "disk_free_gb": round(free_gb, 2),
         "nuscenes_found": nuscenes_found,
         "reasons": reasons,
+        "disclaimer": env_disclaimer,
     }
 
     out_file = REPO_ROOT / "results" / "derived" / "bev_probe.json"

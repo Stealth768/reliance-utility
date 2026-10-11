@@ -42,3 +42,5 @@ This document defines the research scope, tiers of evaluation, and resource cons
 
 ## 5. BEV Driving Study: Feasibility and Status
 No driving results exist in this study. If the `bev_feasibility_check` verdict is NO-GO, the driving study is future work only and will not be included in the submitted paper. If GO, it requires a separate experiment slot outside the frozen experiment list in FREEZE.md.
+
+> **Scope & Environment Disclaimer**: The feasibility probe recorded in `results/derived/bev_probe.json` audits the current execution host. A NO-GO verdict recorded on a local developer machine or CPU laptop indicates local execution impossibility due to lack of CUDA accelerators and local toolchains; it is **not** empirical evidence about execution feasibility on target cloud platforms (e.g., Kaggle GPU environments). Any decision regarding cloud feasibility must be determined directly within the designated GPU cloud runtime.

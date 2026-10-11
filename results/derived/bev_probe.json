@@ -1,5 +1,7 @@
 {
   "verdict": "NO-GO",
+  "hostname": "Farhan",
+  "is_kaggle": false,
   "python_version": "3.13.3",
   "platform": "Windows-11-10.0.26100-SP0",
   "torch_version": null,
@@ -9,7 +11,7 @@
   "mmcv_version": null,
   "mmdet3d_version": null,
   "mmengine_version": null,
-  "disk_free_gb": 269.08,
+  "disk_free_gb": 268.95,
   "nuscenes_found": false,
   "reasons": [
     "PyTorch is not installed in the current environment.",
@@ -17,5 +19,6 @@
     "mmcv is not installed (required for BEVFusion).",
     "mmdet3d is not installed (required for BEVFusion).",
     "nuScenes-mini dataset directory not found locally or in /kaggle/input."
-  ]
+  ],
+  "disclaimer": "Note: This probe was executed on host 'Farhan' (Kaggle environment: False, GPU detected: False). A NO-GO verdict on a local development machine or CPU laptop indicates local execution impossibility, and is NOT empirical evidence regarding feasibility in the target GPU cloud/Kaggle environment."
 }
