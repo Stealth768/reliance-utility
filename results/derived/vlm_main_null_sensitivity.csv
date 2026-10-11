@@ -1,0 +1,13 @@
+model_name,corruption,null_baseline,null_acc,S_star,MI
+Qwen/Qwen2-VL-2B-Instruct,gaussian,removed,0.436,1.0,
+Qwen/Qwen2-VL-2B-Instruct,gaussian,black,0.42,1.0,
+Qwen/Qwen2-VL-2B-Instruct,patch,removed,0.436,,
+Qwen/Qwen2-VL-2B-Instruct,patch,black,0.42,,
+Qwen/Qwen2-VL-2B-Instruct,swapblend,removed,0.436,0.875,0.4848091821039163
+Qwen/Qwen2-VL-2B-Instruct,swapblend,black,0.42,1.0,
+llava-hf/llava-1.5-7b-hf,gaussian,removed,0.484,1.0,
+llava-hf/llava-1.5-7b-hf,gaussian,black,0.476,1.0,
+llava-hf/llava-1.5-7b-hf,patch,removed,0.484,,
+llava-hf/llava-1.5-7b-hf,patch,black,0.476,,
+llava-hf/llava-1.5-7b-hf,swapblend,removed,0.484,1.0,
+llava-hf/llava-1.5-7b-hf,swapblend,black,0.476,1.0,

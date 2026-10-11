@@ -106,11 +106,11 @@ def load_shards_grouped(raw_dir: Path) -> Dict[Tuple[str, str, int], Dict[str, A
     raw_path = Path(raw_dir)
     target_dirs = []
     if raw_path.name.startswith("vlm_") and raw_path.parent.exists():
-        # Scan raw_dir and any sibling vlm_* directories in the same parent (e.g. results/raw/vlm_*)
-        target_dirs = sorted(list(raw_path.parent.glob("vlm_*")))
+        # Scan raw_dir and any sibling vlm_* directories (excluding pilot)
+        target_dirs = sorted([d for d in raw_path.parent.glob("vlm_*") if "pilot" not in d.name])
     elif any(raw_path.glob("vlm_*")):
         # If passed results/raw directly
-        target_dirs = sorted(list(raw_path.glob("vlm_*")))
+        target_dirs = sorted([d for d in raw_path.glob("vlm_*") if "pilot" not in d.name])
     else:
         target_dirs = [raw_path]
 

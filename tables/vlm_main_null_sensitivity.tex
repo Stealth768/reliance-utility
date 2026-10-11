@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\caption{Sensitivity of Crossing Point $S^*$ and Misalignment Index (MI) to Null Baseline Choice.}
+\label{tab:vlm_null_sensitivity}
+\small
+\begin{tabular}{lllrrr}
+\toprule
+model_name & corruption & null_baseline & null_acc & S_star & MI \\
+\midrule
+Qwen/Qwen2-VL-2B-Instruct & gaussian & removed & 0.436000 & 1.000000 & NaN \\
+Qwen/Qwen2-VL-2B-Instruct & gaussian & black & 0.420000 & 1.000000 & NaN \\
+Qwen/Qwen2-VL-2B-Instruct & patch & removed & 0.436000 & NaN & NaN \\
+Qwen/Qwen2-VL-2B-Instruct & patch & black & 0.420000 & NaN & NaN \\
+Qwen/Qwen2-VL-2B-Instruct & swapblend & removed & 0.436000 & 0.875000 & 0.484809 \\
+Qwen/Qwen2-VL-2B-Instruct & swapblend & black & 0.420000 & 1.000000 & NaN \\
+llava-hf/llava-1.5-7b-hf & gaussian & removed & 0.484000 & 1.000000 & NaN \\
+llava-hf/llava-1.5-7b-hf & gaussian & black & 0.476000 & 1.000000 & NaN \\
+llava-hf/llava-1.5-7b-hf & patch & removed & 0.484000 & NaN & NaN \\
+llava-hf/llava-1.5-7b-hf & patch & black & 0.476000 & NaN & NaN \\
+llava-hf/llava-1.5-7b-hf & swapblend & removed & 0.484000 & 1.000000 & NaN \\
+llava-hf/llava-1.5-7b-hf & swapblend & black & 0.476000 & 1.000000 & NaN \\
+\bottomrule
+\end{tabular}
+\end{table*}
