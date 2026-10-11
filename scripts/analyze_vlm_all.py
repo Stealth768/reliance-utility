@@ -97,8 +97,28 @@ def parse_args() -> argparse.Namespace:
 
 
 def load_shards_grouped(raw_dir: Path) -> Dict[Tuple[str, str, int], Dict[str, Any]]:
-    """Load all JSON shards and group by (model_name, corruption, seed)."""
-    json_files = sorted(raw_dir.glob("*.json"))
+    """Load all JSON shards and group by (model_name, corruption, seed).
+
+    Scans `raw_dir` and any sibling/sub `vlm_*` directories under `results/raw/`
+    so both legacy Qwen shards (in `vlm_main`) and new LLaVA/SmolVLM shards
+    (in `vlm_llava`, `vlm_smolvlm`, etc.) are processed seamlessly.
+    """
+    raw_path = Path(raw_dir)
+    target_dirs = []
+    if raw_path.name.startswith("vlm_") and raw_path.parent.exists():
+        # Scan raw_dir and any sibling vlm_* directories in the same parent (e.g. results/raw/vlm_*)
+        target_dirs = sorted(list(raw_path.parent.glob("vlm_*")))
+    elif any(raw_path.glob("vlm_*")):
+        # If passed results/raw directly
+        target_dirs = sorted(list(raw_path.glob("vlm_*")))
+    else:
+        target_dirs = [raw_path]
+
+    json_files = []
+    for d in target_dirs:
+        if d.is_dir():
+            json_files.extend(sorted(d.glob("*.json")))
+
     groups: Dict[Tuple[str, str, int], Dict[str, Any]] = {}
 
     for jf in json_files:

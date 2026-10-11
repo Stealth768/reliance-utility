@@ -405,3 +405,37 @@ def test_dropped_resamples_cause_columns_present_and_sum(tmp_path: Path):
     assert total_causes == int(row["n_no_usable_crossing"]), (
         f"Cause sum {total_causes} != n_no_usable_crossing {row['n_no_usable_crossing']}"
     )
+
+
+def test_load_shards_grouped_scans_multiple_vlm_directories(tmp_path: Path):
+    """load_shards_grouped finds shards across sibling vlm_* directories (e.g. vlm_main and vlm_llava)."""
+    raw_root = tmp_path / "raw"
+    vlm_main = raw_root / "vlm_main"
+    vlm_llava = raw_root / "vlm_llava"
+    vlm_main.mkdir(parents=True)
+    vlm_llava.mkdir(parents=True)
+
+    # Shard in vlm_main (legacy naming, no seed in filename)
+    create_fake_shard(
+        vlm_main / "Qwen2-VL-2B-Instruct_gaussian_shard0.json",
+        model_name="Qwen/Qwen2-VL-2B-Instruct",
+        corruption="gaussian",
+        seed=0,
+        shard_idx=0,
+        start_idx=0,
+    )
+    # Shard in vlm_llava (new naming, with seed)
+    create_fake_shard(
+        vlm_llava / "llava-1.5-7b-hf_swapblend_seed0_shard0.json",
+        model_name="llava-hf/llava-1.5-7b-hf",
+        corruption="swapblend",
+        seed=0,
+        shard_idx=0,
+        start_idx=0,
+    )
+
+    # Pointing to vlm_main should scan both sibling vlm_* folders
+    grouped = load_shards_grouped(vlm_main)
+    assert ("Qwen/Qwen2-VL-2B-Instruct", "gaussian", 0) in grouped
+    assert ("llava-hf/llava-1.5-7b-hf", "swapblend", 0) in grouped
+
