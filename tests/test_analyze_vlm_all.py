@@ -214,13 +214,15 @@ def test_check_numbers_matches_and_detects_mismatch(tmp_path: Path):
     }])
     df.to_csv(summary_csv, index=False)
 
-    # 1. Matching TeX file
+    # 1. Matching TeX file (empty raw_dir so freshness passes)
+    empty_raw = tmp_path / "empty_raw"
+    empty_raw.mkdir()
     match_tex = paper_dir / "section.tex"
     match_tex.write_text(
         r"The accuracy was \checknum{0.8523}{Qwen2-VL-2B-Instruct:gaussian:clean_acc} on clean.",
         encoding="utf-8",
     )
-    assert check_numbers(paper_dir, summary_csv) is True
+    assert check_numbers(paper_dir, summary_csv, raw_dir=empty_raw) is True
 
     # 2. Mismatching TeX file
     mismatch_tex = paper_dir / "section.tex"
@@ -228,7 +230,21 @@ def test_check_numbers_matches_and_detects_mismatch(tmp_path: Path):
         r"The accuracy was \checknum{0.9999}{Qwen2-VL-2B-Instruct:gaussian:clean_acc} on clean.",
         encoding="utf-8",
     )
-    assert check_numbers(paper_dir, summary_csv) is False
+    assert check_numbers(paper_dir, summary_csv, raw_dir=empty_raw) is False
+
+    # 3. Missing CSV fails
+    missing_csv = tmp_path / "missing.csv"
+    assert check_numbers(paper_dir, missing_csv, raw_dir=empty_raw) is False
+
+    # 4. Stale CSV fails (raw shard modified after CSV)
+    raw_with_shard = tmp_path / "stale_raw"
+    raw_with_shard.mkdir()
+    shard_f = raw_with_shard / "shard0.json"
+    shard_f.write_text("{}", encoding="utf-8")
+    # Make shard mtime definitively after summary_csv
+    import os, time
+    os.utime(shard_f, (time.time() + 10, time.time() + 10))
+    assert check_numbers(paper_dir, summary_csv, raw_dir=raw_with_shard) is False
 
 
 def test_analyze_vlm_all_reads_legacy_shards_as_seed_0(tmp_path: Path):

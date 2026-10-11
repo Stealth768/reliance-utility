@@ -16,7 +16,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -30,6 +30,9 @@ def parse_checknums_from_tex(tex_file: Path) -> List[Tuple[str, str, int, Path]]
     try:
         content = tex_file.read_text(encoding="utf-8")
         for line_num, line in enumerate(content.splitlines(), start=1):
+            stripped = line.strip()
+            if stripped.startswith("%"):
+                continue
             for m in pattern.finditer(line):
                 val_str = m.group(1).strip()
                 label = m.group(2).strip()
@@ -42,9 +45,29 @@ def parse_checknums_from_tex(tex_file: Path) -> List[Tuple[str, str, int, Path]]
 def check_numbers(
     paper_dir: Path,
     summary_csv: Path,
+    raw_dir: Optional[Path] = None,
     tol: float = 1e-3,
 ) -> bool:
     """Compare checknum values with summary CSV table."""
+    # 1. Existence check
+    if not summary_csv.exists():
+        print(f"[ERROR] Summary CSV '{summary_csv}' is missing! Regenerate it via scripts/analyze_vlm_all.py.")
+        return False
+
+    # 2. Freshness check against raw shards
+    check_raw = raw_dir if raw_dir is not None else REPO_ROOT / "results" / "raw" / "vlm_main"
+    if check_raw.exists():
+        raw_shards = [f for f in check_raw.glob("*.json") if not f.name.startswith("manifest")]
+        if raw_shards:
+            newest_shard = max(raw_shards, key=lambda f: f.stat().st_mtime)
+            if newest_shard.stat().st_mtime > summary_csv.stat().st_mtime:
+                print(
+                    f"[ERROR] Summary CSV '{summary_csv}' is stale! "
+                    f"It is older than raw shard '{newest_shard.name}'. "
+                    "Regenerate it via scripts/analyze_vlm_all.py."
+                )
+                return False
+
     if not paper_dir.exists():
         print(f"[INFO] Paper directory '{paper_dir}' does not exist. Skipping check.")
         return True
@@ -61,10 +84,6 @@ def check_numbers(
     if not all_checks:
         print(f"[INFO] No \\checknum macros found in {len(tex_files)} .tex file(s). All good.")
         return True
-
-    if not summary_csv.exists():
-        print(f"[ERROR] Summary CSV '{summary_csv}' does not exist, but \\checknum macros were found.")
-        return False
 
     df = pd.read_csv(summary_csv)
     # Build lookup index by (model_name, corruption)
@@ -150,9 +169,19 @@ def main():
         default="results/derived/vlm_main_summary.csv",
         help="Path to generated summary CSV",
     )
+    parser.add_argument(
+        "--raw_dir",
+        type=str,
+        default="results/raw/vlm_main",
+        help="Path to raw shards directory for freshness check",
+    )
     args = parser.parse_args()
 
-    ok = check_numbers(Path(args.paper_dir), Path(args.summary_csv))
+    ok = check_numbers(
+        Path(args.paper_dir),
+        Path(args.summary_csv),
+        raw_dir=Path(args.raw_dir) if args.raw_dir else None,
+    )
     sys.exit(0 if ok else 1)
 
 
