@@ -329,3 +329,75 @@ def test_analyze_vlm_all_reports_dropped_resamples_when_r0_is_zero(tmp_path: Pat
     # Because R(0) is strictly 0.0, any resample that found a crossing will have failed in normalized_reliance
     assert row["n_resamples_dropped"] > 0
     assert row["frac_resamples_dropped"] > 0.0
+
+
+def test_dropped_resamples_cause_columns_present_and_sum(tmp_path: Path):
+    """Four cause columns are present in the CSV and their sum equals n_resamples_dropped."""
+    raw_dir = tmp_path / "raw_cause"
+    raw_dir.mkdir()
+
+    S_grid = np.linspace(0.0, 1.0, 9).tolist()
+    items = []
+    for i in range(12):
+        corr = i % 4
+        probs_s = []
+        for s_idx, S in enumerate(S_grid):
+            p = np.full(4, 0.1)
+            if s_idx == 0:
+                p[corr] = 0.7
+            else:
+                p[corr] = max(0.1, 0.7 - S * 0.8)
+            p = p / p.sum()
+            probs_s.append(p.tolist())
+        # null_removed identical to clean (S=0) → R(0) ~ 0 → triggers r0_zero drops
+        p_null = probs_s[0]
+        items.append({
+            "question_id": i,
+            "correct_choice_idx": corr,
+            "null_probs": {"removed": p_null, "black": [0.25, 0.25, 0.25, 0.25]},
+            "null_mass": {"removed": 0.95, "black": 0.95},
+            "swapped_probs": [0.25, 0.25, 0.25, 0.25],
+            "swapped_mass": 0.95,
+            "probs_per_S": probs_s,
+            "mass_per_S": [0.95] * len(S_grid),
+        })
+
+    shard = {
+        "model_name": "TestModel/CauseTest",
+        "corruption": "gaussian",
+        "shard_idx": 0,
+        "seed": 0,
+        "S_grid": S_grid,
+        "items": items,
+    }
+    (raw_dir / "CauseTest_gaussian_shard0.json").write_text(
+        json.dumps(shard), encoding="utf-8"
+    )
+
+    run_full_analysis(
+        raw_dir=raw_dir,
+        out_dir=tmp_path / "out_cause",
+        table_dir=tmp_path / "tables_cause",
+        fig_dir=tmp_path / "figs_cause",
+        n_boot=200,
+        seed=0,
+    )
+
+    df = pd.read_csv(tmp_path / "out_cause" / "vlm_main_summary.csv")
+    assert len(df) > 0
+    row = df.iloc[0]
+
+    cause_cols = [
+        "n_dropped_no_crossing",
+        "n_dropped_edge_crossing",
+        "n_dropped_r0_zero",
+        "n_dropped_other",
+    ]
+    for col in cause_cols:
+        assert col in df.columns, f"Missing column: {col}"
+        assert int(row[col]) >= 0, f"{col} must be >= 0, got {row[col]}"
+
+    total_causes = sum(int(row[c]) for c in cause_cols)
+    assert total_causes == int(row["n_resamples_dropped"]), (
+        f"Cause sum {total_causes} != n_resamples_dropped {row['n_resamples_dropped']}"
+    )

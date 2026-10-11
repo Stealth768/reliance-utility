@@ -1,4 +1,4 @@
-model_name,corruption,n_seeds,n_items,clean_acc,acc_s1,acc_drop,null_removed_acc,null_black_acc,swapped_acc,mean_letter_mass,S_star,sig_S_star,MI,MI_ci_pooled,MI_ci_hierarchical,no_crossing_frac,n_resamples_dropped,frac_resamples_dropped
-Qwen/Qwen2-VL-2B-Instruct,gaussian,1,500,0.82,0.406,0.414,0.436,0.42,0.368,0.9989,1.000 (edge),0.875,None,"[0.1480, 0.1891]","[0.1502, 0.1897]",0.018,605,0.605
-Qwen/Qwen2-VL-2B-Instruct,patch,1,500,0.82,0.43,0.39,0.436,0.42,0.368,0.999,None,None,None,None,None,0.993,7,0.007
-Qwen/Qwen2-VL-2B-Instruct,swapblend,1,500,0.82,0.372,0.448,0.436,0.42,0.368,0.9989,0.875,1.000,0.4848,"[0.4448, 0.5368]","[0.4426, 0.5413]",0.038,443,0.443
+model_name,corruption,n_seeds,n_items,clean_acc,acc_s1,acc_drop,null_removed_acc,null_black_acc,swapped_acc,mean_letter_mass,S_star,sig_S_star,MI,MI_ci_pooled,MI_ci_hierarchical,no_crossing_frac,n_resamples_dropped,frac_resamples_dropped,n_dropped_no_crossing,n_dropped_edge_crossing,n_dropped_r0_zero,n_dropped_other
+Qwen/Qwen2-VL-2B-Instruct,gaussian,1,500,0.82,0.406,0.414,0.436,0.42,0.368,0.9989,1.000 (edge),0.875,None,"[0.1480, 0.1891]","[0.1502, 0.1897]",0.018,623,0.623,18,605,0,0
+Qwen/Qwen2-VL-2B-Instruct,patch,1,500,0.82,0.43,0.39,0.436,0.42,0.368,0.999,None,None,None,None,None,0.993,1000,1.0,993,7,0,0
+Qwen/Qwen2-VL-2B-Instruct,swapblend,1,500,0.82,0.372,0.448,0.436,0.42,0.368,0.9989,0.875,1.000,0.4848,"[0.4448, 0.5368]","[0.4426, 0.5413]",0.038,481,0.481,38,443,0,0

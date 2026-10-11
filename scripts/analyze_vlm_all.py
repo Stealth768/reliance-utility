@@ -279,13 +279,20 @@ def analyze_model_corruption_all_seeds(
                     all_masses.append(float(mval))
     mean_letter_mass = float(np.mean(all_masses)) if all_masses else 1.0
 
-    # Pooled bootstrap
+    # Pooled bootstrap — track dropped resamples by cause
     rng = np.random.default_rng(seed)
     boot_s_list = []
     boot_mi_list = []
     boot_u_matrix = np.zeros((n_boot, n_S), dtype=float)
     no_crossing_count = 0
+    # Cause sub-counters (sum = n_resamples_dropped)
+    n_dropped_no_crossing = 0    # S_star is None → no usable crossing
+    n_dropped_edge_crossing = 0  # S_star == last grid point → degenerate interval, MI=None
+    n_dropped_r0_zero = 0        # normalized_reliance raises ValueError (R(0) ~ 0)
+    n_dropped_other = 0          # any other exception in the MI computation
     n_resamples_dropped = 0
+
+    _last_grid_val = float(S_grid[-1])
 
     for b in range(n_boot):
         idx = rng.integers(0, n_items_total, size=n_items_total)
@@ -297,6 +304,8 @@ def analyze_model_corruption_all_seeds(
 
         if b_s is None:
             no_crossing_count += 1
+            n_dropped_no_crossing += 1
+            n_resamples_dropped += 1
             boot_s_list.append(np.nan)
             boot_mi_list.append(np.nan)
         else:
@@ -307,11 +316,19 @@ def analyze_model_corruption_all_seeds(
                 b_R_hat = normalized_reliance(b_R)
                 b_mi = misalignment_index(b_R_hat, S_grid, b_s)
                 if b_mi is None or np.isnan(b_mi):
+                    # MI is None when S_star is at the grid edge (degenerate interval)
+                    n_dropped_edge_crossing += 1
                     n_resamples_dropped += 1
                     boot_mi_list.append(np.nan)
                 else:
                     boot_mi_list.append(b_mi)
+            except ValueError:
+                # normalized_reliance raises ValueError when R(0) ~ 0
+                n_dropped_r0_zero += 1
+                n_resamples_dropped += 1
+                boot_mi_list.append(np.nan)
             except Exception:
+                n_dropped_other += 1
                 n_resamples_dropped += 1
                 boot_mi_list.append(np.nan)
 
@@ -391,6 +408,10 @@ def analyze_model_corruption_all_seeds(
         "no_crossing_frac": no_crossing_frac,
         "n_resamples_dropped": n_resamples_dropped,
         "frac_resamples_dropped": frac_resamples_dropped,
+        "n_dropped_no_crossing": n_dropped_no_crossing,
+        "n_dropped_edge_crossing": n_dropped_edge_crossing,
+        "n_dropped_r0_zero": n_dropped_r0_zero,
+        "n_dropped_other": n_dropped_other,
         "all_items": all_items,
     }
 
@@ -611,7 +632,11 @@ def run_full_analysis(
             print(
                 f"[WARN] High fraction of bootstrap resamples dropped: "
                 f"{res['frac_resamples_dropped']:.2%} ({res['n_resamples_dropped']}/{n_boot}) "
-                f"for {mname} | {corr} due to R(0)~0 or numerical exceptions."
+                f"for {mname} | {corr}. "
+                f"Cause breakdown: no_crossing={res['n_dropped_no_crossing']}, "
+                f"edge_crossing={res['n_dropped_edge_crossing']}, "
+                f"r0_zero={res['n_dropped_r0_zero']}, "
+                f"other={res['n_dropped_other']}."
             )
 
         row = {
@@ -634,6 +659,10 @@ def run_full_analysis(
             "no_crossing_frac": round(res["no_crossing_frac"], 4),
             "n_resamples_dropped": res["n_resamples_dropped"],
             "frac_resamples_dropped": round(res["frac_resamples_dropped"], 4),
+            "n_dropped_no_crossing": res["n_dropped_no_crossing"],
+            "n_dropped_edge_crossing": res["n_dropped_edge_crossing"],
+            "n_dropped_r0_zero": res["n_dropped_r0_zero"],
+            "n_dropped_other": res["n_dropped_other"],
         }
         summary_rows.append(row)
 
