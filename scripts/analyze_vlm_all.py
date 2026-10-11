@@ -115,7 +115,13 @@ def load_shards_grouped(raw_dir: Path) -> Dict[Tuple[str, str, int], Dict[str, A
 
         model_name = data.get("model_name", "unknown")
         corruption = data.get("corruption", "unknown")
-        seed = int(data.get("seed", 0))
+        raw_seed = data.get("seed")
+        if raw_seed is not None:
+            seed = int(raw_seed)
+        else:
+            import re
+            m = re.search(r"_seed(\d+)_", jf.name)
+            seed = int(m.group(1)) if m else 0
         key = (model_name, corruption, seed)
 
         if key not in groups:

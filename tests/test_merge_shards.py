@@ -122,3 +122,55 @@ class TestMergeCoverageReport:
         assert "Coverage" in captured.out or "coverage" in captured.out.lower()
         # Missing shard 1 should be flagged
         assert "MISSING" in captured.out or "missing" in captured.out.lower()
+
+
+class TestMergeLegacyShards:
+    """Legacy shards without seed must be refused without flag, accepted with flag."""
+
+    def test_legacy_shard_refused_without_flag(self, tmp_path, capsys):
+        src_dir = tmp_path / "src"
+        src_dir.mkdir()
+        out_dir = tmp_path / "out"
+        out_dir.mkdir()
+
+        # Write legacy shard without seed in name
+        legacy_name = "Qwen2-VL-2B_gaussian_shard0.json"
+        (src_dir / legacy_name).write_text(json.dumps({
+            "model_name": "Qwen2-VL-2B",
+            "corruption": "gaussian",
+            "shard_idx": 0,
+            "items": [],
+        }), encoding="utf-8")
+
+        copied = merge_shards([str(src_dir)], str(out_dir), allow_legacy=False)
+        captured = capsys.readouterr()
+
+        assert copied == 0
+        assert not (out_dir / legacy_name).exists()
+        assert "REFUSED" in captured.err or "REFUSED" in captured.out
+
+    def test_legacy_shard_accepted_with_flag(self, tmp_path, capsys):
+        src_dir = tmp_path / "src"
+        src_dir.mkdir()
+        out_dir = tmp_path / "out"
+        out_dir.mkdir()
+
+        legacy_name = "Qwen2-VL-2B_gaussian_shard0.json"
+        (src_dir / legacy_name).write_text(json.dumps({
+            "model_name": "Qwen2-VL-2B",
+            "corruption": "gaussian",
+            "shard_idx": 0,
+            "items": [],
+        }), encoding="utf-8")
+
+        # Manifest missing fields
+        m_dir = src_dir / "manifest_Qwen2-VL-2B_gaussian_shard0"
+        m_dir.mkdir()
+        (m_dir / "manifest.json").write_text(json.dumps({"seed": 0}), encoding="utf-8")
+
+        copied = merge_shards([str(src_dir)], str(out_dir), allow_legacy=True)
+        captured = capsys.readouterr()
+
+        assert copied == 1
+        assert (out_dir / legacy_name).exists()
+        assert "WARN" in captured.out

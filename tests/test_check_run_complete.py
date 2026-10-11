@@ -85,3 +85,32 @@ class TestIncompleteRunExits1:
             shard_size=25,
         )
         assert result is False
+
+
+class TestLegacyShardsAsSeed0:
+    """Legacy shards named without seed should be identified as seed 0."""
+
+    def test_legacy_shards_recognized_as_seed_0(self, tmp_path):
+        model = "Qwen/Qwen2-VL-2B-Instruct"
+        model_slug = "Qwen2-VL-2B-Instruct"
+        n = 50
+        shard_size = 25
+
+        # Write legacy shards without seed in filename
+        for idx in range(2):
+            fname = f"{model_slug}_gaussian_shard{idx}.json"
+            (tmp_path / fname).write_text(json.dumps({
+                "model_name": model_slug,
+                "shard_idx": idx,
+                "items": [],
+            }), encoding="utf-8")
+
+        result = check_run_complete(
+            out_dir=str(tmp_path),
+            model=model,
+            corruption="gaussian",
+            seed=0,
+            n=n,
+            shard_size=shard_size,
+        )
+        assert result is True

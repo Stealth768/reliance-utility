@@ -26,25 +26,40 @@ import sys
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Pattern for new-format shard filenames: {model_slug}_{corruption}_seed{seed}_shard{idx}.json
 _SHARD_PATTERN = re.compile(
     r"^(?P<model_slug>.+)_(?P<corruption>[^_]+)_seed(?P<seed>\d+)_shard(?P<shard_idx>\d+)\.json$"
 )
 
+# Pattern for legacy shard filenames without seed: {model_slug}_{corruption}_shard{idx}.json
+_LEGACY_SHARD_PATTERN = re.compile(
+    r"^(?P<model_slug>.+)_(?P<corruption>[^_]+)_shard(?P<shard_idx>\d+)\.json$"
+)
 
-def _parse_shard_name(filename: str) -> Optional[Dict[str, str]]:
-    """Parse a new-format shard filename. Returns None if it doesn't match."""
+
+def _parse_shard_name(filename: str) -> Optional[Dict[str, Any]]:
+    """Parse a shard filename. Returns dict with metadata or None if invalid."""
     m = _SHARD_PATTERN.match(filename)
-    if m is None:
-        return None
-    return {
-        "model_slug": m.group("model_slug"),
-        "corruption": m.group("corruption"),
-        "seed": m.group("seed"),
-        "shard_idx": m.group("shard_idx"),
-    }
+    if m is not None:
+        return {
+            "model_slug": m.group("model_slug"),
+            "corruption": m.group("corruption"),
+            "seed": m.group("seed"),
+            "shard_idx": m.group("shard_idx"),
+            "is_legacy": False,
+        }
+    m_leg = _LEGACY_SHARD_PATTERN.match(filename)
+    if m_leg is not None:
+        return {
+            "model_slug": m_leg.group("model_slug"),
+            "corruption": m_leg.group("corruption"),
+            "seed": "0",
+            "shard_idx": m_leg.group("shard_idx"),
+            "is_legacy": True,
+        }
+    return None
 
 
 def _load_manifest(shard_path: Path) -> Dict:
@@ -80,7 +95,7 @@ def _manifest_identity_key(info: Dict[str, str]) -> Tuple[str, str, str, str]:
     return (info["model_slug"], info["corruption"], info["seed"], info["shard_idx"])
 
 
-def merge_shards(src_list: List[str], out_dir: str) -> int:
+def merge_shards(src_list: List[str], out_dir: str, allow_legacy: bool = False) -> int:
     """Merge shards from src_list into out_dir. Returns number of files copied."""
     out_path = Path(out_dir)
     out_path.mkdir(parents=True, exist_ok=True)
@@ -107,6 +122,7 @@ def merge_shards(src_list: List[str], out_dir: str) -> int:
         copied = 0
         skipped_overwrite = 0
         skipped_conflict = 0
+        skipped_legacy = 0
 
         # Track manifest data per shard identity for conflict detection
         identity_manifests: Dict[Tuple, Dict] = {}
@@ -115,8 +131,25 @@ def merge_shards(src_list: List[str], out_dir: str) -> int:
             info = _parse_shard_name(filename)
             if info is None:
                 continue
-            key = _manifest_identity_key(info)
+
             manifest = _load_manifest(src_file)
+
+            # Check legacy format
+            if info.get("is_legacy", False):
+                if not allow_legacy:
+                    print(
+                        f"  [REFUSED] Legacy shard format without seed detected: {filename}. "
+                        "Refusing to merge legacy shards without --allow_legacy flag.",
+                        file=sys.stderr,
+                    )
+                    skipped_legacy += 1
+                    continue
+                else:
+                    for field in ("git_commit", "seed", "data_ids_hash", "lib_versions", "gpu_name"):
+                        if not manifest.get(field):
+                            print(f"  [WARN] Legacy shard {filename}: manifest missing field '{field}'")
+
+            key = _manifest_identity_key(info)
 
             # Conflict check: same identity but different provenance
             if key in identity_manifests:
@@ -150,7 +183,7 @@ def merge_shards(src_list: List[str], out_dir: str) -> int:
             copied += 1
 
         print(f"\nMerge complete: {copied} copied, {skipped_overwrite} already existed, "
-              f"{skipped_conflict} skipped (manifest conflict)")
+              f"{skipped_conflict} skipped (manifest conflict), {skipped_legacy} refused (legacy format)")
 
         # Coverage report
         _print_coverage_report(out_path)
@@ -214,8 +247,13 @@ def main() -> int:
         required=True,
         help="Output directory to merge shards into.",
     )
+    parser.add_argument(
+        "--allow_legacy",
+        action="store_true",
+        help="Allow merging legacy shard filenames without seed and warn about missing manifest fields.",
+    )
     args = parser.parse_args()
-    merge_shards(args.src_list, args.out)
+    merge_shards(args.src_list, args.out, allow_legacy=args.allow_legacy)
     return 0
 
 

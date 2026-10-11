@@ -39,6 +39,11 @@ def check_run_complete(
 
     for shard_idx in range(n_shards):
         shard_file = out_path / f"{model_slug}_{corruption}_seed{seed}_shard{shard_idx}.json"
+        if not shard_file.exists() and seed == 0:
+            legacy_file = out_path / f"{model_slug}_{corruption}_shard{shard_idx}.json"
+            if legacy_file.exists():
+                shard_file = legacy_file
+
         if shard_file.exists():
             present.append(shard_idx)
         else:

@@ -229,3 +229,19 @@ def test_check_numbers_matches_and_detects_mismatch(tmp_path: Path):
         encoding="utf-8",
     )
     assert check_numbers(paper_dir, summary_csv) is False
+
+
+def test_analyze_vlm_all_reads_legacy_shards_as_seed_0(tmp_path: Path):
+    """load_shards_grouped maps legacy shard without seed in name or data to seed 0."""
+    raw_dir = tmp_path / "raw_legacy"
+    raw_dir.mkdir()
+    fname = raw_dir / "Qwen2-VL-2B-Instruct_gaussian_shard0.json"
+    fname.write_text(json.dumps({
+        "model_name": "Qwen/Qwen2-VL-2B-Instruct",
+        "corruption": "gaussian",
+        "shard_idx": 0,
+        "items": [],
+    }), encoding="utf-8")
+
+    grouped = load_shards_grouped(raw_dir)
+    assert ("Qwen/Qwen2-VL-2B-Instruct", "gaussian", 0) in grouped
