@@ -1,0 +1,17 @@
+{
+  "git_commit": "0587cf5",
+  "git_tag": "v0.13.4",
+  "model_hf_revision": "unknown",
+  "assistant_prefix": null,
+  "data_ids_hash": "abaf601d2d2409df81054c5f054a0bfaba9458c303b67ed2953220ac94cb956a",
+  "lib_versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpu_name": "Tesla T4",
+  "config_sha256": "1bdb41c25931fd53f97cef4bedb7d137c449e19ff32962aaf95a377418536e5b",
+  "seed": 0,
+  "model_name": "llava-hf/llava-1.5-7b-hf",
+  "timestamp_utc": "2026-10-11T14:17:37.013379+00:00"
+}

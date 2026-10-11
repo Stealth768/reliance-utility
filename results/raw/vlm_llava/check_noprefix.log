@@ -1,0 +1,39 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading A-OKVQA dataset: HuggingFaceM4/A-OKVQA (revision: d1b0efa3a436e9101dfbde3752db7607da696c35)
+Loaded 500 pilot item IDs from results/derived/main_ids.json
+Loading LLaVA model: llava-hf/llava-1.5-7b-hf (4-bit NF4) on cuda...
+Loading weights:   0%|          | 0/686 [00:00<?, ?it/s]Loading weights:   0%|          | 2/686 [00:00<00:45, 15.15it/s]Loading weights:   1%|          | 8/686 [00:00<00:17, 37.97it/s]Loading weights:   2%|▏         | 15/686 [00:00<00:13, 51.32it/s]Loading weights:   3%|▎         | 24/686 [00:00<00:10, 62.89it/s]Loading weights:   5%|▍         | 33/686 [00:00<00:09, 67.98it/s]Loading weights:   6%|▌         | 42/686 [00:00<00:09, 71.29it/s]Loading weights:   7%|▋         | 51/686 [00:00<00:08, 73.05it/s]Loading weights:   9%|▊         | 60/686 [00:00<00:08, 74.48it/s]Loading weights:  10%|█         | 69/686 [00:01<00:08, 75.57it/s]Loading weights:  11%|█▏        | 78/686 [00:01<00:08, 75.61it/s]Loading weights:  13%|█▎        | 87/686 [00:01<00:07, 75.45it/s]Loading weights:  14%|█▍        | 96/686 [00:01<00:07, 76.37it/s]Loading weights:  15%|█▌        | 105/686 [00:01<00:07, 77.52it/s]Loading weights:  17%|█▋        | 114/686 [00:01<00:07, 77.51it/s]Loading weights:  18%|█▊        | 123/686 [00:01<00:07, 77.47it/s]Loading weights:  19%|█▉        | 132/686 [00:01<00:07, 77.59it/s]Loading weights:  21%|██        | 141/686 [00:01<00:06, 77.95it/s]Loading weights:  22%|██▏       | 150/686 [00:02<00:06, 77.95it/s]Loading weights:  23%|██▎       | 159/686 [00:02<00:06, 77.72it/s]Loading weights:  24%|██▍       | 168/686 [00:02<00:06, 77.38it/s]Loading weights:  26%|██▌       | 177/686 [00:02<00:06, 77.40it/s]Loading weights:  27%|██▋       | 186/686 [00:02<00:06, 77.23it/s]Loading weights:  28%|██▊       | 195/686 [00:02<00:06, 76.54it/s]Loading weights:  30%|██▉       | 204/686 [00:02<00:06, 77.58it/s]Loading weights:  31%|███       | 213/686 [00:02<00:06, 78.38it/s]Loading weights:  32%|███▏      | 222/686 [00:02<00:05, 79.43it/s]Loading weights:  34%|███▎      | 231/686 [00:03<00:05, 79.38it/s]Loading weights:  35%|███▍      | 240/686 [00:03<00:05, 79.80it/s]Loading weights:  36%|███▋      | 249/686 [00:03<00:05, 79.99it/s]Loading weights:  38%|███▊      | 258/686 [00:03<00:05, 80.33it/s]Loading weights:  39%|███▉      | 267/686 [00:03<00:05, 79.67it/s]Loading weights:  40%|████      | 276/686 [00:03<00:05, 80.19it/s]Loading weights:  42%|████▏     | 285/686 [00:03<00:05, 79.65it/s]Loading weights:  51%|█████▏    | 352/686 [00:03<00:01, 241.03it/s]Loading weights:  70%|███████   | 482/686 [00:03<00:00, 535.81it/s]Loading weights:  89%|████████▉ | 612/686 [00:04<00:00, 752.33it/s]Loading weights: 100%|██████████| 686/686 [00:04<00:00, 165.50it/s]
+
+==================================================
+RUNNING MODEL CHECK ON 10 ITEMS: llava-hf/llava-1.5-7b-hf
+  LLaVA Letter Token IDs:
+    Letter A: IDs=[29909, 319] (tokens=["'A'", "'A'"])
+    Letter B: IDs=[29933, 350] (tokens=["'B'", "'B'"])
+    Letter C: IDs=[29907, 315] (tokens=["'C'", "'C'"])
+    Letter D: IDs=[29928, 360] (tokens=["'D'", "'D'"])
+==================================================
+  Item  1: target=1 | clean_pred=1 (p=0.992, mass=0.9998) | text_pred=0 (p=0.034, mass=0.9995)
+
+  [DIAGNOSTIC] Top-5 next tokens after clean forward pass (item 1):
+    #1: 'B'                  | ID:    350 | Prob: 0.9922
+    #2: 'A'                  | ID:    319 | Prob: 0.0037
+    #3: 'D'                  | ID:    360 | Prob: 0.0027
+    #4: 'C'                  | ID:    315 | Prob: 0.0012
+    #5: 'F'                  | ID:    383 | Prob: 0.0000
+
+  Item  2: target=2 | clean_pred=2 (p=0.973, mass=0.9998) | text_pred=2 (p=0.723, mass=0.9998)
+  Item  3: target=2 | clean_pred=2 (p=0.910, mass=0.9998) | text_pred=2 (p=0.459, mass=0.9989)
+  Item  4: target=0 | clean_pred=0 (p=0.411, mass=0.9984) | text_pred=1 (p=0.392, mass=0.9987)
+  Item  5: target=1 | clean_pred=2 (p=0.004, mass=0.9998) | text_pred=3 (p=0.008, mass=0.9997)
+  Item  6: target=2 | clean_pred=2 (p=0.914, mass=0.9997) | text_pred=2 (p=0.866, mass=0.9992)
+  Item  7: target=3 | clean_pred=3 (p=0.999, mass=1.0000) | text_pred=0 (p=0.019, mass=0.9999)
+  Item  8: target=0 | clean_pred=0 (p=0.997, mass=0.9998) | text_pred=0 (p=0.700, mass=0.9993)
+  Item  9: target=2 | clean_pred=2 (p=0.998, mass=1.0002) | text_pred=3 (p=0.101, mass=0.9993)
+  Item 10: target=3 | clean_pred=3 (p=0.581, mass=0.9992) | text_pred=2 (p=0.037, mass=0.9995)
+--------------------------------------------------
+Mean Letter Probability Mass : 0.9995
+Clean Multimodal Accuracy    : 90.00%
+Text-Only Accuracy          : 40.00%
+--------------------------------------------------
+
+[PASS] Model check successful! Mean letter mass >= 0.90.

@@ -1,0 +1,407 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading A-OKVQA dataset: HuggingFaceM4/A-OKVQA (revision: d1b0efa3a436e9101dfbde3752db7607da696c35)
+Loaded 500 pilot item IDs from results/derived/main_ids.json
+
+Target Model: llava-hf/llava-1.5-7b-hf
+Total Questions: 500 across 20 shards
+Corruptions: ['swapblend', 'gaussian', 'patch']
+Pending tasks: 60 shards
+Git commit: 0587cf5, tag: v0.13.4
+Loading LLaVA model: llava-hf/llava-1.5-7b-hf (4-bit NF4) on cuda...
+Loading weights:   0%|          | 0/686 [00:00<?, ?it/s]Loading weights:   0%|          | 2/686 [00:00<00:44, 15.38it/s]Loading weights:   1%|          | 6/686 [00:00<00:24, 27.89it/s]Loading weights:   2%|▏         | 15/686 [00:00<00:13, 51.02it/s]Loading weights:   3%|▎         | 24/686 [00:00<00:10, 61.52it/s]Loading weights:   5%|▍         | 33/686 [00:00<00:09, 66.79it/s]Loading weights:   6%|▌         | 42/686 [00:00<00:09, 69.91it/s]Loading weights:   7%|▋         | 51/686 [00:00<00:08, 71.92it/s]Loading weights:   9%|▊         | 60/686 [00:00<00:08, 73.11it/s]Loading weights:  10%|█         | 69/686 [00:01<00:08, 74.22it/s]Loading weights:  11%|█▏        | 78/686 [00:01<00:08, 74.79it/s]Loading weights:  13%|█▎        | 87/686 [00:01<00:07, 75.28it/s]Loading weights:  14%|█▍        | 96/686 [00:01<00:07, 76.73it/s]Loading weights:  15%|█▌        | 105/686 [00:01<00:07, 78.23it/s]Loading weights:  17%|█▋        | 114/686 [00:01<00:07, 78.94it/s]Loading weights:  18%|█▊        | 123/686 [00:01<00:07, 80.00it/s]Loading weights:  19%|█▉        | 132/686 [00:01<00:06, 80.74it/s]Loading weights:  21%|██        | 141/686 [00:01<00:06, 81.37it/s]Loading weights:  22%|██▏       | 150/686 [00:02<00:06, 81.64it/s]Loading weights:  23%|██▎       | 159/686 [00:02<00:06, 81.30it/s]Loading weights:  24%|██▍       | 168/686 [00:02<00:06, 80.59it/s]Loading weights:  26%|██▌       | 177/686 [00:02<00:06, 79.90it/s]Loading weights:  27%|██▋       | 186/686 [00:02<00:06, 79.45it/s]Loading weights:  28%|██▊       | 195/686 [00:02<00:06, 79.03it/s]Loading weights:  30%|██▉       | 204/686 [00:02<00:06, 80.00it/s]Loading weights:  31%|███       | 213/686 [00:02<00:05, 80.70it/s]Loading weights:  32%|███▏      | 222/686 [00:02<00:05, 81.58it/s]Loading weights:  34%|███▎      | 231/686 [00:03<00:05, 82.27it/s]Loading weights:  35%|███▍      | 240/686 [00:03<00:05, 82.69it/s]Loading weights:  36%|███▋      | 249/686 [00:03<00:05, 82.95it/s]Loading weights:  38%|███▊      | 258/686 [00:03<00:05, 82.99it/s]Loading weights:  39%|███▉      | 267/686 [00:03<00:05, 83.19it/s]Loading weights:  40%|████      | 276/686 [00:03<00:04, 83.36it/s]Loading weights:  42%|████▏     | 285/686 [00:03<00:04, 82.64it/s]Loading weights:  52%|█████▏    | 360/686 [00:03<00:01, 270.81it/s]Loading weights:  72%|███████▏  | 495/686 [00:03<00:00, 580.65it/s]Loading weights:  91%|█████████ | 625/686 [00:04<00:00, 789.90it/s]Loading weights: 100%|██████████| 686/686 [00:04<00:00, 168.89it/s]
+
+>>> Shard 1/20 [swapblend] (Questions 0..24) <<<
+  [swapblend shard 0] Done 5/25 | Overall: 5/1500 | Rate: 0.14 items/s | ETA: 02:58:23
+  [swapblend shard 0] Done 10/25 | Overall: 10/1500 | Rate: 0.13 items/s | ETA: 03:05:22
+  [swapblend shard 0] Done 15/25 | Overall: 15/1500 | Rate: 0.13 items/s | ETA: 03:14:30
+  [swapblend shard 0] Done 20/25 | Overall: 20/1500 | Rate: 0.13 items/s | ETA: 03:14:34
+  [swapblend shard 0] Done 25/25 | Overall: 25/1500 | Rate: 0.12 items/s | ETA: 03:16:43
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard0.json
+
+>>> Shard 2/20 [swapblend] (Questions 25..49) <<<
+  [swapblend shard 1] Done 5/25 | Overall: 30/1500 | Rate: 0.12 items/s | ETA: 03:18:58
+  [swapblend shard 1] Done 10/25 | Overall: 35/1500 | Rate: 0.12 items/s | ETA: 03:20:51
+  [swapblend shard 1] Done 15/25 | Overall: 40/1500 | Rate: 0.12 items/s | ETA: 03:20:00
+  [swapblend shard 1] Done 20/25 | Overall: 45/1500 | Rate: 0.12 items/s | ETA: 03:19:54
+  [swapblend shard 1] Done 25/25 | Overall: 50/1500 | Rate: 0.12 items/s | ETA: 03:19:40
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard1.json
+
+>>> Shard 3/20 [swapblend] (Questions 50..74) <<<
+  [swapblend shard 2] Done 5/25 | Overall: 55/1500 | Rate: 0.12 items/s | ETA: 03:19:30
+  [swapblend shard 2] Done 10/25 | Overall: 60/1500 | Rate: 0.12 items/s | ETA: 03:19:17
+  [swapblend shard 2] Done 15/25 | Overall: 65/1500 | Rate: 0.12 items/s | ETA: 03:19:53
+  [swapblend shard 2] Done 20/25 | Overall: 70/1500 | Rate: 0.12 items/s | ETA: 03:19:51
+  [swapblend shard 2] Done 25/25 | Overall: 75/1500 | Rate: 0.12 items/s | ETA: 03:19:44
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard2.json
+
+>>> Shard 4/20 [swapblend] (Questions 75..99) <<<
+  [swapblend shard 3] Done 5/25 | Overall: 80/1500 | Rate: 0.12 items/s | ETA: 03:18:46
+  [swapblend shard 3] Done 10/25 | Overall: 85/1500 | Rate: 0.12 items/s | ETA: 03:17:47
+  [swapblend shard 3] Done 15/25 | Overall: 90/1500 | Rate: 0.12 items/s | ETA: 03:17:30
+  [swapblend shard 3] Done 20/25 | Overall: 95/1500 | Rate: 0.12 items/s | ETA: 03:17:15
+  [swapblend shard 3] Done 25/25 | Overall: 100/1500 | Rate: 0.12 items/s | ETA: 03:16:21
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard3.json
+
+>>> Shard 5/20 [swapblend] (Questions 100..124) <<<
+  [swapblend shard 4] Done 5/25 | Overall: 105/1500 | Rate: 0.12 items/s | ETA: 03:15:58
+  [swapblend shard 4] Done 10/25 | Overall: 110/1500 | Rate: 0.12 items/s | ETA: 03:14:57
+  [swapblend shard 4] Done 15/25 | Overall: 115/1500 | Rate: 0.12 items/s | ETA: 03:14:34
+  [swapblend shard 4] Done 20/25 | Overall: 120/1500 | Rate: 0.12 items/s | ETA: 03:13:41
+  [swapblend shard 4] Done 25/25 | Overall: 125/1500 | Rate: 0.12 items/s | ETA: 03:12:50
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard4.json
+
+>>> Shard 6/20 [swapblend] (Questions 125..149) <<<
+  [swapblend shard 5] Done 5/25 | Overall: 130/1500 | Rate: 0.12 items/s | ETA: 03:11:57
+  [swapblend shard 5] Done 10/25 | Overall: 135/1500 | Rate: 0.12 items/s | ETA: 03:11:05
+  [swapblend shard 5] Done 15/25 | Overall: 140/1500 | Rate: 0.12 items/s | ETA: 03:10:13
+  [swapblend shard 5] Done 20/25 | Overall: 145/1500 | Rate: 0.12 items/s | ETA: 03:10:00
+  [swapblend shard 5] Done 25/25 | Overall: 150/1500 | Rate: 0.12 items/s | ETA: 03:09:20
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard5.json
+
+>>> Shard 7/20 [swapblend] (Questions 150..174) <<<
+  [swapblend shard 6] Done 5/25 | Overall: 155/1500 | Rate: 0.12 items/s | ETA: 03:08:39
+  [swapblend shard 6] Done 10/25 | Overall: 160/1500 | Rate: 0.12 items/s | ETA: 03:07:48
+  [swapblend shard 6] Done 15/25 | Overall: 165/1500 | Rate: 0.12 items/s | ETA: 03:07:23
+  [swapblend shard 6] Done 20/25 | Overall: 170/1500 | Rate: 0.12 items/s | ETA: 03:06:34
+  [swapblend shard 6] Done 25/25 | Overall: 175/1500 | Rate: 0.12 items/s | ETA: 03:05:51
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard6.json
+
+>>> Shard 8/20 [swapblend] (Questions 175..199) <<<
+  [swapblend shard 7] Done 5/25 | Overall: 180/1500 | Rate: 0.12 items/s | ETA: 03:05:31
+  [swapblend shard 7] Done 10/25 | Overall: 185/1500 | Rate: 0.12 items/s | ETA: 03:04:41
+  [swapblend shard 7] Done 15/25 | Overall: 190/1500 | Rate: 0.12 items/s | ETA: 03:03:52
+  [swapblend shard 7] Done 20/25 | Overall: 195/1500 | Rate: 0.12 items/s | ETA: 03:03:30
+  [swapblend shard 7] Done 25/25 | Overall: 200/1500 | Rate: 0.12 items/s | ETA: 03:02:56
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard7.json
+
+>>> Shard 9/20 [swapblend] (Questions 200..224) <<<
+  [swapblend shard 8] Done 5/25 | Overall: 205/1500 | Rate: 0.12 items/s | ETA: 03:02:31
+  [swapblend shard 8] Done 10/25 | Overall: 210/1500 | Rate: 0.12 items/s | ETA: 03:01:40
+  [swapblend shard 8] Done 15/25 | Overall: 215/1500 | Rate: 0.12 items/s | ETA: 03:01:23
+  [swapblend shard 8] Done 20/25 | Overall: 220/1500 | Rate: 0.12 items/s | ETA: 03:00:32
+  [swapblend shard 8] Done 25/25 | Overall: 225/1500 | Rate: 0.12 items/s | ETA: 02:59:42
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard8.json
+
+>>> Shard 10/20 [swapblend] (Questions 225..249) <<<
+  [swapblend shard 9] Done 5/25 | Overall: 230/1500 | Rate: 0.12 items/s | ETA: 02:59:17
+  [swapblend shard 9] Done 10/25 | Overall: 235/1500 | Rate: 0.12 items/s | ETA: 02:58:43
+  [swapblend shard 9] Done 15/25 | Overall: 240/1500 | Rate: 0.12 items/s | ETA: 02:58:09
+  [swapblend shard 9] Done 20/25 | Overall: 245/1500 | Rate: 0.12 items/s | ETA: 02:57:25
+  [swapblend shard 9] Done 25/25 | Overall: 250/1500 | Rate: 0.12 items/s | ETA: 02:56:42
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard9.json
+
+>>> Shard 11/20 [swapblend] (Questions 250..274) <<<
+  [swapblend shard 10] Done 5/25 | Overall: 255/1500 | Rate: 0.12 items/s | ETA: 02:55:58
+  [swapblend shard 10] Done 10/25 | Overall: 260/1500 | Rate: 0.12 items/s | ETA: 02:55:16
+  [swapblend shard 10] Done 15/25 | Overall: 265/1500 | Rate: 0.12 items/s | ETA: 02:54:40
+  [swapblend shard 10] Done 20/25 | Overall: 270/1500 | Rate: 0.12 items/s | ETA: 02:54:11
+  [swapblend shard 10] Done 25/25 | Overall: 275/1500 | Rate: 0.12 items/s | ETA: 02:53:35
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard10.json
+
+>>> Shard 12/20 [swapblend] (Questions 275..299) <<<
+  [swapblend shard 11] Done 5/25 | Overall: 280/1500 | Rate: 0.12 items/s | ETA: 02:52:53
+  [swapblend shard 11] Done 10/25 | Overall: 285/1500 | Rate: 0.12 items/s | ETA: 02:52:11
+  [swapblend shard 11] Done 15/25 | Overall: 290/1500 | Rate: 0.12 items/s | ETA: 02:51:28
+  [swapblend shard 11] Done 20/25 | Overall: 295/1500 | Rate: 0.12 items/s | ETA: 02:50:51
+  [swapblend shard 11] Done 25/25 | Overall: 300/1500 | Rate: 0.12 items/s | ETA: 02:50:18
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard11.json
+
+>>> Shard 13/20 [swapblend] (Questions 300..324) <<<
+  [swapblend shard 12] Done 5/25 | Overall: 305/1500 | Rate: 0.12 items/s | ETA: 02:49:30
+  [swapblend shard 12] Done 10/25 | Overall: 310/1500 | Rate: 0.12 items/s | ETA: 02:48:48
+  [swapblend shard 12] Done 15/25 | Overall: 315/1500 | Rate: 0.12 items/s | ETA: 02:48:11
+  [swapblend shard 12] Done 20/25 | Overall: 320/1500 | Rate: 0.12 items/s | ETA: 02:47:23
+  [swapblend shard 12] Done 25/25 | Overall: 325/1500 | Rate: 0.12 items/s | ETA: 02:46:39
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard12.json
+
+>>> Shard 14/20 [swapblend] (Questions 325..349) <<<
+  [swapblend shard 13] Done 5/25 | Overall: 330/1500 | Rate: 0.12 items/s | ETA: 02:46:06
+  [swapblend shard 13] Done 10/25 | Overall: 335/1500 | Rate: 0.12 items/s | ETA: 02:45:22
+  [swapblend shard 13] Done 15/25 | Overall: 340/1500 | Rate: 0.12 items/s | ETA: 02:44:38
+  [swapblend shard 13] Done 20/25 | Overall: 345/1500 | Rate: 0.12 items/s | ETA: 02:43:51
+  [swapblend shard 13] Done 25/25 | Overall: 350/1500 | Rate: 0.12 items/s | ETA: 02:43:08
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard13.json
+
+>>> Shard 15/20 [swapblend] (Questions 350..374) <<<
+  [swapblend shard 14] Done 5/25 | Overall: 355/1500 | Rate: 0.12 items/s | ETA: 02:42:30
+  [swapblend shard 14] Done 10/25 | Overall: 360/1500 | Rate: 0.12 items/s | ETA: 02:41:51
+  [swapblend shard 14] Done 15/25 | Overall: 365/1500 | Rate: 0.12 items/s | ETA: 02:41:12
+  [swapblend shard 14] Done 20/25 | Overall: 370/1500 | Rate: 0.12 items/s | ETA: 02:40:26
+  [swapblend shard 14] Done 25/25 | Overall: 375/1500 | Rate: 0.12 items/s | ETA: 02:39:47
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard14.json
+
+>>> Shard 16/20 [swapblend] (Questions 375..399) <<<
+  [swapblend shard 15] Done 5/25 | Overall: 380/1500 | Rate: 0.12 items/s | ETA: 02:39:04
+  [swapblend shard 15] Done 10/25 | Overall: 385/1500 | Rate: 0.12 items/s | ETA: 02:38:21
+  [swapblend shard 15] Done 15/25 | Overall: 390/1500 | Rate: 0.12 items/s | ETA: 02:37:32
+  [swapblend shard 15] Done 20/25 | Overall: 395/1500 | Rate: 0.12 items/s | ETA: 02:36:48
+  [swapblend shard 15] Done 25/25 | Overall: 400/1500 | Rate: 0.12 items/s | ETA: 02:36:05
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard15.json
+
+>>> Shard 17/20 [swapblend] (Questions 400..424) <<<
+  [swapblend shard 16] Done 5/25 | Overall: 405/1500 | Rate: 0.12 items/s | ETA: 02:35:21
+  [swapblend shard 16] Done 10/25 | Overall: 410/1500 | Rate: 0.12 items/s | ETA: 02:34:42
+  [swapblend shard 16] Done 15/25 | Overall: 415/1500 | Rate: 0.12 items/s | ETA: 02:34:00
+  [swapblend shard 16] Done 20/25 | Overall: 420/1500 | Rate: 0.12 items/s | ETA: 02:33:14
+  [swapblend shard 16] Done 25/25 | Overall: 425/1500 | Rate: 0.12 items/s | ETA: 02:32:27
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard16.json
+
+>>> Shard 18/20 [swapblend] (Questions 425..449) <<<
+  [swapblend shard 17] Done 5/25 | Overall: 430/1500 | Rate: 0.12 items/s | ETA: 02:31:44
+  [swapblend shard 17] Done 10/25 | Overall: 435/1500 | Rate: 0.12 items/s | ETA: 02:31:01
+  [swapblend shard 17] Done 15/25 | Overall: 440/1500 | Rate: 0.12 items/s | ETA: 02:30:18
+  [swapblend shard 17] Done 20/25 | Overall: 445/1500 | Rate: 0.12 items/s | ETA: 02:29:32
+  [swapblend shard 17] Done 25/25 | Overall: 450/1500 | Rate: 0.12 items/s | ETA: 02:28:53
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard17.json
+
+>>> Shard 19/20 [swapblend] (Questions 450..474) <<<
+  [swapblend shard 18] Done 5/25 | Overall: 455/1500 | Rate: 0.12 items/s | ETA: 02:28:08
+  [swapblend shard 18] Done 10/25 | Overall: 460/1500 | Rate: 0.12 items/s | ETA: 02:27:25
+  [swapblend shard 18] Done 15/25 | Overall: 465/1500 | Rate: 0.12 items/s | ETA: 02:26:46
+  [swapblend shard 18] Done 20/25 | Overall: 470/1500 | Rate: 0.12 items/s | ETA: 02:26:06
+  [swapblend shard 18] Done 25/25 | Overall: 475/1500 | Rate: 0.12 items/s | ETA: 02:25:27
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard18.json
+
+>>> Shard 20/20 [swapblend] (Questions 475..499) <<<
+  [swapblend shard 19] Done 5/25 | Overall: 480/1500 | Rate: 0.12 items/s | ETA: 02:24:43
+  [swapblend shard 19] Done 10/25 | Overall: 485/1500 | Rate: 0.12 items/s | ETA: 02:24:09
+  [swapblend shard 19] Done 15/25 | Overall: 490/1500 | Rate: 0.12 items/s | ETA: 02:23:38
+  [swapblend shard 19] Done 20/25 | Overall: 495/1500 | Rate: 0.12 items/s | ETA: 02:23:03
+  [swapblend shard 19] Done 25/25 | Overall: 500/1500 | Rate: 0.12 items/s | ETA: 02:22:23
+  -> Successfully saved shard: llava-1.5-7b-hf_swapblend_seed0_shard19.json
+
+>>> Shard 1/20 [gaussian] (Questions 0..24) <<<
+  [gaussian shard 0] Done 5/25 | Overall: 505/1500 | Rate: 0.12 items/s | ETA: 02:21:44
+  [gaussian shard 0] Done 10/25 | Overall: 510/1500 | Rate: 0.12 items/s | ETA: 02:21:04
+  [gaussian shard 0] Done 15/25 | Overall: 515/1500 | Rate: 0.12 items/s | ETA: 02:20:22
+  [gaussian shard 0] Done 20/25 | Overall: 520/1500 | Rate: 0.12 items/s | ETA: 02:19:37
+  [gaussian shard 0] Done 25/25 | Overall: 525/1500 | Rate: 0.12 items/s | ETA: 02:18:54
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard0.json
+
+>>> Shard 2/20 [gaussian] (Questions 25..49) <<<
+  [gaussian shard 1] Done 5/25 | Overall: 530/1500 | Rate: 0.12 items/s | ETA: 02:18:14
+  [gaussian shard 1] Done 10/25 | Overall: 535/1500 | Rate: 0.12 items/s | ETA: 02:17:35
+  [gaussian shard 1] Done 15/25 | Overall: 540/1500 | Rate: 0.12 items/s | ETA: 02:16:50
+  [gaussian shard 1] Done 20/25 | Overall: 545/1500 | Rate: 0.12 items/s | ETA: 02:16:08
+  [gaussian shard 1] Done 25/25 | Overall: 550/1500 | Rate: 0.12 items/s | ETA: 02:15:25
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard1.json
+
+>>> Shard 3/20 [gaussian] (Questions 50..74) <<<
+  [gaussian shard 2] Done 5/25 | Overall: 555/1500 | Rate: 0.12 items/s | ETA: 02:14:43
+  [gaussian shard 2] Done 10/25 | Overall: 560/1500 | Rate: 0.12 items/s | ETA: 02:14:01
+  [gaussian shard 2] Done 15/25 | Overall: 565/1500 | Rate: 0.12 items/s | ETA: 02:13:23
+  [gaussian shard 2] Done 20/25 | Overall: 570/1500 | Rate: 0.12 items/s | ETA: 02:12:43
+  [gaussian shard 2] Done 25/25 | Overall: 575/1500 | Rate: 0.12 items/s | ETA: 02:12:03
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard2.json
+
+>>> Shard 4/20 [gaussian] (Questions 75..99) <<<
+  [gaussian shard 3] Done 5/25 | Overall: 580/1500 | Rate: 0.12 items/s | ETA: 02:11:18
+  [gaussian shard 3] Done 10/25 | Overall: 585/1500 | Rate: 0.12 items/s | ETA: 02:10:33
+  [gaussian shard 3] Done 15/25 | Overall: 590/1500 | Rate: 0.12 items/s | ETA: 02:09:52
+  [gaussian shard 3] Done 20/25 | Overall: 595/1500 | Rate: 0.12 items/s | ETA: 02:09:12
+  [gaussian shard 3] Done 25/25 | Overall: 600/1500 | Rate: 0.12 items/s | ETA: 02:08:27
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard3.json
+
+>>> Shard 5/20 [gaussian] (Questions 100..124) <<<
+  [gaussian shard 4] Done 5/25 | Overall: 605/1500 | Rate: 0.12 items/s | ETA: 02:07:47
+  [gaussian shard 4] Done 10/25 | Overall: 610/1500 | Rate: 0.12 items/s | ETA: 02:07:02
+  [gaussian shard 4] Done 15/25 | Overall: 615/1500 | Rate: 0.12 items/s | ETA: 02:06:21
+  [gaussian shard 4] Done 20/25 | Overall: 620/1500 | Rate: 0.12 items/s | ETA: 02:05:36
+  [gaussian shard 4] Done 25/25 | Overall: 625/1500 | Rate: 0.12 items/s | ETA: 02:04:51
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard4.json
+
+>>> Shard 6/20 [gaussian] (Questions 125..149) <<<
+  [gaussian shard 5] Done 5/25 | Overall: 630/1500 | Rate: 0.12 items/s | ETA: 02:04:07
+  [gaussian shard 5] Done 10/25 | Overall: 635/1500 | Rate: 0.12 items/s | ETA: 02:03:22
+  [gaussian shard 5] Done 15/25 | Overall: 640/1500 | Rate: 0.12 items/s | ETA: 02:02:38
+  [gaussian shard 5] Done 20/25 | Overall: 645/1500 | Rate: 0.12 items/s | ETA: 02:01:59
+  [gaussian shard 5] Done 25/25 | Overall: 650/1500 | Rate: 0.12 items/s | ETA: 02:01:16
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard5.json
+
+>>> Shard 7/20 [gaussian] (Questions 150..174) <<<
+  [gaussian shard 6] Done 5/25 | Overall: 655/1500 | Rate: 0.12 items/s | ETA: 02:00:34
+  [gaussian shard 6] Done 10/25 | Overall: 660/1500 | Rate: 0.12 items/s | ETA: 01:59:49
+  [gaussian shard 6] Done 15/25 | Overall: 665/1500 | Rate: 0.12 items/s | ETA: 01:59:08
+  [gaussian shard 6] Done 20/25 | Overall: 670/1500 | Rate: 0.12 items/s | ETA: 01:58:24
+  [gaussian shard 6] Done 25/25 | Overall: 675/1500 | Rate: 0.12 items/s | ETA: 01:57:41
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard6.json
+
+>>> Shard 8/20 [gaussian] (Questions 175..199) <<<
+  [gaussian shard 7] Done 5/25 | Overall: 680/1500 | Rate: 0.12 items/s | ETA: 01:57:02
+  [gaussian shard 7] Done 10/25 | Overall: 685/1500 | Rate: 0.12 items/s | ETA: 01:56:17
+  [gaussian shard 7] Done 15/25 | Overall: 690/1500 | Rate: 0.12 items/s | ETA: 01:55:33
+  [gaussian shard 7] Done 20/25 | Overall: 695/1500 | Rate: 0.12 items/s | ETA: 01:54:54
+  [gaussian shard 7] Done 25/25 | Overall: 700/1500 | Rate: 0.12 items/s | ETA: 01:54:12
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard7.json
+
+>>> Shard 9/20 [gaussian] (Questions 200..224) <<<
+  [gaussian shard 8] Done 5/25 | Overall: 705/1500 | Rate: 0.12 items/s | ETA: 01:53:32
+  [gaussian shard 8] Done 10/25 | Overall: 710/1500 | Rate: 0.12 items/s | ETA: 01:52:48
+  [gaussian shard 8] Done 15/25 | Overall: 715/1500 | Rate: 0.12 items/s | ETA: 01:52:10
+  [gaussian shard 8] Done 20/25 | Overall: 720/1500 | Rate: 0.12 items/s | ETA: 01:51:26
+  [gaussian shard 8] Done 25/25 | Overall: 725/1500 | Rate: 0.12 items/s | ETA: 01:50:41
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard8.json
+
+>>> Shard 10/20 [gaussian] (Questions 225..249) <<<
+  [gaussian shard 9] Done 5/25 | Overall: 730/1500 | Rate: 0.12 items/s | ETA: 01:50:02
+  [gaussian shard 9] Done 10/25 | Overall: 735/1500 | Rate: 0.12 items/s | ETA: 01:49:20
+  [gaussian shard 9] Done 15/25 | Overall: 740/1500 | Rate: 0.12 items/s | ETA: 01:48:38
+  [gaussian shard 9] Done 20/25 | Overall: 745/1500 | Rate: 0.12 items/s | ETA: 01:47:55
+  [gaussian shard 9] Done 25/25 | Overall: 750/1500 | Rate: 0.12 items/s | ETA: 01:47:12
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard9.json
+
+>>> Shard 11/20 [gaussian] (Questions 250..274) <<<
+  [gaussian shard 10] Done 5/25 | Overall: 755/1500 | Rate: 0.12 items/s | ETA: 01:46:29
+  [gaussian shard 10] Done 10/25 | Overall: 760/1500 | Rate: 0.12 items/s | ETA: 01:45:47
+  [gaussian shard 10] Done 15/25 | Overall: 765/1500 | Rate: 0.12 items/s | ETA: 01:45:05
+  [gaussian shard 10] Done 20/25 | Overall: 770/1500 | Rate: 0.12 items/s | ETA: 01:44:26
+  [gaussian shard 10] Done 25/25 | Overall: 775/1500 | Rate: 0.12 items/s | ETA: 01:43:44
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard10.json
+
+>>> Shard 12/20 [gaussian] (Questions 275..299) <<<
+  [gaussian shard 11] Done 5/25 | Overall: 780/1500 | Rate: 0.12 items/s | ETA: 01:43:01
+  [gaussian shard 11] Done 10/25 | Overall: 785/1500 | Rate: 0.12 items/s | ETA: 01:42:18
+  [gaussian shard 11] Done 15/25 | Overall: 790/1500 | Rate: 0.12 items/s | ETA: 01:41:35
+  [gaussian shard 11] Done 20/25 | Overall: 795/1500 | Rate: 0.12 items/s | ETA: 01:40:54
+  [gaussian shard 11] Done 25/25 | Overall: 800/1500 | Rate: 0.12 items/s | ETA: 01:40:13
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard11.json
+
+>>> Shard 13/20 [gaussian] (Questions 300..324) <<<
+  [gaussian shard 12] Done 5/25 | Overall: 805/1500 | Rate: 0.12 items/s | ETA: 01:39:29
+  [gaussian shard 12] Done 10/25 | Overall: 810/1500 | Rate: 0.12 items/s | ETA: 01:38:47
+  [gaussian shard 12] Done 15/25 | Overall: 815/1500 | Rate: 0.12 items/s | ETA: 01:38:05
+  [gaussian shard 12] Done 20/25 | Overall: 820/1500 | Rate: 0.12 items/s | ETA: 01:37:21
+  [gaussian shard 12] Done 25/25 | Overall: 825/1500 | Rate: 0.12 items/s | ETA: 01:36:38
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard12.json
+
+>>> Shard 14/20 [gaussian] (Questions 325..349) <<<
+  [gaussian shard 13] Done 5/25 | Overall: 830/1500 | Rate: 0.12 items/s | ETA: 01:35:58
+  [gaussian shard 13] Done 10/25 | Overall: 835/1500 | Rate: 0.12 items/s | ETA: 01:35:15
+  [gaussian shard 13] Done 15/25 | Overall: 840/1500 | Rate: 0.12 items/s | ETA: 01:34:32
+  [gaussian shard 13] Done 20/25 | Overall: 845/1500 | Rate: 0.12 items/s | ETA: 01:33:48
+  [gaussian shard 13] Done 25/25 | Overall: 850/1500 | Rate: 0.12 items/s | ETA: 01:33:05
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard13.json
+
+>>> Shard 15/20 [gaussian] (Questions 350..374) <<<
+  [gaussian shard 14] Done 5/25 | Overall: 855/1500 | Rate: 0.12 items/s | ETA: 01:32:23
+  [gaussian shard 14] Done 10/25 | Overall: 860/1500 | Rate: 0.12 items/s | ETA: 01:31:41
+  [gaussian shard 14] Done 15/25 | Overall: 865/1500 | Rate: 0.12 items/s | ETA: 01:30:59
+  [gaussian shard 14] Done 20/25 | Overall: 870/1500 | Rate: 0.12 items/s | ETA: 01:30:15
+  [gaussian shard 14] Done 25/25 | Overall: 875/1500 | Rate: 0.12 items/s | ETA: 01:29:33
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard14.json
+
+>>> Shard 16/20 [gaussian] (Questions 375..399) <<<
+  [gaussian shard 15] Done 5/25 | Overall: 880/1500 | Rate: 0.12 items/s | ETA: 01:28:50
+  [gaussian shard 15] Done 10/25 | Overall: 885/1500 | Rate: 0.12 items/s | ETA: 01:28:07
+  [gaussian shard 15] Done 15/25 | Overall: 890/1500 | Rate: 0.12 items/s | ETA: 01:27:23
+  [gaussian shard 15] Done 20/25 | Overall: 895/1500 | Rate: 0.12 items/s | ETA: 01:26:40
+  [gaussian shard 15] Done 25/25 | Overall: 900/1500 | Rate: 0.12 items/s | ETA: 01:25:57
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard15.json
+
+>>> Shard 17/20 [gaussian] (Questions 400..424) <<<
+  [gaussian shard 16] Done 5/25 | Overall: 905/1500 | Rate: 0.12 items/s | ETA: 01:25:14
+  [gaussian shard 16] Done 10/25 | Overall: 910/1500 | Rate: 0.12 items/s | ETA: 01:24:32
+  [gaussian shard 16] Done 15/25 | Overall: 915/1500 | Rate: 0.12 items/s | ETA: 01:23:49
+  [gaussian shard 16] Done 20/25 | Overall: 920/1500 | Rate: 0.12 items/s | ETA: 01:23:05
+  [gaussian shard 16] Done 25/25 | Overall: 925/1500 | Rate: 0.12 items/s | ETA: 01:22:21
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard16.json
+
+>>> Shard 18/20 [gaussian] (Questions 425..449) <<<
+  [gaussian shard 17] Done 5/25 | Overall: 930/1500 | Rate: 0.12 items/s | ETA: 01:21:38
+  [gaussian shard 17] Done 10/25 | Overall: 935/1500 | Rate: 0.12 items/s | ETA: 01:20:55
+  [gaussian shard 17] Done 15/25 | Overall: 940/1500 | Rate: 0.12 items/s | ETA: 01:20:12
+  [gaussian shard 17] Done 20/25 | Overall: 945/1500 | Rate: 0.12 items/s | ETA: 01:19:29
+  [gaussian shard 17] Done 25/25 | Overall: 950/1500 | Rate: 0.12 items/s | ETA: 01:18:47
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard17.json
+
+>>> Shard 19/20 [gaussian] (Questions 450..474) <<<
+  [gaussian shard 18] Done 5/25 | Overall: 955/1500 | Rate: 0.12 items/s | ETA: 01:18:03
+  [gaussian shard 18] Done 10/25 | Overall: 960/1500 | Rate: 0.12 items/s | ETA: 01:17:20
+  [gaussian shard 18] Done 15/25 | Overall: 965/1500 | Rate: 0.12 items/s | ETA: 01:16:38
+  [gaussian shard 18] Done 20/25 | Overall: 970/1500 | Rate: 0.12 items/s | ETA: 01:15:56
+  [gaussian shard 18] Done 25/25 | Overall: 975/1500 | Rate: 0.12 items/s | ETA: 01:15:14
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard18.json
+
+>>> Shard 20/20 [gaussian] (Questions 475..499) <<<
+  [gaussian shard 19] Done 5/25 | Overall: 980/1500 | Rate: 0.12 items/s | ETA: 01:14:31
+  [gaussian shard 19] Done 10/25 | Overall: 985/1500 | Rate: 0.12 items/s | ETA: 01:13:50
+  [gaussian shard 19] Done 15/25 | Overall: 990/1500 | Rate: 0.12 items/s | ETA: 01:13:10
+  [gaussian shard 19] Done 20/25 | Overall: 995/1500 | Rate: 0.12 items/s | ETA: 01:12:29
+  [gaussian shard 19] Done 25/25 | Overall: 1000/1500 | Rate: 0.12 items/s | ETA: 01:11:47
+  -> Successfully saved shard: llava-1.5-7b-hf_gaussian_seed0_shard19.json
+
+>>> Shard 1/20 [patch] (Questions 0..24) <<<
+  [patch shard 0] Done 5/25 | Overall: 1005/1500 | Rate: 0.12 items/s | ETA: 01:11:04
+  [patch shard 0] Done 10/25 | Overall: 1010/1500 | Rate: 0.12 items/s | ETA: 01:10:21
+  [patch shard 0] Done 15/25 | Overall: 1015/1500 | Rate: 0.12 items/s | ETA: 01:09:37
+  [patch shard 0] Done 20/25 | Overall: 1020/1500 | Rate: 0.12 items/s | ETA: 01:08:53
+  [patch shard 0] Done 25/25 | Overall: 1025/1500 | Rate: 0.12 items/s | ETA: 01:08:10
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard0.json
+
+>>> Shard 2/20 [patch] (Questions 25..49) <<<
+  [patch shard 1] Done 5/25 | Overall: 1030/1500 | Rate: 0.12 items/s | ETA: 01:07:27
+  [patch shard 1] Done 10/25 | Overall: 1035/1500 | Rate: 0.12 items/s | ETA: 01:06:44
+  [patch shard 1] Done 15/25 | Overall: 1040/1500 | Rate: 0.12 items/s | ETA: 01:06:00
+  [patch shard 1] Done 20/25 | Overall: 1045/1500 | Rate: 0.12 items/s | ETA: 01:05:17
+  [patch shard 1] Done 25/25 | Overall: 1050/1500 | Rate: 0.12 items/s | ETA: 01:04:33
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard1.json
+
+>>> Shard 3/20 [patch] (Questions 50..74) <<<
+  [patch shard 2] Done 5/25 | Overall: 1055/1500 | Rate: 0.12 items/s | ETA: 01:03:50
+  [patch shard 2] Done 10/25 | Overall: 1060/1500 | Rate: 0.12 items/s | ETA: 01:03:06
+  [patch shard 2] Done 15/25 | Overall: 1065/1500 | Rate: 0.12 items/s | ETA: 01:02:24
+  [patch shard 2] Done 20/25 | Overall: 1070/1500 | Rate: 0.12 items/s | ETA: 01:01:41
+  [patch shard 2] Done 25/25 | Overall: 1075/1500 | Rate: 0.12 items/s | ETA: 01:00:58
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard2.jsonWarning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading A-OKVQA dataset: HuggingFaceM4/A-OKVQA (revision: d1b0efa3a436e9101dfbde3752db7607da696c35)
+Loaded 500 pilot item IDs from results/derived/main_ids.json
+
+Target Model: llava-hf/llava-1.5-7b-hf
+Total Questions: 500 across 20 shards
+Corruptions: ['swapblend', 'gaussian', 'patch']
+Pending tasks: 5 shards
+Git commit: 0587cf5, tag: v0.13.4
+Loading LLaVA model: llava-hf/llava-1.5-7b-hf (4-bit NF4) on cuda...
+Loading weights:   0%|          | 0/686 [00:00<?, ?it/s]Loading weights:   0%|          | 2/686 [00:00<00:47, 14.40it/s]Loading weights:   1%|          | 8/686 [00:00<00:18, 36.80it/s]Loading weights:   2%|▏         | 15/686 [00:00<00:13, 49.81it/s]Loading weights:   3%|▎         | 24/686 [00:00<00:10, 60.85it/s]Loading weights:   5%|▍         | 33/686 [00:00<00:09, 66.36it/s]Loading weights:   6%|▌         | 42/686 [00:00<00:09, 69.78it/s]Loading weights:   7%|▋         | 51/686 [00:00<00:08, 71.31it/s]Loading weights:   9%|▊         | 60/686 [00:00<00:08, 72.80it/s]Loading weights:  10%|█         | 69/686 [00:01<00:08, 73.89it/s]Loading weights:  11%|█▏        | 78/686 [00:01<00:08, 74.48it/s]Loading weights:  13%|█▎        | 87/686 [00:01<00:08, 74.77it/s]Loading weights:  14%|█▍        | 96/686 [00:01<00:07, 75.25it/s]Loading weights:  15%|█▌        | 105/686 [00:01<00:07, 77.01it/s]Loading weights:  17%|█▋        | 114/686 [00:01<00:07, 77.57it/s]Loading weights:  18%|█▊        | 123/686 [00:01<00:07, 77.43it/s]Loading weights:  19%|█▉        | 132/686 [00:01<00:07, 76.29it/s]Loading weights:  21%|██        | 141/686 [00:01<00:07, 76.42it/s]Loading weights:  22%|██▏       | 150/686 [00:02<00:07, 75.90it/s]Loading weights:  23%|██▎       | 159/686 [00:02<00:06, 76.67it/s]Loading weights:  24%|██▍       | 168/686 [00:02<00:06, 76.14it/s]Loading weights:  26%|██▌       | 177/686 [00:02<00:06, 76.40it/s]Loading weights:  27%|██▋       | 186/686 [00:02<00:06, 75.87it/s]Loading weights:  28%|██▊       | 194/686 [00:02<00:06, 76.79it/s]Loading weights:  29%|██▉       | 202/686 [00:02<00:06, 77.19it/s]Loading weights:  31%|███       | 211/686 [00:02<00:06, 75.97it/s]Loading weights:  32%|███▏      | 220/686 [00:03<00:06, 76.40it/s]Loading weights:  33%|███▎      | 229/686 [00:03<00:05, 77.18it/s]Loading weights:  35%|███▍      | 238/686 [00:03<00:05, 77.90it/s]Loading weights:  36%|███▌      | 247/686 [00:03<00:05, 77.96it/s]Loading weights:  37%|███▋      | 256/686 [00:03<00:05, 77.98it/s]Loading weights:  39%|███▊      | 265/686 [00:03<00:05, 76.93it/s]Loading weights:  40%|███▉      | 274/686 [00:03<00:05, 76.30it/s]Loading weights:  41%|████▏     | 283/686 [00:03<00:05, 76.70it/s]Loading weights:  43%|████▎     | 295/686 [00:03<00:04, 87.07it/s]Loading weights:  61%|██████    | 420/686 [00:04<00:00, 405.20it/s]Loading weights:  80%|███████▉  | 547/686 [00:04<00:00, 648.22it/s]Loading weights:  98%|█████████▊| 674/686 [00:04<00:00, 822.30it/s]Loading weights: 100%|██████████| 686/686 [00:04<00:00, 161.13it/s]
+
+>>> Shard 16/20 [patch] (Questions 375..399) <<<
+  [patch shard 15] Done 5/25 | Overall: 5/125 | Rate: 0.13 items/s | ETA: 15:55
+  [patch shard 15] Done 10/25 | Overall: 10/125 | Rate: 0.12 items/s | ETA: 16:00
+  [patch shard 15] Done 15/25 | Overall: 15/125 | Rate: 0.12 items/s | ETA: 15:04
+  [patch shard 15] Done 20/25 | Overall: 20/125 | Rate: 0.12 items/s | ETA: 14:29
+  [patch shard 15] Done 25/25 | Overall: 25/125 | Rate: 0.12 items/s | ETA: 13:50
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard15.json
+
+>>> Shard 17/20 [patch] (Questions 400..424) <<<
+  [patch shard 16] Done 5/25 | Overall: 30/125 | Rate: 0.12 items/s | ETA: 13:11
+  [patch shard 16] Done 10/25 | Overall: 35/125 | Rate: 0.12 items/s | ETA: 12:34
+  [patch shard 16] Done 15/25 | Overall: 40/125 | Rate: 0.12 items/s | ETA: 11:53
+  [patch shard 16] Done 20/25 | Overall: 45/125 | Rate: 0.12 items/s | ETA: 11:09
+  [patch shard 16] Done 25/25 | Overall: 50/125 | Rate: 0.12 items/s | ETA: 10:25
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard16.json
+
+>>> Shard 18/20 [patch] (Questions 425..449) <<<
+  [patch shard 17] Done 5/25 | Overall: 55/125 | Rate: 0.12 items/s | ETA: 09:45
+  [patch shard 17] Done 10/25 | Overall: 60/125 | Rate: 0.12 items/s | ETA: 09:03
+  [patch shard 17] Done 15/25 | Overall: 65/125 | Rate: 0.12 items/s | ETA: 08:22
+  [patch shard 17] Done 20/25 | Overall: 70/125 | Rate: 0.12 items/s | ETA: 07:39
+  [patch shard 17] Done 25/25 | Overall: 75/125 | Rate: 0.12 items/s | ETA: 06:59
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard17.json
+
+>>> Shard 19/20 [patch] (Questions 450..474) <<<
+  [patch shard 18] Done 5/25 | Overall: 80/125 | Rate: 0.12 items/s | ETA: 06:16
+  [patch shard 18] Done 10/25 | Overall: 85/125 | Rate: 0.12 items/s | ETA: 05:35
+  [patch shard 18] Done 15/25 | Overall: 90/125 | Rate: 0.12 items/s | ETA: 04:54
+  [patch shard 18] Done 20/25 | Overall: 95/125 | Rate: 0.12 items/s | ETA: 04:12
+  [patch shard 18] Done 25/25 | Overall: 100/125 | Rate: 0.12 items/s | ETA: 03:31
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard18.json
+
+>>> Shard 20/20 [patch] (Questions 475..499) <<<
+  [patch shard 19] Done 5/25 | Overall: 105/125 | Rate: 0.12 items/s | ETA: 02:48
+  [patch shard 19] Done 10/25 | Overall: 110/125 | Rate: 0.12 items/s | ETA: 02:07
+  [patch shard 19] Done 15/25 | Overall: 115/125 | Rate: 0.12 items/s | ETA: 01:25
+  [patch shard 19] Done 20/25 | Overall: 120/125 | Rate: 0.12 items/s | ETA: 00:42
+  [patch shard 19] Done 25/25 | Overall: 125/125 | Rate: 0.12 items/s | ETA: 00:00
+  -> Successfully saved shard: llava-1.5-7b-hf_patch_seed0_shard19.json
+
+All benchmark tasks completed in 17:51.
