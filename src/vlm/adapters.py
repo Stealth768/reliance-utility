@@ -14,6 +14,30 @@ import numpy as np
 from src.vlm.scoring import CHOICE_LETTERS, build_prompt, get_choice_token_ids
 
 
+def get_multivariant_choice_token_ids(tokenizer: Any) -> Dict[str, Tuple[int, int]]:
+    """Look up bare and space-prefixed token IDs for each letter in ['A', 'B', 'C', 'D'].
+
+    Asserts that both 'X' and ' X' each tokenize to exactly one token ID.
+
+    Returns
+    -------
+    Dict[str, Tuple[int, int]]
+        Mapping letter -> (bare_token_id, space_prefixed_token_id).
+    """
+    variants: Dict[str, Tuple[int, int]] = {}
+    for letter in CHOICE_LETTERS:
+        bare_ids = tokenizer.encode(letter, add_special_tokens=False)
+        if len(bare_ids) != 1:
+            raise ValueError(f"Bare letter '{letter}' did not tokenize to a single token (got {bare_ids})")
+
+        spaced_ids = tokenizer.encode(f" {letter}", add_special_tokens=False)
+        if len(spaced_ids) != 1:
+            raise ValueError(f"Spaced letter ' {letter}' did not tokenize to a single token (got {spaced_ids})")
+
+        variants[letter] = (bare_ids[0], spaced_ids[0])
+    return variants
+
+
 class BaseVLMAdapter(ABC):
     """Abstract base adapter for vision-language models."""
 
@@ -140,12 +164,24 @@ class SmolVLMAdapter(BaseVLMAdapter):
             outputs = self.model(**inputs)
             last_logits = outputs.logits[0, -1, :]
 
-        token_ids = get_choice_token_ids(self.tokenizer)
+        # Look up both bare ('A') and space-prefixed (' A') token IDs
+        variant_ids = get_multivariant_choice_token_ids(self.tokenizer)
         full_probs = torch.softmax(last_logits, dim=-1)
-        choice_logits = last_logits[token_ids]
-        renorm = torch.softmax(choice_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
-        mass = float(full_probs[token_ids].sum().item())
-        return renorm, mass
+
+        letter_probs_unnorm = []
+        for letter in CHOICE_LETTERS:
+            bare_id, space_id = variant_ids[letter]
+            prob_sum = float((full_probs[bare_id] + full_probs[space_id]).item())
+            letter_probs_unnorm.append(prob_sum)
+
+        total_mass = sum(letter_probs_unnorm)
+        if total_mass > 0.0:
+            renorm = np.array([p / total_mass for p in letter_probs_unnorm], dtype=np.float64)
+        else:
+            renorm = np.full(4, 0.25, dtype=np.float64)
+
+        return renorm, float(total_mass)
+
 
 
 class InternVL2Adapter(BaseVLMAdapter):

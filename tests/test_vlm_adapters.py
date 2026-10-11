@@ -65,3 +65,41 @@ def test_mock_adapter_check_logic():
     assert len(probs) == 4
     assert np.isclose(np.sum(probs), 1.0)
     assert mass >= 0.90
+
+
+def test_get_multivariant_choice_token_ids():
+    """get_multivariant_choice_token_ids looks up bare and space-prefixed IDs."""
+    from src.vlm.adapters import get_multivariant_choice_token_ids
+
+    class MockSmolTokenizer:
+        def encode(self, text, add_special_tokens=False):
+            mapping = {
+                "A": [49], " A": [330],
+                "B": [50], " B": [389],
+                "C": [51], " C": [340],
+                "D": [52], " D": [422],
+            }
+            return mapping[text]
+
+    tok = MockSmolTokenizer()
+    variants = get_multivariant_choice_token_ids(tok)
+
+    assert variants["A"] == (49, 330)
+    assert variants["B"] == (50, 389)
+    assert variants["C"] == (51, 340)
+    assert variants["D"] == (52, 422)
+
+
+def test_get_multivariant_choice_token_ids_rejects_multitoken():
+    """get_multivariant_choice_token_ids raises ValueError if bare or spaced variant is multi-token."""
+    from src.vlm.adapters import get_multivariant_choice_token_ids
+
+    class BrokenTokenizer:
+        def encode(self, text, add_special_tokens=False):
+            if text == " A":
+                return [300, 301]
+            return [10]
+
+    with pytest.raises(ValueError, match="did not tokenize to a single token"):
+        get_multivariant_choice_token_ids(BrokenTokenizer())
+
