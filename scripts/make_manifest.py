@@ -33,8 +33,16 @@ def write_manifest(
     config_dict: Dict[str, Any],
     seed: int,
     model_name: str,
+    # Enriched provenance fields (all optional for backward compatibility)
+    git_commit: Optional[str] = None,
+    git_tag: Optional[str] = None,
+    model_hf_revision: Optional[str] = None,
+    assistant_prefix: Optional[str] = None,
+    data_ids_hash: Optional[str] = None,
+    lib_versions: Optional[Dict[str, str]] = None,
+    gpu_name: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Write run manifest containing git hash, config SHA-256, seed, model, and timestamp.
+    """Write run manifest containing provenance info, config SHA-256, seed, model, and timestamp.
 
     Parameters
     ----------
@@ -46,6 +54,21 @@ def write_manifest(
         Random seed used for the run.
     model_name : str
         Name or identifier of the evaluated model.
+    git_commit : str or None
+        Short git commit hash (e.g. from ``git rev-parse --short HEAD``).
+        If None, falls back to full HEAD hash via get_git_commit_hash().
+    git_tag : str or None
+        Exact git tag on HEAD (``git describe --tags --exact-match``), or None.
+    model_hf_revision : str or None
+        HuggingFace revision hash if available, else "unknown".
+    assistant_prefix : str or None
+        Named assistant prefix variant used (e.g. "answer_colon"), or None.
+    data_ids_hash : str or None
+        SHA-256 of the data_ids JSON file content.
+    lib_versions : dict or None
+        Mapping of library name -> version string; keys torch, transformers, bitsandbytes.
+    gpu_name : str or None
+        GPU device name, or "n/a".
 
     Returns
     -------
@@ -58,8 +81,17 @@ def write_manifest(
     sorted_config_str = json.dumps(config_dict, sort_keys=True)
     config_sha256 = hashlib.sha256(sorted_config_str.encode("utf-8")).hexdigest()
 
-    manifest_data = {
-        "git_commit": get_git_commit_hash(cwd=run_path),
+    # Use provided git_commit if given, otherwise fall back to full hash lookup
+    resolved_git_commit = git_commit if git_commit is not None else get_git_commit_hash(cwd=run_path)
+
+    manifest_data: Dict[str, Any] = {
+        "git_commit": resolved_git_commit,
+        "git_tag": git_tag,
+        "model_hf_revision": model_hf_revision if model_hf_revision is not None else "unknown",
+        "assistant_prefix": assistant_prefix,
+        "data_ids_hash": data_ids_hash if data_ids_hash is not None else "unknown",
+        "lib_versions": lib_versions if lib_versions is not None else {},
+        "gpu_name": gpu_name if gpu_name is not None else "n/a",
         "config_sha256": config_sha256,
         "seed": seed,
         "model_name": model_name,

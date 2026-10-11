@@ -224,3 +224,45 @@ def swap_blend(
     blended = (1.0 - S_clamped) * arr.astype(float) + S_clamped * arr_other.astype(float)
     return _to_output(blended, is_pil)
 
+
+def create_mean_image(size: tuple) -> "Image.Image":
+    """Create a solid gray RGB image at the dataset mean RGB (127, 127, 127).
+
+    Parameters
+    ----------
+    size : tuple
+        Image size as (width, height).
+
+    Returns
+    -------
+    PIL.Image.Image
+        Solid gray RGB PIL Image.
+    """
+    width, height = int(size[0]), int(size[1])
+    return Image.new("RGB", (width, height), color=(127, 127, 127))
+
+
+def create_noise_image(size: tuple, seed: int) -> "Image.Image":
+    """Create a standard normal pixel noise image clipped to [0, 1], scaled to [0, 255].
+
+    Noise is drawn from N(0, 1) per channel, clipped to [0, 1], then scaled to
+    uint8 [0, 255]. Seed for reproducibility.
+
+    Parameters
+    ----------
+    size : tuple
+        Image size as (width, height).
+    seed : int
+        RNG seed for the noise draw.
+
+    Returns
+    -------
+    PIL.Image.Image
+        Noise RGB PIL Image.
+    """
+    width, height = int(size[0]), int(size[1])
+    rng = np.random.default_rng(seed)
+    noise = rng.standard_normal((height, width, 3))
+    noise_clipped = np.clip(noise, 0.0, 1.0)
+    arr = (noise_clipped * 255.0).astype(np.uint8)
+    return Image.fromarray(arr, mode="RGB")

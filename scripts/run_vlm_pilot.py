@@ -3,7 +3,7 @@
 Architectures supported via adapters:
 - Qwen/Qwen2-VL-2B-Instruct
 - HuggingFaceTB/SmolVLM-Instruct
-- OpenGVLab/InternVL2-2B
+- llava-hf/llava-1.5-7b-hf
 
 Corruptions supported:
 - gaussian (gaussian_blend)
@@ -14,15 +14,20 @@ Modes:
 - Normal run: processes shards and saves resumable shard JSON files.
 - --check: evaluates 10 questions clean and text-only, prints letter mass,
   and refuses to continue if mean letter mass < 0.9.
+
+Shard filename pattern (v0.9+):
+  {model_slug}_{corruption}_seed{seed}_shard{shard_idx}.json
+  (seed is included to prevent collision across multi-account runs)
 """
 
 import argparse
 import json
 import math
+import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 # Ensure repo root is on sys.path
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -44,7 +49,7 @@ def parse_args() -> argparse.Namespace:
         "--model",
         type=str,
         default="Qwen/Qwen2-VL-2B-Instruct",
-        help="HuggingFace model identifier (e.g. Qwen/Qwen2-VL-2B-Instruct, OpenGVLab/InternVL2-2B, HuggingFaceTB/SmolVLM-Instruct)",
+        help="HuggingFace model identifier (e.g. Qwen/Qwen2-VL-2B-Instruct, HuggingFaceTB/SmolVLM-Instruct, llava-hf/llava-1.5-7b-hf)",
     )
     parser.add_argument(
         "--data_ids",
@@ -99,9 +104,17 @@ def parse_args() -> argparse.Namespace:
         default=None,
         choices=["answer_colon", "the_answer_is"],
         help=(
-            "SmolVLM only: named assistant pre-fill variant to append before reading logits. "
+            "SmolVLM / LLaVA: named assistant pre-fill variant to append before reading logits. "
             "'answer_colon' -> 'Answer:', 'the_answer_is' -> 'The answer is'. "
-            "Ignored for Qwen2-VL and InternVL2."
+            "Ignored for Qwen2-VL."
+        ),
+    )
+    parser.add_argument(
+        "--extra_nulls",
+        action="store_true",
+        help=(
+            "Also evaluate mean_image (solid gray 127,127,127) and noise_image "
+            "(standard normal noise clipped [0,1]) null conditions alongside 'removed' and 'black'."
         ),
     )
     return parser.parse_args()
@@ -127,6 +140,58 @@ def get_derangement(n: int, seed: int) -> np.ndarray:
     while np.any(p == np.arange(n)):
         p = rng.permutation(n)
     return p
+
+
+def get_git_info() -> Dict[str, Optional[str]]:
+    """Return dict with git_commit (short) and git_tag (or None) for the current HEAD."""
+    info: Dict[str, Optional[str]] = {"git_commit": None, "git_tag": None}
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, check=False, cwd=str(REPO_ROOT)
+        )
+        if result.returncode == 0:
+            info["git_commit"] = result.stdout.strip() or None
+    except Exception:
+        pass
+
+    try:
+        result = subprocess.run(
+            ["git", "describe", "--tags", "--exact-match", "HEAD"],
+            capture_output=True, text=True, check=False, cwd=str(REPO_ROOT)
+        )
+        if result.returncode == 0:
+            info["git_tag"] = result.stdout.strip() or None
+    except Exception:
+        pass
+
+    return info
+
+
+def get_lib_versions() -> Dict[str, str]:
+    """Return a dict with installed versions of torch, transformers, bitsandbytes.
+
+    Returns 'n/a' for any library not installed.
+    """
+    versions: Dict[str, str] = {}
+    for lib in ("torch", "transformers", "bitsandbytes"):
+        try:
+            mod = __import__(lib)
+            versions[lib] = getattr(mod, "__version__", "unknown")
+        except ImportError:
+            versions[lib] = "n/a"
+    return versions
+
+
+def get_gpu_name() -> str:
+    """Return GPU device name string, or 'n/a' if no CUDA device available."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return torch.cuda.get_device_name(0)
+    except Exception:
+        pass
+    return "n/a"
 
 
 def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
@@ -218,6 +283,11 @@ def run_benchmark():
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Collect git / library provenance info at startup
+    git_info = get_git_info()
+    lib_versions = get_lib_versions()
+    gpu_name = get_gpu_name()
+
     # 1. Load questions
     data_ids_path = Path(args.data_ids)
     if not data_ids_path.exists():
@@ -238,6 +308,13 @@ def run_benchmark():
     corruptions_list = [c.strip() for c in args.corruptions.split(",") if c.strip()]
     S_grid = np.linspace(0.0, 1.0, args.grid).tolist()
 
+    # Compute data_ids hash for manifest
+    import hashlib
+    try:
+        data_ids_hash = hashlib.sha256(data_ids_path.read_bytes()).hexdigest()
+    except Exception:
+        data_ids_hash = "unknown"
+
     # 2. Model adapter initialization
     adapter = get_adapter(args.model, assistant_prefix=args.assistant_prefix)
     model_slug = args.model.split("/")[-1]
@@ -251,12 +328,12 @@ def run_benchmark():
         run_check_mode(adapter, all_examples)
         return
 
-    # 4. Filter needed shard tasks
+    # 4. Filter needed shard tasks (NEW: seed included in filename)
     n_shards = (n_total + args.shard_size - 1) // args.shard_size
     needed_tasks = []
     for corruption in corruptions_list:
         for shard_idx in range(n_shards):
-            shard_file = out_dir / f"{model_slug}_{corruption}_shard{shard_idx}.json"
+            shard_file = out_dir / f"{model_slug}_{corruption}_seed{args.seed}_shard{shard_idx}.json"
             if not shard_file.exists():
                 needed_tasks.append((corruption, shard_idx, shard_file))
 
@@ -268,9 +345,16 @@ def run_benchmark():
     print(f"Total Questions: {n_total} across {n_shards} shards")
     print(f"Corruptions: {corruptions_list}")
     print(f"Pending tasks: {len(needed_tasks)} shards")
+    print(f"Git commit: {git_info['git_commit']}, tag: {git_info['git_tag']}")
 
     # Load model onto GPU
-    adapter.load(device="cuda", dtype="float16")
+    adapter.load(device="cuda", dtype="float16")  # VERIFY-ON-GPU
+
+    # Gather model revision after loading (best effort)
+    try:
+        model_hf_revision = getattr(adapter.model.config, "_commit_hash", "unknown") or "unknown"
+    except Exception:
+        model_hf_revision = "unknown"
 
     start_time = time.time()
     completed_items = 0
@@ -302,6 +386,30 @@ def run_benchmark():
             blk_img = black_image(orig_image.size)
             p_null_black, mass_black = adapter.letter_probs(blk_img, question, choices)
 
+            null_probs: Dict[str, Any] = {
+                "removed": p_null_removed.tolist(),
+                "black": p_null_black.tolist(),
+            }
+            null_mass: Dict[str, Any] = {
+                "removed": mass_removed,
+                "black": mass_black,
+            }
+
+            # 2b. Extra nulls (optional)
+            if args.extra_nulls:
+                from src.corruptions.image import create_mean_image, create_noise_image
+                item_seed = args.seed * 10000 + q_global_idx * 100
+
+                mean_img = create_mean_image(orig_image.size)
+                p_mean, mass_mean = adapter.letter_probs(mean_img, question, choices)
+                null_probs["mean_image"] = p_mean.tolist()
+                null_mass["mean_image"] = mass_mean
+
+                noise_img = create_noise_image(orig_image.size, seed=item_seed)
+                p_noise, mass_noise = adapter.letter_probs(noise_img, question, choices)
+                null_probs["noise_image"] = p_noise.tolist()
+                null_mass["noise_image"] = mass_noise
+
             # 3. Swapped-image control (derangement donor)
             donor_idx = int(swap_permutation[q_global_idx])
             donor_image = all_examples[donor_idx]["image"]
@@ -313,11 +421,11 @@ def run_benchmark():
             mass_per_s = []
 
             for s_idx, S in enumerate(S_grid):
-                item_seed = args.seed * 10000 + q_global_idx * 100 + int(round(S * 100))
+                item_seed_s = args.seed * 10000 + q_global_idx * 100 + int(round(S * 100))
                 if corruption == "gaussian":
-                    corrupted_img = gaussian_blend(orig_image, S=S, seed=item_seed)
+                    corrupted_img = gaussian_blend(orig_image, S=S, seed=item_seed_s)
                 elif corruption == "patch":
-                    corrupted_img = patch_mask(orig_image, S=S, seed=item_seed, patch=28)
+                    corrupted_img = patch_mask(orig_image, S=S, seed=item_seed_s, patch=28)
                 elif corruption == "swapblend":
                     corrupted_img = swap_blend(orig_image, donor_image, S=S)
                 else:
@@ -330,14 +438,8 @@ def run_benchmark():
             item_dict = {
                 "question_id": q_id,
                 "correct_choice_idx": correct_idx,
-                "null_probs": {
-                    "removed": p_null_removed.tolist(),
-                    "black": p_null_black.tolist(),
-                },
-                "null_mass": {
-                    "removed": mass_removed,
-                    "black": mass_black,
-                },
+                "null_probs": null_probs,
+                "null_mass": null_mass,
                 "swapped_probs": p_swapped.tolist(),
                 "swapped_mass": mass_swapped,
                 "probs_per_S": probs_per_s,
@@ -363,6 +465,7 @@ def run_benchmark():
             "model_name": args.model,
             "corruption": corruption,
             "shard_idx": shard_idx,
+            "seed": args.seed,
             "start_idx": start_idx,
             "end_idx": end_idx,
             "n_questions": len(items_records),
@@ -375,17 +478,29 @@ def run_benchmark():
             write_raw(shard_file, shard_data)
             print(f"  -> Successfully saved shard: {shard_file.name}")
 
-        # Write run manifest
+        # Write run manifest (enriched with provenance fields)
         config_dict = {
             "model": args.model,
             "corruption": corruption,
             "shard_idx": shard_idx,
+            "seed": args.seed,
             "n_items": len(items_records),
             "grid_points": len(S_grid),
-            "seed": args.seed,
         }
-        manifest_dir = out_dir / f"manifest_{model_slug}_{corruption}_shard{shard_idx}"
-        write_manifest(manifest_dir, config_dict, seed=args.seed, model_name=args.model)
+        manifest_dir = out_dir / f"manifest_{model_slug}_{corruption}_seed{args.seed}_shard{shard_idx}"
+        write_manifest(
+            manifest_dir,
+            config_dict,
+            seed=args.seed,
+            model_name=args.model,
+            git_commit=git_info.get("git_commit"),
+            git_tag=git_info.get("git_tag"),
+            model_hf_revision=model_hf_revision,
+            assistant_prefix=args.assistant_prefix,
+            data_ids_hash=data_ids_hash,
+            lib_versions=lib_versions,
+            gpu_name=gpu_name,
+        )
 
     print(f"\nAll benchmark tasks completed in {format_eta(time.time() - start_time)}.")
 

@@ -143,3 +143,31 @@ def test_swap_blend_shape_dtype_preserved(sample_pil_image, sample_numpy_image):
     assert res_np.shape == sample_numpy_image.shape
     assert res_np.dtype == np.uint8
 
+
+def test_create_mean_image():
+    """create_mean_image creates solid gray (127, 127, 127) image."""
+    from src.corruptions.image import create_mean_image
+    img = create_mean_image((60, 40))
+    assert isinstance(img, Image.Image)
+    assert img.size == (60, 40)
+    arr = np.array(img)
+    assert np.all(arr == 127)
+
+
+def test_create_noise_image_reproducible():
+    """create_noise_image generates deterministic noise within valid pixel bounds."""
+    from src.corruptions.image import create_noise_image
+    img1 = create_noise_image((50, 50), seed=42)
+    img2 = create_noise_image((50, 50), seed=42)
+    img3 = create_noise_image((50, 50), seed=99)
+    assert isinstance(img1, Image.Image)
+    assert img1.size == (50, 50)
+    arr1 = np.array(img1)
+    arr2 = np.array(img2)
+    arr3 = np.array(img3)
+    assert np.array_equal(arr1, arr2)
+    assert not np.array_equal(arr1, arr3)
+    assert arr1.dtype == np.uint8
+    assert arr1.min() >= 0
+    assert arr1.max() <= 255
+
