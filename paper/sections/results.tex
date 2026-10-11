@@ -1,0 +1,24 @@
+\section{Empirical Evaluation on Vision-Language Models}
+\label{sec:results}
+
+We evaluate reliance-utility alignment on open-weights Vision-Language Models evaluated on the A-OKVQA benchmark ($N=500$ disjoint validation items):
+\begin{itemize}
+    \item \textbf{Qwen2-VL-2B-Instruct} (native resolution vision transformer)
+    \item \textbf{SmolVLM-Instruct} (compact vision-language model)
+    \item \textbf{LLaVA-1.5-7B-hf} (4-bit NF4 quantized instruction model)
+\end{itemize}
+Each model is evaluated across three corruption types: \emph{Gaussian blur/noise blend}, \emph{random patch occlusion}, and \emph{deceptive visual swap-blend}.
+
+\begin{table*}[t]
+\centering
+\caption{Cross-Model VLM Reliance-Utility Main Benchmark Summary ($N=500$).}
+\label{tab:vlm_main_summary}
+\small
+\input{tables/vlm_main_summary.tex}
+\end{table*}
+
+\subsection{Analysis of Utility Inversion and Reliance}
+% TODO: Analyze empirical crossing points S* and significant crossings once full runs complete.
+% TODO: Discuss behavior under swapblend (pre-registered hypothesis: test whether R_hat remains > 0.5 when utility is negative).
+% TODO: Compare correlation between Misalignment Index and plain accuracy drop across models.
+\noindent [TODO: Detailed empirical discussion will be populated from completed benchmark runs.]

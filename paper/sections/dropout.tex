@@ -1,0 +1,14 @@
+\section{Mitigation via Modality Dropout}
+\label{sec:dropout}
+
+To investigate whether reliance-utility misalignment can be mitigated during training, we evaluate a controlled case study applying modality dropout to a late fusion architecture. The architecture incorporates two MLP encoders and a learned quality-agnostic gate (evaluating representation $B$ without direct access to degradation severity $S$).
+
+\subsection{Pre-Registered Hypotheses}
+Prior to executing training experiments, we pre-registered three formal hypotheses in our experimental log:
+\begin{description}
+    \item[H1:] Models trained with higher modality-dropout probability $p \in \{0.0, 0.1, 0.25, 0.5\}$ have lower $\mi$ under the \emph{removed} null (i.e., $\mi$ is monotonically non-increasing in $p$, allowing for ties within confidence intervals).
+    \item[H2:] Clean accuracy drops by less than 3 percentage points between $p=0.0$ and $p=0.25$.
+    \item[H3:] If H1 fails, the failure is reported directly without post hoc dataset alteration or grid tuning.
+\end{description}
+
+\noindent [TODO: Insert summary table \input{tables/fusion_summary.tex} and discuss H1/H2 empirical outcomes once training completes.]

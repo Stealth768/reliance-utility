@@ -1,0 +1,28 @@
+\section{Validation on Synthetic Benchmark}
+\label{sec:synthetic}
+
+To validate our theoretical formulation before evaluating large-scale models, we implemented a controlled synthetic toy-fusion benchmark with known data-generating distributions. The benchmark evaluates three distinct architectural designs:
+\begin{enumerate}
+    \item \textbf{FixedModel}: A quality-blind linear fusion baseline with constant equal weighting across modalities.
+    \item \textbf{PartialGatedModel}: A heuristic gating model that partially dampens degraded inputs.
+    \item \textbf{GatedModel}: An optimal quality-aware gated architecture that dynamically dampens inputs as noise increases.
+\end{enumerate}
+
+\subsection{Empirical Validation Results}
+Table~\ref{tab:synthetic_summary} reports the empirical crossing points $S^*$ and Misalignment Index ($\mi$) across five independent random seeds under three null baseline choices (\emph{removed}, \emph{zeros}, and \emph{mean}).
+
+\begin{table*}[t]
+\centering
+\caption{Synthetic Benchmark Results across Architectures and Null Baselines (Iteration v0.4).}
+\label{tab:synthetic_summary}
+\small
+\input{tables/synthetic_summary.tex}
+\end{table*}
+
+Under the canonical \emph{removed} null baseline:
+\begin{itemize}
+    \item The quality-blind \textbf{FixedModel} crosses zero utility at $S^* \approx 0.65$ but maintains heavy predictive reliance, resulting in high misalignment ($\mi \approx 1.49$, 95\% CI $[1.45, 1.51]$).
+    \item The \textbf{PartialGatedModel} yields moderate misalignment ($\mi \approx 1.29$, 95\% CI $[1.27, 1.30]$).
+    \item The quality-aware \textbf{GatedModel} exhibits substantially lower misalignment ($\mi \approx 0.65$, 95\% CI $[0.64, 0.66]$).
+\end{itemize}
+The paired bootstrap analysis confirms that the architectural ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$ is statistically significant with non-overlapping confidence intervals.

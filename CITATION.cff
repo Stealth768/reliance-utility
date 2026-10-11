@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this benchmark or codebase in your research, please cite it as below."
+title: "Reliance-Utility Misalignment in Multimodal AI"
+version: 0.13.0
+date-released: "2026-10-11"
+url: "https://github.com/Stealth768/reliance-utility"
+repository-code: "https://github.com/Stealth768/reliance-utility"
+license: "TODO: Specify license (e.g. MIT or Apache-2.0)"
+authors:
+  - family-names: "TODO: Author Family Name"
+    given-names: "TODO: Author Given Name"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+preferred-citation:
+  type: article
+  title: "Reliance-Utility Misalignment in Multimodal AI: Formal Framework and Multi-Model Evaluation"
+  authors:
+    - family-names: "TODO: Author Family Name"
+      given-names: "TODO: Author Given Name"
+  year: 2026

@@ -1,0 +1,21 @@
+{
+  "title": "Reliance-Utility Misalignment in Multimodal AI",
+  "upload_type": "software",
+  "description": "Artifact and code release for evaluating reliance-utility misalignment, crossing points, and empirical over-trust in multimodal foundation models.",
+  "access_right": "open",
+  "license": "TODO: Specify license (e.g. mit or apache-2.0)",
+  "creators": [
+    {
+      "name": "TODO: Author Full Name",
+      "affiliation": "TODO: Institution"
+    }
+  ],
+  "keywords": [
+    "multimodal AI",
+    "vision-language models",
+    "reliance",
+    "utility",
+    "misalignment",
+    "robustness"
+  ]
+}

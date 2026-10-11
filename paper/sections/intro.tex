@@ -1,0 +1,6 @@
+\section{Introduction}
+\label{sec:intro}
+
+Modern multimodal architectures achieve strong benchmark performance by jointly modeling vision, language, and other sensory streams. However, standard training paradigms rarely train models to explicitly estimate input quality or abstain from incorporating degraded inputs. Consequently, when an input modality undergoes sensor degradation, environmental noise, or adversarial corruption, the model may continue to rely on the degraded signal even after its informational content has fallen below that of a pure unimodal baseline.
+
+This work addresses the gap between \emph{behavioral reliance} (how much the model's output distribution depends on a given modality) and \emph{multimodal utility} (whether incorporating that modality yields higher task accuracy than ignoring it). We provide a formal framework, metric definitions, and systematic empirical benchmarking across multiple open-weights models and corruption types.

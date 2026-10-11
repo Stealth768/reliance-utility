@@ -1,0 +1,60 @@
+\section{Methodology: Measuring Reliance-Utility Misalignment}
+\label{sec:method}
+
+\subsection{Formal Formulation and Notation}
+Let $X = (X_m, X_{\text{rest}})$ denote a multimodal input instance, where $X_m$ is the target modality under study (e.g., visual input in Vision-Language Models) and $X_{\text{rest}}$ denotes the remaining contextual modalities (e.g., text prompt and instructions). We evaluate the model's behavior under a calibrated family of corruption operators $T_m(X_m, S)$, parameterized by degradation severity $S \in [0, 1]$, where $S=0$ represents clean, uncorrupted input and $S=1$ corresponds to complete informational degradation.
+
+Let $f(\cdot)$ denote a multimodal predictive model producing output distribution $B$. The predictive distribution under severity $S$ is:
+\begin{equation}
+B_m(S) = f(T_m(X_m, S), X_{\text{rest}})
+\end{equation}
+We define the unimodal null baseline behavior as:
+\begin{equation}
+B_{\text{null}} = f(\text{null}_m, X_{\text{rest}})
+\end{equation}
+where $\text{null}_m$ represents the complete absence or neutralization of modality $m$. In our primary benchmarks, the canonical null is the \emph{removed} condition, where visual tokens are completely omitted from the model sequence. Additional control nulls include \emph{black} (all-zero image), \emph{mean} (dataset-mean gray), and \emph{noise} (uncorrelated Gaussian noise).
+
+\subsection{Multimodal Utility $U(S)$}
+Multimodal utility measures the task performance benefit gained by providing the degraded modality $X_m$ at severity $S$ relative to the unimodal null baseline:
+\begin{equation}
+U(S) = \text{acc}(B_m(S)) - \text{acc}(B_{\text{null}})
+\end{equation}
+where $\text{acc}(\cdot)$ denotes classification accuracy on the target evaluation set.
+When $U(S) > 0$, the degraded modality provides net positive value. When $U(S) \le 0$, the modality has become useless or actively harmful compared to ignoring it altogether.
+
+\subsection{Information-Theoretic Reliance $R(S)$ and Normalized Reliance $\hat{R}(S)$}
+Behavioral reliance quantifies the extent to which the model's output distribution shifts when conditioned on the corrupted modality versus the null baseline. We operationalize reliance via the Jensen-Shannon Divergence ($\jsd$) in base-2 logarithm:
+\begin{equation}
+R(S) = \mathbb{E}_x \left[ \jsd(B_m(S) \parallel B_{\text{null}}) \right]
+\end{equation}
+where $\jsd(P \parallel Q) = \frac{1}{2} \dkl\left(P \parallel \frac{P+Q}{2}\right) + \frac{1}{2} \dkl\left(Q \parallel \frac{P+Q}{2}\right)$, strictly bounded in $[0, 1]$.
+
+To enable meaningful cross-model and cross-architecture comparisons, we define normalized reliance relative to the clean baseline:
+\begin{equation}
+\hat{R}(S) = \frac{R(S)}{R(0)}
+\end{equation}
+where $R(0) > 0$ represents clean behavioral reliance. When $\hat{R}(S) \approx 1$, the model maintains its original reliance despite degradation. When $\hat{R}(S) \to 0$, the model discounts the degraded modality.
+
+\subsection{Utility Crossing Point $S^*$}
+The utility crossing point $S^*$ marks the severity threshold where the degraded modality ceases to deliver positive task utility:
+\begin{equation}
+S^* = \min \left\{ S \in [0, 1] \mid U_{\text{smooth}}(S) \le 0 \right\}
+\end{equation}
+where $U_{\text{smooth}}(S)$ is computed with a 3-point moving average. If $U_{\text{smooth}}(S) > 0$ across all grid points, $S^* = \text{None}$. If $S^*$ occurs at the final grid point ($S=1$), the crossing interval $[S^*, 1]$ is degenerate and reported as an edge case with no usable integration interval.
+
+Additionally, to account for sampling variance, we evaluate the \emph{significant crossing point}, defined as the first severity level $S$ where the upper bound of the 95\% bootstrap confidence interval of $U(S)$ falls strictly below zero.
+
+\subsection{Misalignment Index ($\mi$)}
+The Misalignment Index quantifies cumulative unwarranted reliance exhibited by the model over the negative-utility regime $[S^*, 1]$:
+\begin{equation}
+\mi = \frac{1}{1 - S^*} \int_{S^*}^1 \hat{R}(S) \, dS
+\end{equation}
+computed via the trapezoid integration rule. When $S^* = \text{None}$, $\mi = \text{None}$.
+Unlike earlier formulations, $\mi$ is intentionally left unclipped at the upper boundary: if severe degradation actively causes the model's predictive divergence to exceed its clean baseline ($\hat{R}(S) > 1$), $\mi$ exceeds 1.0, reflecting genuine hyper-reliance on noise.
+
+\subsection{Bootstrap Inference and Confidence Intervals}
+To compute robust confidence intervals, we employ two resampling schemes:
+\begin{enumerate}
+    \item \textbf{Pooled Bootstrap}: $B=1000$ resamples drawn with replacement across all evaluated questions to yield basic percentile confidence intervals.
+    \item \textbf{Two-Level Hierarchical Bootstrap}: Resampling random seeds with replacement, followed by resampling evaluation questions within each resampled seed ($B=1000$). This captures both within-run item variability and across-run initialization variability.
+\end{enumerate}

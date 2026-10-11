@@ -1,0 +1,22 @@
+\section{Limitations}
+\label{sec:limitations}
+
+We explicitly delineate several structural and methodological limitations of this study:
+
+\begin{enumerate}
+    \item \textbf{Null-Baseline Dependence}: Both utility $U(S)$ and behavioral reliance $R(S)$ are measured relative to a chosen unimodal null baseline $B_{\text{null}}$. While our primary evaluations utilize the \emph{removed} condition (true unimodal ablation), alternative nulls (such as black, mean, or noise images) yield different baseline accuracies and can shift both $S^*$ and $\mi$.
+    
+    \item \textbf{Conflation of Gate Sharpness and Crossing Timing in $\mi$}: The Misalignment Index integrates normalized reliance over $[S^*, 1]$. Consequently, a model that crosses zero utility very early (small $S^*$) with a gradual gating transition can yield a similar $\mi$ value to a model that crosses late with sharp, persistent reliance.
+    
+    \item \textbf{Residual Reliance in Smooth Sigmoid Gating}: In parametric gating models utilizing smooth activations (such as sigmoid or softmax), the gate weight assigned to a degraded modality rarely reaches strict mathematical zero, leading to non-zero residual reliance even under complete informational corruption.
+    
+    \item \textbf{4-Bit Quantization Effects in LLaVA-1.5-7B}: Due to GPU accelerator memory constraints on single T4 instances, LLaVA-1.5-7B is evaluated in 4-bit NormalFloat (NF4) quantization. Quantization may alter predictive logit calibration relative to full-precision weights.
+    
+    \item \textbf{Evaluation Benchmark Scope}: Our empirical VLM evaluation is conducted exclusively on the 4-choice multiple-choice formulation of A-OKVQA ($N=500$ validation items), rather than open-ended free-form generation.
+    
+    \item \textbf{Prompt-Format-Dependent Letter Mass}: In modern instruction-tuned VLMs, the proportion of softmax probability mass assigned to choice letters at the initial generation position is highly sensitive to the prompt template and assistant pre-fill prefix. Models whose letter mass fails the $\ge 0.90$ threshold cannot be reliably evaluated under a fixed single-token multiple-choice readout.
+    
+    \item \textbf{Exclusion of InternVL2}: InternVL2-2B was dropped from our multi-model benchmark due to an unresolvable library incompatibility between its custom remote repository code and `transformers>=4.50` (missing `all_tied_weights_keys` attribute during model instantiation).
+    
+    \item \textbf{Omission of Autonomous Driving (BEV) Study}: Although initially considered as a stretch case study, a preliminary feasibility probe on standard cloud environments revealed critical dependency constraints (unavailability of pre-compiled `mmcv`/`mmdet3d` libraries and dataset storage limitations), leading to a formal `NO-GO` verdict. Driving evaluations are strictly deferred to future work.
+\end{enumerate}

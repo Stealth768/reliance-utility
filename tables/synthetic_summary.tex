@@ -1,0 +1,36 @@
+\begin{tabular}{llrrlll}
+\toprule
+model & null_kind & clean_acc & null_acc & S_star_pooled_CI & MI_pooled_CI & MI_hier_CI \\
+\midrule
+FixedModel & removed & 0.995900 & 0.666600 & [0.600, 0.650] & [1.454, 1.507] & [1.373, 1.637] \\
+FixedModel & zeros & 0.995900 & 0.412800 & [0.850, 0.900] & [0.717, 0.741] & [0.581, 0.877] \\
+FixedModel & mean & 0.995900 & 0.367200 & [0.900, 0.950] & [0.847, 0.876] & [0.670, 1.012] \\
+PartialGatedModel & removed & 0.995600 & 0.666600 & [0.650, 0.650] & [1.267, 1.305] & [1.196, 1.405] \\
+PartialGatedModel & zeros & 0.995600 & 0.415800 & [0.900, 0.950] & [0.629, 0.651] & [0.504, 0.781] \\
+PartialGatedModel & mean & 0.995600 & 0.376900 & [0.950, 0.950] & [0.766, 0.792] & [0.583, 0.927] \\
+GatedModel & removed & 0.995500 & 0.666600 & [0.700, 0.700] & [0.639, 0.661] & [0.579, 0.752] \\
+GatedModel & zeros & 0.995500 & 0.421700 & no crossing & no crossing & no crossing \\
+GatedModel & mean & 0.995500 & 0.385700 & no crossing & no crossing & no crossing \\
+OracleGatedModel & removed & 0.995900 & 0.666600 & [0.650, 0.700] & [0.000, 0.000] & [0.000, 0.208] \\
+OracleGatedModel & zeros & 0.995900 & 0.412800 & no crossing & no crossing & no crossing \\
+OracleGatedModel & mean & 0.995900 & 0.367200 & no crossing & no crossing & no crossing \\
+SharpGatedModel_0.5 & removed & 0.995300 & 0.666600 & [0.650, 0.700] & [0.847, 0.876] & [0.782, 0.967] \\
+SharpGatedModel_0.5 & zeros & 0.995300 & 0.427900 & no crossing & no crossing & [0.488, 0.576] \\
+SharpGatedModel_0.5 & mean & 0.995300 & 0.401500 & no crossing & no crossing & [0.534, 0.636] \\
+SharpGatedModel_1.0 & removed & 0.995500 & 0.666600 & [0.700, 0.700] & [0.639, 0.662] & [0.580, 0.758] \\
+SharpGatedModel_1.0 & zeros & 0.995500 & 0.421700 & no crossing & no crossing & no crossing \\
+SharpGatedModel_1.0 & mean & 0.995500 & 0.385700 & no crossing & no crossing & no crossing \\
+SharpGatedModel_2.0 & removed & 0.994700 & 0.666600 & [0.700, 0.700] & [0.502, 0.522] & [0.429, 0.630] \\
+SharpGatedModel_2.0 & zeros & 0.994700 & 0.422800 & no crossing & no crossing & no crossing \\
+SharpGatedModel_2.0 & mean & 0.994700 & 0.373200 & no crossing & no crossing & no crossing \\
+SharpGatedModel_4.0 & removed & 0.993600 & 0.666600 & [0.650, 0.700] & [0.436, 0.480] & [0.360, 0.572] \\
+SharpGatedModel_4.0 & zeros & 0.993600 & 0.443800 & no crossing & no crossing & no crossing \\
+SharpGatedModel_4.0 & mean & 0.993600 & 0.367800 & no crossing & no crossing & no crossing \\
+SharpGatedModel_8.0 & removed & 0.992200 & 0.666600 & [0.650, 0.650] & [0.430, 0.449] & [0.331, 0.545] \\
+SharpGatedModel_8.0 & zeros & 0.992200 & 0.454200 & no crossing & no crossing & no crossing \\
+SharpGatedModel_8.0 & mean & 0.992200 & 0.367200 & no crossing & no crossing & no crossing \\
+SharpGatedModel_16.0 & removed & 0.990900 & 0.666600 & [0.650, 0.650] & [0.417, 0.434] & [0.321, 0.539] \\
+SharpGatedModel_16.0 & zeros & 0.990900 & 0.455300 & no crossing & no crossing & [0.285, 0.289] \\
+SharpGatedModel_16.0 & mean & 0.990900 & 0.367200 & no crossing & no crossing & no crossing \\
+\bottomrule
+\end{tabular}
