@@ -138,9 +138,87 @@ def load_aokvqa_validation(
     return sampled_examples
 
 
+def sample_main_disjoint_ids(
+    pilot_ids_path: str = "results/derived/pilot_ids.json",
+    main_ids_path: str = "results/derived/main_ids.json",
+    n_sample: int = 500,
+    seed: int = 1,
+) -> List[str]:
+    """Sample N=500 validation question IDs strictly disjoint from pilot_ids.json.
+
+    Writes results write-once to main_ids_path via write_raw.
+
+    Parameters
+    ----------
+    pilot_ids_path : str, default="results/derived/pilot_ids.json"
+        Path to pilot IDs file.
+    main_ids_path : str, default="results/derived/main_ids.json"
+        Destination path for main study question IDs.
+    n_sample : int, default=500
+        Number of items to sample.
+    seed : int, default=1
+        RNG seed for disjoint sampling.
+
+    Returns
+    -------
+    List[str]
+        Sampled question IDs for the main study.
+    """
+    target_path = Path(main_ids_path)
+    if target_path.exists():
+        with open(target_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return list(data["question_ids"])
+
+    # Load pilot IDs to exclude
+    with open(pilot_ids_path, "r", encoding="utf-8") as f:
+        pilot_data = json.load(f)
+    pilot_ids_set = set(pilot_data["question_ids"])
+
+    meta = get_dataset_metadata()
+    # Fetch all validation question IDs
+    try:
+        from datasets import load_dataset  # type: ignore
+        ds = load_dataset(meta["dataset_id"], split="validation", revision=meta["revision"])
+        all_qids = [str(x["question_id"]) for x in ds]
+    except Exception:
+        import pandas as pd
+        parquet_url = "https://huggingface.co/api/datasets/HuggingFaceM4/A-OKVQA/parquet/default/validation/0.parquet"
+        df = pd.read_parquet(parquet_url, columns=["question_id"])
+        all_qids = [str(x) for x in df["question_id"]]
+
+    available_qids = [qid for qid in all_qids if qid not in pilot_ids_set]
+    if n_sample > len(available_qids):
+        raise ValueError(
+            f"Requested {n_sample} items, but only {len(available_qids)} disjoint items remain."
+        )
+
+    rng = np.random.default_rng(seed)
+    chosen_indices = rng.choice(len(available_qids), size=n_sample, replace=False)
+    chosen_indices.sort()
+    main_qids = [available_qids[i] for i in chosen_indices]
+
+    from src.io_utils import write_raw
+    record = {
+        "dataset_id": meta["dataset_id"],
+        "revision": meta["revision"],
+        "split": meta["split"],
+        "n_sample": len(main_qids),
+        "seed": seed,
+        "pilot_ids_path": pilot_ids_path,
+        "question_ids": main_qids,
+    }
+    write_raw(target_path, record)
+    print(f"Sampled N={len(main_qids)} disjoint items and wrote to {target_path}")
+    return main_qids
+
+
 if __name__ == "__main__":
     meta = get_dataset_metadata()
     print(f"Dataset ID: {meta['dataset_id']}")
     print(f"Revision: {meta['revision']}")
     items = load_aokvqa_validation()
     print(f"Loaded {len(items)} pilot items.")
+    main_qids = sample_main_disjoint_ids()
+    print(f"Loaded {len(main_qids)} main items.")
+
