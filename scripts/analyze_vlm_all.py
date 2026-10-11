@@ -285,6 +285,7 @@ def analyze_model_corruption_all_seeds(
     boot_mi_list = []
     boot_u_matrix = np.zeros((n_boot, n_S), dtype=float)
     no_crossing_count = 0
+    n_resamples_dropped = 0
 
     for b in range(n_boot):
         idx = rng.integers(0, n_items_total, size=n_items_total)
@@ -298,17 +299,24 @@ def analyze_model_corruption_all_seeds(
             no_crossing_count += 1
             boot_s_list.append(np.nan)
             boot_mi_list.append(np.nan)
+        else:
+            boot_s_list.append(b_s)
             b_D = np.mean(core["jsd_matrix"][:, idx], axis=1)
             b_R = reliance(b_D)
             try:
                 b_R_hat = normalized_reliance(b_R)
                 b_mi = misalignment_index(b_R_hat, S_grid, b_s)
+                if b_mi is None or np.isnan(b_mi):
+                    n_resamples_dropped += 1
+                    boot_mi_list.append(np.nan)
+                else:
+                    boot_mi_list.append(b_mi)
             except Exception:
-                b_mi = np.nan
-            boot_s_list.append(b_s)
-            boot_mi_list.append(b_mi if b_mi is not None else np.nan)
+                n_resamples_dropped += 1
+                boot_mi_list.append(np.nan)
 
     no_crossing_frac = no_crossing_count / n_boot
+    frac_resamples_dropped = n_resamples_dropped / n_boot
     valid_mi = [m for m in boot_mi_list if not np.isnan(m)]
     if len(valid_mi) > 0:
         mi_ci_pooled = (float(np.percentile(valid_mi, 2.5)), float(np.percentile(valid_mi, 97.5)))
@@ -381,6 +389,8 @@ def analyze_model_corruption_all_seeds(
         "MI_ci_hier_low": mi_ci_hier[0],
         "MI_ci_hier_high": mi_ci_hier[1],
         "no_crossing_frac": no_crossing_frac,
+        "n_resamples_dropped": n_resamples_dropped,
+        "frac_resamples_dropped": frac_resamples_dropped,
         "all_items": all_items,
     }
 
@@ -597,6 +607,13 @@ def run_full_analysis(
             else "None"
         )
 
+        if res["frac_resamples_dropped"] > 0.05:
+            print(
+                f"[WARN] High fraction of bootstrap resamples dropped: "
+                f"{res['frac_resamples_dropped']:.2%} ({res['n_resamples_dropped']}/{n_boot}) "
+                f"for {mname} | {corr} due to R(0)~0 or numerical exceptions."
+            )
+
         row = {
             "model_name": mname,
             "corruption": corr,
@@ -615,6 +632,8 @@ def run_full_analysis(
             "MI_ci_pooled": mi_ci_p_str,
             "MI_ci_hierarchical": mi_ci_h_str,
             "no_crossing_frac": round(res["no_crossing_frac"], 4),
+            "n_resamples_dropped": res["n_resamples_dropped"],
+            "frac_resamples_dropped": round(res["frac_resamples_dropped"], 4),
         }
         summary_rows.append(row)
 

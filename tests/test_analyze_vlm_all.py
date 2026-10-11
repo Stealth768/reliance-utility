@@ -136,7 +136,7 @@ def test_fake_shards_produce_summary_csv(fake_raw_dir: Path, tmp_path: Path):
         "clean_acc", "acc_s1", "acc_drop", "null_removed_acc",
         "null_black_acc", "swapped_acc", "mean_letter_mass",
         "S_star", "sig_S_star", "MI", "MI_ci_pooled", "MI_ci_hierarchical",
-        "no_crossing_frac",
+        "no_crossing_frac", "n_resamples_dropped", "frac_resamples_dropped",
     ]
     for col in expected_cols:
         assert col in df.columns, f"Missing column: {col}"
@@ -245,3 +245,71 @@ def test_analyze_vlm_all_reads_legacy_shards_as_seed_0(tmp_path: Path):
 
     grouped = load_shards_grouped(raw_dir)
     assert ("Qwen/Qwen2-VL-2B-Instruct", "gaussian", 0) in grouped
+
+
+def test_analyze_vlm_all_reports_dropped_resamples_when_r0_is_zero(tmp_path: Path):
+    """When R(0)~0 causes exceptions in bootstrap resamples, dropped count is tracked and reported."""
+    raw_dir = tmp_path / "raw_r0_zero"
+    raw_dir.mkdir()
+    fname = raw_dir / "Qwen2-VL-2B-Instruct_gaussian_shard0.json"
+
+    S_grid = np.linspace(0.0, 1.0, 9).tolist()
+    items = []
+    # Force clean S=0 to have IDENTICAL probabilities to null_removed for all items
+    # so that JSD(clean, null) == 0.0 and R(0) == 0.0.
+    for i in range(10):
+        corr = i % 4
+        probs_s = []
+        for s_idx, S in enumerate(S_grid):
+            p = np.full(4, 0.1)
+            # High utility at S=0, crossing to negative utility at high S
+            if s_idx == 0:
+                p[corr] = 0.7
+            else:
+                p[corr] = 0.7 - S * 0.6  # drops to 0.1 at S=1
+            p = (p / np.sum(p)).tolist()
+            probs_s.append(p)
+
+        # Identical to S=0 distribution:
+        p_null = list(probs_s[0])
+        items.append({
+            "question_id": i,
+            "correct_choice_idx": corr,
+            "null_probs": {"removed": p_null, "black": [0.25]*4},
+            "null_mass": {"removed": 1.0, "black": 1.0},
+            "swapped_probs": [0.25]*4,
+            "swapped_mass": 1.0,
+            "probs_per_S": probs_s,
+            "mass_per_S": [1.0]*len(S_grid),
+        })
+
+    shard_data = {
+        "model_name": "Qwen/Qwen2-VL-2B-Instruct",
+        "corruption": "gaussian",
+        "shard_idx": 0,
+        "seed": 0,
+        "S_grid": S_grid,
+        "items": items,
+    }
+    fname.write_text(json.dumps(shard_data), encoding="utf-8")
+
+    out_dir = tmp_path / "out"
+    table_dir = tmp_path / "tables"
+    fig_dir = tmp_path / "figures"
+
+    run_full_analysis(
+        raw_dir=raw_dir,
+        out_dir=out_dir,
+        table_dir=table_dir,
+        fig_dir=fig_dir,
+        n_boot=100,
+        seed=42,
+    )
+
+    summary_df = pd.read_csv(out_dir / "vlm_main_summary.csv")
+    row = summary_df.iloc[0]
+    assert "n_resamples_dropped" in row
+    assert "frac_resamples_dropped" in row
+    # Because R(0) is strictly 0.0, any resample that found a crossing will have failed in normalized_reliance
+    assert row["n_resamples_dropped"] > 0
+    assert row["frac_resamples_dropped"] > 0.0
