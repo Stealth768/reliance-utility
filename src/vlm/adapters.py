@@ -198,8 +198,7 @@ class InternVL2Adapter(BaseVLMAdapter):
             torch_dtype=torch_dtype,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
-            device_map="auto" if device == "cuda" else None,
-        ).eval()
+        ).eval().to(device)
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.model_id, trust_remote_code=True, use_fast=False
         )
