@@ -3,13 +3,13 @@
 \caption{Multimodal Reliance-Utility Benchmark Summary across Models and Corruptions.}
 \label{tab:vlm_main_summary}
 \small
-\begin{tabular}{llrrrrrrrrrlllllrlrrrrrrr}
+\begin{tabular}{llrrrrrrrrrllllllrrlrrrrrrr}
 \toprule
-model_name & corruption & n_seeds & n_items & clean_acc & acc_s1 & acc_drop & null_removed_acc & null_black_acc & swapped_acc & mean_letter_mass & S_star & sig_S_star & MI & MI_ci_pooled & MI_ci_hierarchical & R_hat_s1 & R_hat_s1_ci & no_crossing_frac & n_no_usable_crossing & frac_no_usable_crossing & n_no_usable_crossing_no_cross & n_no_usable_crossing_edge & n_no_usable_crossing_r0_zero & n_no_usable_crossing_other \\
+model_name & corruption & n_seeds & n_items & clean_acc & acc_s1 & acc_drop & null_removed_acc & null_black_acc & swapped_acc & mean_letter_mass & S_star & sig_S_star & MI & MI_ci_pooled & MI_ci_hierarchical & conditional_mi_range & frac_usable_resamples & R_hat_s1 & R_hat_s1_ci & no_crossing_frac & n_no_usable_crossing & frac_no_usable_crossing & n_no_usable_crossing_no_cross & n_no_usable_crossing_edge & n_no_usable_crossing_r0_zero & n_no_usable_crossing_other \\
 \midrule
-Qwen/Qwen2-VL-2B-Instruct & gaussian & 1 & 500 & 0.820000 & 0.406000 & 0.414000 & 0.436000 & 0.420000 & 0.368000 & 0.998900 & 1.000 (edge) & 0.875 & None & [0.1480, 0.1891] & [0.1502, 0.1897] & 0.168100 & [0.1475, 0.1891] & 0.018000 & 623 & 0.623000 & 18 & 605 & 0 & 0 \\
-Qwen/Qwen2-VL-2B-Instruct & patch & 1 & 500 & 0.820000 & 0.430000 & 0.390000 & 0.436000 & 0.420000 & 0.368000 & 0.999000 & None & None & None & None & None & 0.029000 & [0.0271, 0.0315] & 0.993000 & 1000 & 1.000000 & 993 & 7 & 0 & 0 \\
-Qwen/Qwen2-VL-2B-Instruct & swapblend & 1 & 500 & 0.820000 & 0.372000 & 0.448000 & 0.436000 & 0.420000 & 0.368000 & 0.998900 & 0.875 & 1.000 & 0.4848 & [0.4448, 0.5368] & [0.4426, 0.5413] & 0.487200 & [0.4368, 0.5433] & 0.038000 & 481 & 0.481000 & 38 & 443 & 0 & 0 \\
+Qwen/Qwen2-VL-2B-Instruct & gaussian & 1 & 500 & 0.820000 & 0.406000 & 0.414000 & 0.436000 & 0.420000 & 0.368000 & 0.998900 & 1.000 (edge) & 0.875 & undefined & None & None & [0.1480, 0.1891] & 0.377000 & 0.168100 & [0.1475, 0.1891] & 0.018000 & 623 & 0.623000 & 18 & 605 & 0 & 0 \\
+Qwen/Qwen2-VL-2B-Instruct & patch & 1 & 500 & 0.820000 & 0.430000 & 0.390000 & 0.436000 & 0.420000 & 0.368000 & 0.999000 & None & None & undefined & None & None & None & 0.000000 & 0.029000 & [0.0271, 0.0315] & 0.993000 & 1000 & 1.000000 & 993 & 7 & 0 & 0 \\
+Qwen/Qwen2-VL-2B-Instruct & swapblend & 1 & 500 & 0.820000 & 0.372000 & 0.448000 & 0.436000 & 0.420000 & 0.368000 & 0.998900 & 0.875 & 1.000 & 0.4848 & [0.4448, 0.5368] & [0.4426, 0.5413] & [0.4448, 0.5368] & 0.519000 & 0.487200 & [0.4368, 0.5433] & 0.038000 & 481 & 0.481000 & 38 & 443 & 0 & 0 \\
 \bottomrule
 \end{tabular}
 \end{table*}

@@ -631,17 +631,28 @@ def run_full_analysis(
             continue
         summaries.append(res)
 
-        mi_str = f"{res['MI']:.4f}" if res['MI'] is not None and not np.isnan(res['MI']) else "None"
+        point_mi = res["MI"]
+        is_mi_defined = point_mi is not None and not np.isnan(point_mi)
+
+        mi_str = f"{point_mi:.4f}" if is_mi_defined else "undefined"
         mi_ci_p_str = (
             f"[{res['MI_ci_pooled_low']:.4f}, {res['MI_ci_pooled_high']:.4f}]"
-            if not np.isnan(res['MI_ci_pooled_low'])
+            if is_mi_defined and not np.isnan(res['MI_ci_pooled_low'])
             else "None"
         )
         mi_ci_h_str = (
             f"[{res['MI_ci_hier_low']:.4f}, {res['MI_ci_hier_high']:.4f}]"
-            if not np.isnan(res['MI_ci_hier_low'])
+            if is_mi_defined and not np.isnan(res['MI_ci_hier_low'])
             else "None"
         )
+
+        # Conditional MI range across resamples that found a usable crossing
+        n_usable = n_boot - res["n_resamples_dropped"]
+        frac_usable = n_usable / n_boot
+        if not np.isnan(res["MI_ci_pooled_low"]):
+            cond_mi_range_str = f"[{res['MI_ci_pooled_low']:.4f}, {res['MI_ci_pooled_high']:.4f}]"
+        else:
+            cond_mi_range_str = "None"
 
         if res["frac_resamples_dropped"] > 0.05:
             print(
@@ -671,6 +682,8 @@ def run_full_analysis(
             "MI": mi_str,
             "MI_ci_pooled": mi_ci_p_str,
             "MI_ci_hierarchical": mi_ci_h_str,
+            "conditional_mi_range": cond_mi_range_str,
+            "frac_usable_resamples": round(frac_usable, 4),
             "R_hat_s1": round(res["R_hat_s1"], 4) if not np.isnan(res["R_hat_s1"]) else np.nan,
             "R_hat_s1_ci": (
                 f"[{res['R_hat_s1_ci_low']:.4f}, {res['R_hat_s1_ci_high']:.4f}]"

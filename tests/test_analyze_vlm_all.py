@@ -136,6 +136,7 @@ def test_fake_shards_produce_summary_csv(fake_raw_dir: Path, tmp_path: Path):
         "clean_acc", "acc_s1", "acc_drop", "null_removed_acc",
         "null_black_acc", "swapped_acc", "mean_letter_mass",
         "S_star", "sig_S_star", "MI", "MI_ci_pooled", "MI_ci_hierarchical",
+        "conditional_mi_range", "frac_usable_resamples",
         "R_hat_s1", "R_hat_s1_ci",
         "no_crossing_frac", "n_no_usable_crossing", "frac_no_usable_crossing",
     ]
