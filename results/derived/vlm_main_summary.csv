@@ -1,0 +1,3 @@
+model,corruption,n_questions,clean_acc,null_acc_removed,null_acc_black,swapped_acc,mean_letter_mass,R_0,S_star_display,S_star_lo,S_star_hi,significant_crossing,MI,MI_lo,MI_hi,no_crossing_fraction
+Qwen/Qwen2-VL-2B-Instruct,gaussian,200,0.83,0.485,0.51,0.43,0.9989947509765625,0.26969772003277326,"edge, no usable crossing",0.875,1.0,none,,0.1364331579586296,0.21171615634044438,0.354
+Qwen/Qwen2-VL-2B-Instruct,patch,200,0.83,0.485,0.51,0.43,0.9990283203125,0.26969772003277326,no crossing,1.0,1.0,none,,,,0.972
