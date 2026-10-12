@@ -93,19 +93,40 @@ def parse_args() -> argparse.Namespace:
         default=42,
         help="Random seed for bootstrap resampling",
     )
+    parser.add_argument(
+        "--no_siblings",
+        action="store_true",
+        default=False,
+        help=(
+            "Disable automatic scanning of sibling vlm_* directories. "
+            "When set, only the folder given by --raw_dir is read. "
+            "Use this to analyse vlm_rep (or any single folder) in isolation "
+            "without merging it with vlm_main / vlm_llava results."
+        ),
+    )
     return parser.parse_args()
 
 
-def load_shards_grouped(raw_dir: Path) -> Dict[Tuple[str, str, int], Dict[str, Any]]:
+def load_shards_grouped(
+    raw_dir: Path,
+    no_siblings: bool = False,
+) -> Dict[Tuple[str, str, int], Dict[str, Any]]:
     """Load all JSON shards and group by (model_name, corruption, seed).
 
-    Scans `raw_dir` and any sibling/sub `vlm_*` directories under `results/raw/`
-    so both legacy Qwen shards (in `vlm_main`) and new LLaVA/SmolVLM shards
-    (in `vlm_llava`, `vlm_smolvlm`, etc.) are processed seamlessly.
+    By default scans `raw_dir` **and** any sibling ``vlm_*`` directories
+    under ``results/raw/`` so Qwen (``vlm_main``), LLaVA (``vlm_llava``),
+    etc. are processed seamlessly in a single call.
+
+    Pass ``no_siblings=True`` to read **only** the folder given by
+    ``raw_dir`` — use this when analysing ``vlm_rep`` (or any single
+    folder) in isolation without merging it with the main N=500 results.
     """
     raw_path = Path(raw_dir)
     target_dirs = []
-    if raw_path.name.startswith("vlm_") and raw_path.parent.exists():
+    if no_siblings:
+        # Explicit isolation: only the requested directory
+        target_dirs = [raw_path]
+    elif raw_path.name.startswith("vlm_") and raw_path.parent.exists():
         # Scan raw_dir and any sibling vlm_* directories (excluding pilot)
         target_dirs = sorted([d for d in raw_path.parent.glob("vlm_*") if "pilot" not in d.name])
     elif any(raw_path.glob("vlm_*")):
@@ -618,14 +639,15 @@ def run_full_analysis(
     fig_dir: Path,
     n_boot: int = 1000,
     seed: int = 42,
+    no_siblings: bool = False,
 ):
     """Main execution orchestrating all analysis steps."""
     out_dir.mkdir(parents=True, exist_ok=True)
     table_dir.mkdir(parents=True, exist_ok=True)
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Scanning raw shards from: {raw_dir}")
-    shards_by_key = load_shards_grouped(raw_dir)
+    print(f"Scanning raw shards from: {raw_dir}" + (" (isolated, no siblings)" if no_siblings else ""))
+    shards_by_key = load_shards_grouped(raw_dir, no_siblings=no_siblings)
     if not shards_by_key:
         print(f"[WARN] No valid evaluation shards found in {raw_dir}.")
         return
@@ -808,6 +830,7 @@ def main():
         fig_dir=Path(args.fig_dir),
         n_boot=args.n_boot,
         seed=args.seed,
+        no_siblings=args.no_siblings,
     )
 
 

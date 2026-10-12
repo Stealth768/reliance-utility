@@ -439,3 +439,46 @@ def test_load_shards_grouped_scans_multiple_vlm_directories(tmp_path: Path):
     assert ("Qwen/Qwen2-VL-2B-Instruct", "gaussian", 0) in grouped
     assert ("llava-hf/llava-1.5-7b-hf", "swapblend", 0) in grouped
 
+
+def test_no_siblings_isolates_single_directory(tmp_path: Path):
+    """load_shards_grouped with no_siblings=True reads ONLY the given folder (vlm_rep isolation)."""
+    raw_root = tmp_path / "raw"
+    vlm_main = raw_root / "vlm_main"
+    vlm_rep = raw_root / "vlm_rep"
+    vlm_main.mkdir(parents=True)
+    vlm_rep.mkdir(parents=True)
+
+    # A shard in vlm_main (would be picked up by sibling scan)
+    create_fake_shard(
+        vlm_main / "Qwen2-VL-2B-Instruct_gaussian_seed0_shard0.json",
+        model_name="Qwen/Qwen2-VL-2B-Instruct",
+        corruption="gaussian",
+        seed=0,
+        shard_idx=0,
+        start_idx=0,
+    )
+    # A shard in vlm_rep (the replication data)
+    create_fake_shard(
+        vlm_rep / "llava-1.5-7b-hf_swapblend_seed1_shard0.json",
+        model_name="llava-hf/llava-1.5-7b-hf",
+        corruption="swapblend",
+        seed=1,
+        shard_idx=0,
+        start_idx=0,
+    )
+
+    # Without no_siblings: pointing to vlm_rep picks up vlm_main too
+    grouped_merged = load_shards_grouped(vlm_rep, no_siblings=False)
+    assert ("Qwen/Qwen2-VL-2B-Instruct", "gaussian", 0) in grouped_merged, (
+        "sibling scan should include vlm_main key"
+    )
+    assert ("llava-hf/llava-1.5-7b-hf", "swapblend", 1) in grouped_merged
+
+    # With no_siblings=True: only vlm_rep shards are loaded
+    grouped_isolated = load_shards_grouped(vlm_rep, no_siblings=True)
+    assert ("llava-hf/llava-1.5-7b-hf", "swapblend", 1) in grouped_isolated, (
+        "vlm_rep shard must be present"
+    )
+    assert ("Qwen/Qwen2-VL-2B-Instruct", "gaussian", 0) not in grouped_isolated, (
+        "vlm_main shard must NOT appear when no_siblings=True"
+    )

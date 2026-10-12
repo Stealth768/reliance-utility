@@ -76,3 +76,50 @@ def test_main_ids_disjoint_from_pilot():
     intersection = pilot_ids.intersection(main_ids)
     assert len(intersection) == 0, f"Found {len(intersection)} overlapping IDs: {intersection}"
 
+
+def test_three_id_sets_are_disjoint():
+    """pilot_ids, main_ids, and rep_ids are pairwise disjoint and together cover all 1145 validation IDs."""
+    pilot_path = Path("results/derived/pilot_ids.json")
+    main_path = Path("results/derived/main_ids.json")
+    rep_path = Path("results/derived/rep_ids.json")
+
+    for p in (pilot_path, main_path, rep_path):
+        assert p.exists(), f"{p} missing"
+
+    with open(pilot_path, "r", encoding="utf-8") as f:
+        pilot_data = json.load(f)
+    with open(main_path, "r", encoding="utf-8") as f:
+        main_data = json.load(f)
+    with open(rep_path, "r", encoding="utf-8") as f:
+        rep_data = json.load(f)
+
+    pilot_ids = set(pilot_data["question_ids"])
+    main_ids = set(main_data["question_ids"])
+    rep_ids = set(rep_data["question_ids"])
+
+    # --- Size checks ---
+    assert len(pilot_ids) == 200, f"Expected 200 pilot IDs, got {len(pilot_ids)}"
+    assert len(main_ids) == 500, f"Expected 500 main IDs, got {len(main_ids)}"
+    assert len(rep_ids) == 445, f"Expected 445 rep IDs, got {len(rep_ids)}"
+
+    # No duplicates within each array
+    assert len(pilot_data["question_ids"]) == 200
+    assert len(main_data["question_ids"]) == 500
+    assert len(rep_data["question_ids"]) == 445
+
+    # --- Pairwise disjointness ---
+    pilot_main = pilot_ids & main_ids
+    assert len(pilot_main) == 0, f"pilot ∩ main not empty: {pilot_main}"
+
+    pilot_rep = pilot_ids & rep_ids
+    assert len(pilot_rep) == 0, f"pilot ∩ rep not empty: {pilot_rep}"
+
+    main_rep = main_ids & rep_ids
+    assert len(main_rep) == 0, f"main ∩ rep not empty: {main_rep}"
+
+    # --- Union covers full validation set (1145 questions) ---
+    total_union = pilot_ids | main_ids | rep_ids
+    assert len(total_union) == 1145, (
+        f"Union of all three ID sets = {len(total_union)}, expected 1145"
+    )
+
