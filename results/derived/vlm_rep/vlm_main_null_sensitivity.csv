@@ -1,0 +1,5 @@
+model_name,corruption,null_baseline,null_acc,S_star,MI
+Qwen/Qwen2-VL-2B-Instruct,gaussian,removed,0.4606741573033708,1.0,
+Qwen/Qwen2-VL-2B-Instruct,gaussian,black,0.4764044943820225,0.875,0.15816176174536567
+Qwen/Qwen2-VL-2B-Instruct,swapblend,removed,0.4606741573033708,0.875,0.4814416065745021
+Qwen/Qwen2-VL-2B-Instruct,swapblend,black,0.4764044943820225,0.875,0.4810311929109943
