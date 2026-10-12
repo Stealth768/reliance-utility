@@ -1,4 +1,10 @@
 model_name,corruption,null_baseline,null_acc,S_star,MI
+HuggingFaceTB/SmolVLM-Instruct,gaussian,removed,0.368,1.0,
+HuggingFaceTB/SmolVLM-Instruct,gaussian,black,0.354,,
+HuggingFaceTB/SmolVLM-Instruct,patch,removed,0.368,,
+HuggingFaceTB/SmolVLM-Instruct,patch,black,0.354,,
+HuggingFaceTB/SmolVLM-Instruct,swapblend,removed,0.368,1.0,
+HuggingFaceTB/SmolVLM-Instruct,swapblend,black,0.354,,
 Qwen/Qwen2-VL-2B-Instruct,gaussian,removed,0.436,1.0,
 Qwen/Qwen2-VL-2B-Instruct,gaussian,black,0.42,1.0,
 Qwen/Qwen2-VL-2B-Instruct,patch,removed,0.436,,

@@ -3,3 +3,7 @@ Qwen/Qwen2-VL-2B-Instruct,gaussian,removed,0.4606741573033708,1.0,
 Qwen/Qwen2-VL-2B-Instruct,gaussian,black,0.4764044943820225,0.875,0.15816176174536567
 Qwen/Qwen2-VL-2B-Instruct,swapblend,removed,0.4606741573033708,0.875,0.4814416065745021
 Qwen/Qwen2-VL-2B-Instruct,swapblend,black,0.4764044943820225,0.875,0.4810311929109943
+llava-hf/llava-1.5-7b-hf,gaussian,removed,0.4966292134831461,1.0,
+llava-hf/llava-1.5-7b-hf,gaussian,black,0.4764044943820225,,
+llava-hf/llava-1.5-7b-hf,swapblend,removed,0.4966292134831461,0.875,0.5740474174539103
+llava-hf/llava-1.5-7b-hf,swapblend,black,0.4764044943820225,,

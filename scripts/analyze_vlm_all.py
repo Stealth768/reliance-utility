@@ -127,11 +127,14 @@ def load_shards_grouped(
         # Explicit isolation: only the requested directory
         target_dirs = [raw_path]
     elif raw_path.name.startswith("vlm_") and raw_path.parent.exists():
-        # Scan raw_dir and any sibling vlm_* directories (excluding pilot)
-        target_dirs = sorted([d for d in raw_path.parent.glob("vlm_*") if "pilot" not in d.name])
+        # Scan raw_dir and any sibling vlm_* directories (excluding pilot, and excluding rep unless it is raw_dir)
+        target_dirs = sorted([
+            d for d in raw_path.parent.glob("vlm_*")
+            if "pilot" not in d.name and (d.resolve() == raw_path.resolve() or "rep" not in d.name)
+        ])
     elif any(raw_path.glob("vlm_*")):
-        # If passed results/raw directly
-        target_dirs = sorted([d for d in raw_path.glob("vlm_*") if "pilot" not in d.name])
+        # If passed results/raw directly (exclude pilot and rep)
+        target_dirs = sorted([d for d in raw_path.glob("vlm_*") if "pilot" not in d.name and "rep" not in d.name])
     else:
         target_dirs = [raw_path]
 
