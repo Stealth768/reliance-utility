@@ -174,6 +174,12 @@ def run_training_experiment(
             "labels": lbls,
         }
         train_dict, val_dict, test_dict = split_data(raw, n_train=n_train, n_val=n_val, n_test=n_test)
+        # Sliced 2-view representations (left 14 cols, right 14 cols)
+        test_dict = {
+            "x_a": test_dict["x_a"][:, :, :14].reshape(len(test_dict["x_a"]), -1).astype(np.float32),
+            "x_b": test_dict["x_b"][:, :, 14:].reshape(len(test_dict["x_b"]), -1).astype(np.float32),
+            "labels": test_dict["labels"],
+        }
         dim_a, dim_b, n_classes = 392, 392, 10
         train_ds = FashionMNISTTwoViewDataset(train_dict["x_a"], train_dict["labels"], dropout_p=dropout_p, seed=seed)
     else:
