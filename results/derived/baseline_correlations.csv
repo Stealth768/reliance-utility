@@ -1,0 +1,31 @@
+subset,n_samples,metric,spearman_rho,p_value
+Main Benchmark (all 9 conditions),9,VRS,-0.42163702135578385,0.25833942502696056
+Main Benchmark (all 9 conditions),9,Blank_Drop,-0.05270462766947298,0.892879242924744
+Main Benchmark (all 9 conditions),9,Image_Sensitivity,-0.05270462766947298,0.892879242924744
+Main Benchmark (all 9 conditions),9,Visual_Benefit_Rate,-0.42163702135578385,0.25833942502696056
+Main Benchmark (all 9 conditions),9,Visual_Harm_Rate,0.3689323936863109,0.3285303518243947
+Replication Benchmark (all 6 conditions),6,VRS,-0.35856858280031817,0.4851979632652575
+Replication Benchmark (all 6 conditions),6,Blank_Drop,-0.35856858280031817,0.4851979632652575
+Replication Benchmark (all 6 conditions),6,Image_Sensitivity,-0.35856858280031817,0.4851979632652575
+Replication Benchmark (all 6 conditions),6,Visual_Benefit_Rate,-0.35856858280031817,0.4851979632652575
+Replication Benchmark (all 6 conditions),6,Visual_Harm_Rate,0.35856858280031817,0.4851979632652575
+Pooled Main + Replication (all 15 conditions),15,VRS,-0.3765052794131181,0.1665935905151345
+Pooled Main + Replication (all 15 conditions),15,Blank_Drop,-0.25703725806087874,0.35506495738674504
+Pooled Main + Replication (all 15 conditions),15,Image_Sensitivity,-0.09050607678199955,0.7483788846132176
+Pooled Main + Replication (all 15 conditions),15,Visual_Benefit_Rate,-0.3765052794131181,0.1665935905151345
+Pooled Main + Replication (all 15 conditions),15,Visual_Harm_Rate,0.28961944570239856,0.2950833159274211
+Per-Corruption: swapblend across models & splits,6,VRS,-0.942857142857143,0.004804664723032055
+Per-Corruption: swapblend across models & splits,6,Blank_Drop,-0.7142857142857143,0.11078717201166179
+Per-Corruption: swapblend across models & splits,6,Image_Sensitivity,-0.6571428571428573,0.1561749271137024
+Per-Corruption: swapblend across models & splits,6,Visual_Benefit_Rate,-0.942857142857143,0.004804664723032055
+Per-Corruption: swapblend across models & splits,6,Visual_Harm_Rate,0.48571428571428577,0.3287230320699708
+Per-Corruption: gaussian across models & splits,6,VRS,-0.3714285714285715,0.4684781341107872
+Per-Corruption: gaussian across models & splits,6,Blank_Drop,0.08571428571428573,0.8717434402332361
+Per-Corruption: gaussian across models & splits,6,Image_Sensitivity,0.3714285714285715,0.4684781341107872
+Per-Corruption: gaussian across models & splits,6,Visual_Benefit_Rate,-0.3714285714285715,0.4684781341107872
+Per-Corruption: gaussian across models & splits,6,Visual_Harm_Rate,0.942857142857143,0.004804664723032055
+Per-Corruption: patch across models & splits,3,VRS,-1.0,0.0
+Per-Corruption: patch across models & splits,3,Blank_Drop,-0.5,0.6666666666666666
+Per-Corruption: patch across models & splits,3,Image_Sensitivity,-0.5,0.6666666666666666
+Per-Corruption: patch across models & splits,3,Visual_Benefit_Rate,-1.0,0.0
+Per-Corruption: patch across models & splits,3,Visual_Harm_Rate,0.5,0.6666666666666666
