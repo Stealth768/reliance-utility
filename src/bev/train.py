@@ -10,6 +10,7 @@ from src.bev.corruptions import (
     apply_camera_fog,
     apply_camera_glare,
     apply_camera_occlusion,
+    apply_camera_phantom,
     apply_lidar_rain,
 )
 
@@ -32,6 +33,7 @@ _CAMERA_CORRUPTIONS = {
     "fog": apply_camera_fog,
     "glare": apply_camera_glare,
     "occlusion": apply_camera_occlusion,
+    "phantom": apply_camera_phantom,
 }
 
 # Severity grid – 9 evenly spaced points in [0, 1]
@@ -94,7 +96,7 @@ def evaluate_bev_predictions(
     ----------
     model : trained BEVFixedFusionModel or BEVGatedFusionModel
     test_cameras / test_lidars / test_labels : raw numpy test arrays
-    corruption : one of 'fog', 'glare', 'occlusion'
+    corruption : one of 'fog', 'glare', 'occlusion', 'phantom'
     seed : used for per-S corruption seed
     """
     model.eval()
@@ -111,13 +113,17 @@ def evaluate_bev_predictions(
 
     # ---- 9-point severity grid ----
     probs_per_S: List[List[List[float]]] = [[] for _ in range(n_test)]
+    mean_gate_per_S: List[float] = []
+
     for s_idx, S in enumerate(S_grid):
         corrupt_seed = seed * 1000 + s_idx
         corrupted_cams = corrupt_cameras(test_cameras, corruption, S=S, seed=corrupt_seed)
         with torch.no_grad():
             t_corr = torch.from_numpy(corrupted_cams).to(device)
-            logits_s, _ = model(t_corr, t_lid, cam_removed=False)
+            logits_s, gate_s = model(t_corr, t_lid, cam_removed=False)
             ps = torch.softmax(logits_s, dim=-1).cpu().numpy()
+            mean_gate = float(gate_s.mean().cpu().item())
+            mean_gate_per_S.append(mean_gate)
             for i in range(n_test):
                 probs_per_S[i].append(ps[i].tolist())
 
@@ -131,7 +137,12 @@ def evaluate_bev_predictions(
         for i in range(n_test)
     ]
 
-    return {"S_grid": S_grid, "items": items}
+    return {
+        "S_grid": S_grid,
+        "mean_gate_per_S": mean_gate_per_S,
+        "items": items,
+    }
+
 
 
 # -------------------------------------------------------------------
@@ -243,9 +254,11 @@ def run_bev_experiment(
         "seed": seed,
         "n_test": len(test_eval["items"]),
         "S_grid": test_eval["S_grid"],
+        "mean_gate_per_S": test_eval.get("mean_gate_per_S", []),
         "items": test_eval["items"],
     }
 
     pred_file.write_text(json.dumps(pred_data, indent=2), encoding="utf-8")
     print(f"Saved predictions: {pred_file}")
     return pred_file
+

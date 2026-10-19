@@ -113,3 +113,38 @@ def apply_lidar_rain(
     clutter = rng.uniform(0.1, 0.6, size=lidars.shape).astype(np.float32)
     out = np.where(noise_mask, clutter, attenuated)
     return np.clip(out, 0.0, 1.0).astype(np.float32)
+
+
+def apply_camera_phantom(
+    images: np.ndarray,
+    S: float,
+    seed: int = 42,
+) -> np.ndarray:
+    """Simulate deceptive camera phantom/ghost obstacle (e.g. billboard, painted shadow, mirage).
+
+    Injects an illusory vehicle/obstacle signature into the camera RGB stream with intensity S,
+    while physical spatial LiDAR detects clear path. Tests cross-modal reliance under false alarms.
+    """
+    S_clamped = float(np.clip(S, 0.0, 1.0))
+    if S_clamped == 0.0:
+        return images.copy()
+
+    rng = np.random.default_rng(seed)
+    out = images.copy()
+    is_batch = images.ndim == 4
+    N = images.shape[0] if is_batch else 1
+
+    phantom_color = np.array([0.9, 0.2, 0.2], dtype=np.float32)[:, None, None]
+
+    for i in range(N):
+        img_slice = out[i] if is_batch else out
+        # Illusion artifact located centrally on the road
+        row_start, row_end = 40, 52
+        col_start, col_end = 26, 38
+        patch = img_slice[:, row_start:row_end, col_start:col_end]
+        # Blend phantom artifact scaled by severity S
+        blended = (1.0 - S_clamped) * patch + S_clamped * phantom_color
+        img_slice[:, row_start:row_end, col_start:col_end] = blended
+
+    return np.clip(out, 0.0, 1.0).astype(np.float32)
+

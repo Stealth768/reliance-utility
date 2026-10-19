@@ -23,9 +23,10 @@ def parse_args():
     parser.add_argument(
         "--corruptions",
         type=str,
-        default="fog,glare,occlusion",
-        help="Comma-separated camera corruptions (default: 'fog,glare,occlusion')",
+        default="fog,glare,occlusion,phantom",
+        help="Comma-separated camera corruptions (default: 'fog,glare,occlusion,phantom')",
     )
+
     parser.add_argument(
         "--p",
         type=str,

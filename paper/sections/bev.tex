@@ -15,15 +15,20 @@ We evaluate three physics-grounded camera corruptions across severity $S \in [0,
     where $\beta=3.0$ is the extinction coefficient and $L_{\infty}=0.85$ is atmospheric airlight.
     \item \textbf{Solar Glare Saturation}: Models direct low-angle solar blooming, washing out the upper-central camera dynamic range with radial additive saturation.
     \item \textbf{Physical Lens Occlusion}: Simulates localized camera lens dirt, mud, and water droplets occluding visual road features.
+    \item \textbf{Phantom / Ghost Obstacle Deception}: Injects an illusory obstacle artifact into the camera image stream with severity $S$, while physical LiDAR occupancy proves the path is unobstructed. This specifically measures cross-modal over-reliance under false-positive visual deception.
 \end{enumerate}
 
 \subsection{Architectures: Fixed vs.\ Quality-Gated Fusion}
 We compare two canonical fusion paradigms:
 \begin{itemize}
-    \item \textbf{Quality-Blind Fixed Fusion (\texttt{BEVFixedFusionModel})}: Concatenates camera feature representations $h_{\text{cam}}$ and LiDAR features $h_{\text{lid}}$ into a static fusion MLP head with fixed equal weighting.
+    \item \textbf{Quality-Blind Fixed Fusion (\texttt{BEVFixedFusionModel})}: Concatenates camera feature representations $h_{\text{cam}}$ and LiDAR features $h_{\text{lid}}$ into a static fusion MLP head with fixed equal weighting ($g=0.5$).
     \item \textbf{Quality-Aware Dynamic Gated Fusion (\texttt{BEVGatedFusionModel})}: Estimates a dynamic scalar gate $g = \sigma(W_g h_{\text{lid}})$ conditioned on LiDAR spatial consistency, gating camera logit contribution:
     \begin{equation}
         z_{\text{fused}} = g \cdot \text{head}_{\text{cam}}(h_{\text{cam}}) + (1 - g) \cdot \text{head}_{\text{lid}}(h_{\text{lid}}).
     \end{equation}
 \end{itemize}
 Both architectures are trained with learned null embeddings for camera-removed conditions, allowing exact measurement of reliance $R(S) = \jsd(B(S) \parallel B_{\text{null}})$ and terminal reliance $\hat{R}(1)$.
+
+\subsection{Reliability Gate Dynamics}
+Beyond output divergence $\jsd$, dynamic gating exposes an internal inspectable control variable $g(S) \in [0, 1]$. We trace the mean gate curve $\bar{g}(S)$ across degradation severity $S$ to determine whether the architecture successfully executes autonomous sensor discounting (driving $g(S) \to 0$ as $S \to 1$) or suffers from catastrophic sensor lock-in ($g(S) \gg 0$).
+

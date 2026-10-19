@@ -51,6 +51,13 @@ def test_bev_corruptions_shape_and_bounds():
     assert rain_1.shape == lid.shape
     assert np.all(rain_1 >= 0.0) and np.all(rain_1 <= 1.0)
 
+    from src.bev.corruptions import apply_camera_phantom
+    phantom_1 = apply_camera_phantom(cam, S=1.0)
+    assert phantom_1.shape == cam.shape
+    assert np.all(phantom_1 >= 0.0) and np.all(phantom_1 <= 1.0)
+    assert not np.array_equal(phantom_1, cam)
+
+
 
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch required for BEV model test")
 def test_bev_models_forward():

@@ -276,12 +276,47 @@ def run_full_bev_analysis(
         ax.legend(frameon=True, fontsize=9)
         plt.tight_layout()
 
+        # Figure 1: Terminal Reliance vs p
         fig_path = fig_dir / "bev_reliance_vs_p.pdf"
         fig.savefig(fig_path, format="pdf", bbox_inches="tight")
         plt.close(fig)
         print(f"Saved: {fig_path}")
+
+        # Figure 2: Reliability Gate Dynamics g(S) vs Severity S
+        fig2, ax2 = plt.subplots(figsize=(6.5, 4.2))
+        s_grid = np.linspace(0.0, 1.0, 9)
+        has_gate_data = False
+        color_idx = 0
+
+        for (m, c, p), runs in sorted(grouped.items()):
+            if m == "gated":  # only gated model has dynamic gate
+                gate_curves = [r.get("mean_gate_per_S") for r in runs if "mean_gate_per_S" in r and len(r["mean_gate_per_S"]) == 9]
+                if gate_curves:
+                    has_gate_data = True
+                    mean_gate = np.mean(gate_curves, axis=0)
+                    std_gate = np.std(gate_curves, axis=0)
+                    col = CB_COLORS[color_idx % len(CB_COLORS)]
+                    ls = "-" if p == 0.0 else "--"
+                    lbl = f"Gated ({c}, p={p})"
+                    ax2.plot(s_grid, mean_gate, marker="o", linestyle=ls, color=col, label=lbl, linewidth=1.8)
+                    ax2.fill_between(s_grid, mean_gate - std_gate, mean_gate + std_gate, color=col, alpha=0.15)
+                    color_idx += 1
+
+        if has_gate_data:
+            ax2.axhline(0.5, color="gray", linestyle=":", label="Fixed Fusion Baseline (g=0.5)")
+            ax2.set_xlabel("Camera Corruption Severity $S$", fontsize=11)
+            ax2.set_ylabel(r"Learned Reliability Gate $g(S) \in [0, 1]$", fontsize=11)
+            ax2.set_title("BEV Sensor Fusion: Dynamic Gate Response to Adverse Weather", fontsize=12, fontweight="bold")
+            ax2.grid(True, linestyle="--", alpha=0.5)
+            ax2.legend(frameon=True, fontsize=9)
+            plt.tight_layout()
+            fig2_path = fig_dir / "bev_gate_dynamics.pdf"
+            fig2.savefig(fig2_path, format="pdf", bbox_inches="tight")
+            plt.close(fig2)
+            print(f"Saved: {fig2_path}")
     except Exception as e:
         print(f"[WARN] Failed to plot BEV figure: {e}")
+
 
 
 def main():
