@@ -18,5 +18,5 @@ We explicitly delineate several structural and methodological limitations of thi
     
     \item \textbf{Exclusion of InternVL2}: InternVL2-2B was dropped from our multi-model benchmark due to an unresolvable library incompatibility between its custom remote repository code and `transformers>=4.50` (missing `all_tied_weights_keys` attribute during model instantiation).
     
-    \item \textbf{Omission of Autonomous Driving (BEV) Study}: Although initially considered as a stretch case study, a preliminary feasibility probe on standard cloud environments revealed critical dependency constraints (unavailability of pre-compiled `mmcv`/`mmdet3d` libraries and dataset storage limitations), leading to a formal `NO-GO` verdict. Driving evaluations are strictly deferred to future work.
+    \item \textbf{Autonomous Driving (BEV) Study --- Proposed, Not Frozen}: A standalone Camera-LiDAR BEV architecture and physical corruption suite were developed as a feasibility probe; however, no pre-declared hypotheses were formalized for this case study. Per the pre-registration protocol, the BEV analysis remains outside the frozen paper scope and is deferred to future work pending formal hypothesis declaration.
 \end{enumerate}

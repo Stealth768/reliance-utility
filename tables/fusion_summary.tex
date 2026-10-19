@@ -3,14 +3,14 @@
 \caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy.}
 \label{tab:fusion_summary}
 \small
-\begin{tabular}{lrrrrrrrrrr}
+\begin{tabular}{lrrrrrrrrrrr}
 \toprule
-dataset & dropout_p & n_seeds & clean_acc & acc_null_removed & R_0 & R_hat_1 & S_star & MI & MI_ci_low & MI_ci_high \\
+dataset & dropout_p & n_seeds & clean_acc & acc_null_removed & R_0 & R_1_raw & R_hat_1 & S_star & MI & MI_ci_low & MI_ci_high \\
 \midrule
-fashionmnist & 0.000000 & 5 & 0.887920 & 0.561960 & 0.330845 & 1.845638 & 0.500000 & 1.657078 & 1.447916 & 2.019684 \\
-fashionmnist & 0.100000 & 5 & 0.887720 & 0.839600 & 0.055724 & 8.105111 & 0.250000 & 4.585811 & 4.203133 & 4.916835 \\
-fashionmnist & 0.250000 & 5 & 0.884280 & 0.847680 & 0.039503 & 8.361940 & 0.250000 & 4.513616 & 4.271591 & 5.174725 \\
-fashionmnist & 0.500000 & 5 & 0.882320 & 0.858360 & 0.023833 & 6.200458 & 0.375000 & 3.684212 & 3.438749 & 3.942645 \\
+fashionmnist & 0.000000 & 5 & 0.887920 & 0.561960 & 0.330845 & 0.610619 & 1.845638 & 0.500000 & 1.657078 & 1.441700 & 2.082123 \\
+fashionmnist & 0.100000 & 5 & 0.887720 & 0.839600 & 0.055724 & 0.451646 & 8.105111 & 0.250000 & 4.585811 & 4.207146 & 4.922483 \\
+fashionmnist & 0.250000 & 5 & 0.884280 & 0.847680 & 0.039503 & 0.330318 & 8.361940 & 0.250000 & 4.513616 & 4.235336 & 5.243992 \\
+fashionmnist & 0.500000 & 5 & 0.882320 & 0.858360 & 0.023833 & 0.147774 & 6.200458 & 0.375000 & 3.684212 & 3.421911 & 3.944851 \\
 \bottomrule
 \end{tabular}
 \end{table}

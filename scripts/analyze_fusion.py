@@ -93,37 +93,39 @@ def analyze_dataset_p_condition(
     S_grid = np.array(seed_runs[0]["S_grid"])
     n_S = len(S_grid)
 
-    # Flatten items across seeds
-    all_items = []
-    seed_item_lists = []
+    # Pre-extract per-seed item statistics (avoids redundant recomputations in bootstrap)
+    seed_acc_deg = []
+    seed_acc_null = []
+    seed_jsd = []
+
     for run in seed_runs:
-        all_items.extend(run["items"])
-        seed_item_lists.append(run["items"])
+        items = run["items"]
+        n_it = len(items)
+        c_idx = np.array([it["correct_choice_idx"] for it in items])
+        n_p = np.array([it["null_probs"]["removed"] for it in items])
+        n_pred = np.argmax(n_p, axis=-1)
+        acc_n = (n_pred == c_idx).astype(float)
 
-    n_items_total = len(all_items)
-    correct_idx = np.array([it["correct_choice_idx"] for it in all_items])
-    null_probs = np.array([it["null_probs"]["removed"] for it in all_items])
+        p_S = np.array([[it["probs_per_S"][s] for it in items] for s in range(n_S)])
+        pred_S = np.argmax(p_S, axis=-1)
+        acc_d = (pred_S == c_idx[None, :]).astype(float)
 
-    null_preds = np.argmax(null_probs, axis=-1)
-    acc_null_per_item = (null_preds == correct_idx).astype(float)
-    acc_null = float(np.mean(acc_null_per_item))
+        jsd_m = np.zeros((n_S, n_it), dtype=float)
+        for s in range(n_S):
+            ps = p_S[s]
+            pn = n_p
+            m = 0.5 * (ps + pn)
+            kl_p = np.sum(ps * np.log2(np.maximum(ps, 1e-12) / np.maximum(m, 1e-12)), axis=-1)
+            kl_n = np.sum(pn * np.log2(np.maximum(pn, 1e-12) / np.maximum(m, 1e-12)), axis=-1)
+            jsd_m[s] = np.clip(0.5 * (kl_p + kl_n), 0.0, 1.0)
 
-    probs_S = np.array([[it["probs_per_S"][s] for it in all_items] for s in range(n_S)])
-    preds_S = np.argmax(probs_S, axis=-1)
-    acc_S_matrix = (preds_S == correct_idx[None, :]).astype(float)
-    acc_deg = np.mean(acc_S_matrix, axis=1)
+        seed_acc_deg.append(acc_d)
+        seed_acc_null.append(acc_n)
+        seed_jsd.append(jsd_m)
 
-    # JSD per item
-    jsd_matrix = np.zeros((n_S, n_items_total), dtype=float)
-    for s in range(n_S):
-        ps = probs_S[s]
-        pn = null_probs
-        m = 0.5 * (ps + pn)
-        kl_p = np.sum(ps * np.log2(np.maximum(ps, 1e-12) / np.maximum(m, 1e-12)), axis=-1)
-        kl_n = np.sum(pn * np.log2(np.maximum(pn, 1e-12) / np.maximum(m, 1e-12)), axis=-1)
-        jsd_matrix[s] = np.clip(0.5 * (kl_p + kl_n), 0.0, 1.0)
-
-    D_S = np.mean(jsd_matrix, axis=1)
+    acc_deg = np.mean(np.concatenate(seed_acc_deg, axis=1), axis=1)
+    acc_null = float(np.mean(np.concatenate(seed_acc_null, axis=0)))
+    D_S = np.mean(np.concatenate(seed_jsd, axis=1), axis=1)
     U_S = utility(acc_deg, acc_null)
     R_S = reliance(D_S)
     try:
@@ -142,35 +144,24 @@ def analyze_dataset_p_condition(
 
     for b in range(n_boot):
         b_seed_idx = rng.integers(0, n_seeds, size=n_seeds)
-        b_items = []
+        b_acc_d_list = []
+        b_acc_n_list = []
+        b_jsd_list = []
         for s_idx in b_seed_idx:
-            sub = seed_item_lists[s_idx]
-            sub_idx = rng.integers(0, len(sub), size=len(sub))
-            for i in sub_idx:
-                b_items.append(sub[i])
+            n_sub = seed_acc_null[s_idx].shape[0]
+            sub_idx = rng.integers(0, n_sub, size=n_sub)
+            b_acc_d_list.append(seed_acc_deg[s_idx][:, sub_idx])
+            b_acc_n_list.append(seed_acc_null[s_idx][sub_idx])
+            b_jsd_list.append(seed_jsd[s_idx][:, sub_idx])
 
-        b_corr = np.array([it["correct_choice_idx"] for it in b_items])
-        b_null = np.array([it["null_probs"]["removed"] for it in b_items])
-        b_acc_null = float(np.mean(np.argmax(b_null, axis=-1) == b_corr))
-
-        b_probs_S = np.array([[it["probs_per_S"][s] for it in b_items] for s in range(n_S)])
-        b_preds_S = np.argmax(b_probs_S, axis=-1)
-        b_acc_deg = np.mean((b_preds_S == b_corr[None, :]).astype(float), axis=1)
+        b_acc_deg = np.mean(np.concatenate(b_acc_d_list, axis=1), axis=1)
+        b_acc_null = float(np.mean(np.concatenate(b_acc_n_list, axis=0)))
+        b_D = np.mean(np.concatenate(b_jsd_list, axis=1), axis=1)
 
         b_u = utility(b_acc_deg, b_acc_null)
         b_s = utility_crossing(b_u, S_grid, window=3)
 
         if b_s is not None:
-            # JSD
-            b_jsd = np.zeros((n_S, len(b_items)), dtype=float)
-            for s in range(n_S):
-                ps = b_probs_S[s]
-                pn = b_null
-                m = 0.5 * (ps + pn)
-                kl_p = np.sum(ps * np.log2(np.maximum(ps, 1e-12) / np.maximum(m, 1e-12)), axis=-1)
-                kl_n = np.sum(pn * np.log2(np.maximum(pn, 1e-12) / np.maximum(m, 1e-12)), axis=-1)
-                b_jsd[s] = np.clip(0.5 * (kl_p + kl_n), 0.0, 1.0)
-            b_D = np.mean(b_jsd, axis=1)
             b_R = reliance(b_D)
             try:
                 b_R_hat = normalized_reliance(b_R)
@@ -194,6 +185,7 @@ def analyze_dataset_p_condition(
         "clean_acc": float(acc_deg[0]),
         "acc_null_removed": acc_null,
         "R_0": float(R_S[0]),
+        "R_1_raw": float(R_S[-1]),
         "R_hat_1": float(R_hat_S[-1]) if len(R_hat_S) > 0 else np.nan,
         "S_star": S_star,
         "MI": MI,
