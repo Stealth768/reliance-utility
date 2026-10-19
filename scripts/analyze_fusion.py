@@ -193,11 +193,14 @@ def analyze_dataset_p_condition(
         "n_seeds": n_seeds,
         "clean_acc": float(acc_deg[0]),
         "acc_null_removed": acc_null,
+        "R_0": float(R_S[0]),
+        "R_hat_1": float(R_hat_S[-1]) if len(R_hat_S) > 0 else np.nan,
         "S_star": S_star,
         "MI": MI,
         "MI_ci_low": ci_low,
         "MI_ci_high": ci_high,
     }
+
 
 
 def run_full_fusion_analysis(
