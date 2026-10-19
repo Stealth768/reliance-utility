@@ -1,0 +1,29 @@
+\section{Case Study: Camera-LiDAR BEV Sensor Fusion}
+\label{sec:bev}
+
+To ground the reliance-utility framework in safety-critical autonomous cyber-physical systems, we introduce a controlled case study in 3D Bird's Eye View (BEV) multi-sensor fusion. 
+
+\subsection{Sensor Representations and Corruption Physics}
+In autonomous driving, front-facing perspective cameras provide high-resolution semantic perception ($3 \times 64 \times 64$ RGB views) but suffer acute vulnerability to adverse weather and solar conditions. Top-down LiDAR range grids ($1 \times 32 \times 32$ spatial occupancy) provide direct metric depth geometry that is largely invariant to illumination. We formalize a 4-class corridor navigation hazard prediction task ($Y \in \{\text{Clear}, \text{Obstacle}, \text{Vehicle Ahead}, \text{Road Boundary Hazard}\}$).
+
+We evaluate three physics-grounded camera corruptions across severity $S \in [0, 1]$:
+\begin{enumerate}
+    \item \textbf{Koschmieder Atmospheric Fog}: Attenuates the clean scene image $I$ according to Koschmieder's physical law of atmospheric scattering:
+    \begin{equation}
+        I_{\text{fog}}(S) = I \cdot e^{-\beta S} + L_{\infty} (1 - e^{-\beta S}),
+    \end{equation}
+    where $\beta=3.0$ is the extinction coefficient and $L_{\infty}=0.85$ is atmospheric airlight.
+    \item \textbf{Solar Glare Saturation}: Models direct low-angle solar blooming, washing out the upper-central camera dynamic range with radial additive saturation.
+    \item \textbf{Physical Lens Occlusion}: Simulates localized camera lens dirt, mud, and water droplets occluding visual road features.
+\end{enumerate}
+
+\subsection{Architectures: Fixed vs.\ Quality-Gated Fusion}
+We compare two canonical fusion paradigms:
+\begin{itemize}
+    \item \textbf{Quality-Blind Fixed Fusion (\texttt{BEVFixedFusionModel})}: Concatenates camera feature representations $h_{\text{cam}}$ and LiDAR features $h_{\text{lid}}$ into a static fusion MLP head with fixed equal weighting.
+    \item \textbf{Quality-Aware Dynamic Gated Fusion (\texttt{BEVGatedFusionModel})}: Estimates a dynamic scalar gate $g = \sigma(W_g h_{\text{lid}})$ conditioned on LiDAR spatial consistency, gating camera logit contribution:
+    \begin{equation}
+        z_{\text{fused}} = g \cdot \text{head}_{\text{cam}}(h_{\text{cam}}) + (1 - g) \cdot \text{head}_{\text{lid}}(h_{\text{lid}}).
+    \end{equation}
+\end{itemize}
+Both architectures are trained with learned null embeddings for camera-removed conditions, allowing exact measurement of reliance $R(S) = \jsd(B(S) \parallel B_{\text{null}})$ and terminal reliance $\hat{R}(1)$.

@@ -11,4 +11,16 @@ Prior to executing training experiments, we pre-registered three formal hypothes
     \item[H3:] If H1 fails, the failure is reported directly without post hoc dataset alteration or grid tuning.
 \end{description}
 
-\noindent [TODO: Insert summary table \input{tables/fusion_summary.tex} and discuss H1/H2 empirical outcomes once training completes.]
+\subsection{Empirical Findings and Hypothesis Testing}
+The results across the 20-run late-fusion grid on the Fashion-MNIST two-view benchmark ($p \in \{0.0, 0.1, 0.25, 0.5\}$, 5 seeds each) are summarized in Table~\ref{tab:fusion_summary}.
+
+\input{tables/fusion_summary.tex}
+
+\paragraph{Clean Accuracy Preservation (H2 Passed).}
+Hypothesis H2 predicted that clean multimodal accuracy would drop by less than 3 percentage points between $p=0.0$ and $p=0.25$. As reported in Table~\ref{tab:fusion_summary}, clean accuracy at $p=0.0$ is $88.79\%$ and at $p=0.25$ is $88.43\%$, representing an empirical drop of merely $0.36$ percentage points ($95\%$ bootstrap CI well within the 3\% bound). Thus, \textbf{H2 is decisively supported}.
+
+\paragraph{Non-Monotonic Reliance Misalignment (H1 Failed).}
+Hypothesis H1 pre-registered that $\mi$ would be monotonically non-increasing in dropout probability $p$. Empirically, $\mi$ does not decrease with $p$; instead, it exhibits a non-monotonic pattern: $\mi = 1.66$ at $p=0.0$, rising sharply to $4.59$ at $p=0.1$ and $4.51$ at $p=0.25$, before slightly declining to $3.68$ at $p=0.50$. In accordance with protocol rule \textbf{H3}, we report this failure transparently without altering datasets or tuning the grid.
+
+\paragraph{Mechanism Analysis.}
+The root cause of the $\mi$ increase under modality dropout is a pronounced upward shift in unimodal baseline accuracy. When trained with $p=0.0$, the network under-utilizes the unimodal branch when modality A is ablated, attaining only $56.20\%$ null-removed accuracy. Because multimodal performance remains above $56\%$ across moderate severities, utility crosses zero late at $S^* = 0.50$. In contrast, training with modality dropout forces the network to master unimodal prediction ($83.96\%$ at $p=0.1$ and $84.77\%$ at $p=0.25$). Consequently, degraded inputs drop below the now-stringent unimodal benchmark much earlier, shifting $S^*$ to $0.25$. This dramatically expands the integration interval $[S^*, 1]$ over which the model still places non-zero behavioral reliance on modality A, yielding a higher aggregate misalignment index despite improved unimodal robustness.
