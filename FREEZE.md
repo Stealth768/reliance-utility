@@ -35,7 +35,24 @@ Any evaluation, model, benchmark, or variant not explicitly listed here is stric
 
 ---
 
-## 3. Explicitly Excluded (Future Work)
+## 3. Case Study: Camera-LiDAR Bird's Eye View (BEV) Sensor Fusion
+- **Domain**: Autonomous driving road-corridor hazard classification (4 classes: Clear, Obstacle, Vehicle, Boundary).
+- **Sensors**:
+  1. Camera: Perspective front RGB view ($3 \times 64 \times 64$).
+  2. LiDAR: Top-down Bird's Eye View occupancy grid ($1 \times 32 \times 32$).
+- **Architectures**:
+  1. `BEVFixedFusionModel`: Static concatenation with quality-blind fusion head (constant 0.5 gate).
+  2. `BEVGatedFusionModel`: Dynamic reliability gating ($g = \sigma(W h_{\text{lidar}})$) scaling camera logits.
+- **Camera Corruptions**:
+  1. `fog`: Koschmieder physical atmospheric scattering model ($I_{\text{fog}} = I e^{-\beta S} + L(1 - e^{-\beta S})$).
+  2. `glare`: Radial direct solar blooming and sensor saturation.
+  3. `occlusion`: Physical lens mud/splatter occlusion.
+- **Training Grid**: Camera dropout $p \in \{0.0, 0.25\}$ across 5 seeds ($0, 1, 2, 3, 4$), 25 epochs.
+- **Null Baseline**: Camera removed with learned null embedding (`cam_removed=True`), LiDAR intact.
+
+---
+
+## 4. Explicitly Excluded (Future Work)
 - **InternVL2-2B**: Dropped due to persistent remote-code incompatibility with `transformers>=4.50` (`all_tied_weights_keys` missing).
-- **Autonomous Driving (BEVFusion / nuScenes-mini)**: Feasibility probe verdict is `NO-GO`; driving evaluation is deferred to future work.
+- **Full-scale mmdet3d / nuScenes-mini**: Heavy C++ CUDA extension compilation and 50 GB disk requirements exceed free-tier cloud constraints; replaced by pure-PyTorch BEV case study above.
 - **Open-ended Generation**: Multiple-choice 4-option formulation is frozen.
