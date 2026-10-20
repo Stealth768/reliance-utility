@@ -20,3 +20,23 @@ We explicitly delineate several structural and methodological limitations of thi
     
     \item \textbf{Autonomous Driving (BEV) Study --- Proposed, Not Frozen}: A standalone Camera-LiDAR BEV architecture and physical corruption suite were developed as a feasibility probe; however, no pre-declared hypotheses were formalized for this case study. Per the pre-registration protocol, the BEV analysis remains outside the frozen paper scope and is deferred to future work pending formal hypothesis declaration.
 \end{enumerate}
+
+\begin{itemize}
+\item \textbf{Null-baseline dependence.} Conclusions for individual
+  models depend on whether the no-input baseline is a removed image or a
+  black image; the divergence between the two is about two orders of
+  magnitude larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL, and part of
+  their residual reliance may reflect the presence of image tokens.
+\item \textbf{Multiple comparisons.} The criterion is evaluated in 42
+  combinations without correction, and the two that satisfy it overlap.
+\item \textbf{Operationalization after the fact.} The interval-based form
+  of the pre-registered criterion was fixed after seeing data.
+\item \textbf{Normalization by $R(0)$.} $\hat R$ and MI are unreliable
+  when clean-input reliance is small, as in the fusion study.
+\item \textbf{Misalignment Index.} Undefined in most real conditions;
+  validated mainly on synthetic models; conflates gate sharpness and
+  timing.
+\item \textbf{Scope.} One dataset, one multiple-choice format, three
+  models (one in 4-bit), one swap pairing per sample, and no autonomous
+  driving evaluation.
+\end{itemize}

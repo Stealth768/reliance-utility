@@ -106,6 +106,9 @@ def check_numbers(
             corr = str(row.get("corruption", "")).strip()
             lookup_rep[(m_name, corr)] = dict(row)
 
+    fusion_csv = REPO_ROOT / "results" / "derived" / "fusion_summary.csv"
+    df_fusion = pd.read_csv(fusion_csv) if fusion_csv.exists() else None
+
     mismatches = 0
     total_checks = len(all_checks)
 
@@ -161,6 +164,53 @@ def check_numbers(
                 continue
 
             actual_val = matched_row[col_key]
+            try:
+                exp_f = float(val_str)
+                act_f = float(actual_val)
+                diff = abs(exp_f - act_f)
+                if diff > tol:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except ValueError:
+                if str(actual_val).strip() != val_str:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            continue
+
+        # Fusion check: fusion:dropout_p:column
+        if len(parts) == 3 and parts[0] == "fusion":
+            p_key, col_key = parts[1], parts[2]
+            if df_fusion is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {fusion_csv} not found.")
+                mismatches += 1
+                continue
+            import numpy as np
+            if p_key in ("diff_0_25", "diff_0_025"):
+                p0_val = float(df_fusion.loc[np.isclose(df_fusion["dropout_p"], 0.0), col_key].values[0])
+                p25_val = float(df_fusion.loc[np.isclose(df_fusion["dropout_p"], 0.25), col_key].values[0])
+                actual_val = p0_val - p25_val
+            else:
+                try:
+                    p_float = float(p_key)
+                    matching = df_fusion[np.isclose(df_fusion["dropout_p"], p_float)]
+                    if len(matching) == 0:
+                        print(f"  [FAIL] {fpath.name}:{line_num} - p={p_key} not found in fusion table.")
+                        mismatches += 1
+                        continue
+                    if col_key not in matching.columns:
+                        print(f"  [FAIL] {fpath.name}:{line_num} - Column '{col_key}' not found in fusion table.")
+                        mismatches += 1
+                        continue
+                    actual_val = matching.iloc[0][col_key]
+                except ValueError:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - Invalid fusion key '{p_key}'.")
+                    mismatches += 1
+                    continue
+
             try:
                 exp_f = float(val_str)
                 act_f = float(actual_val)

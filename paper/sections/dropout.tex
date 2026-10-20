@@ -1,28 +1,54 @@
-\section{Mitigation via Modality Dropout}
-\label{sec:dropout}
+\section{Case study: modality dropout in a two-view proxy}
+\label{sec:fusion}
 
-To investigate whether reliance-utility misalignment can be mitigated during training, we evaluate a controlled case study applying modality dropout to a late fusion architecture. The architecture incorporates two MLP encoders and a learned quality-agnostic gate (evaluating representation $B$ without direct access to degradation severity $S$).
+\paragraph{Setup.}
+To examine whether training with modality dropout changes reliance on a
+degraded input, we train small late-fusion networks on Fashion-MNIST with
+each image split into a left half (view A) and a right half (view B). This
+is a \emph{two-view proxy} and not a multimodal benchmark. View A is
+degraded by interpolation toward noise on a nine-point severity grid; the
+no-input baseline replaces view A by a learned null embedding. The fusion
+gate does not receive the severity. We train with view-A dropout
+probabilities $p\in\{0,0.1,0.25,0.5\}$ and five seeds.
 
-\subsection{Pre-Registered Hypotheses}
-Prior to executing training experiments, we pre-registered three formal hypotheses in our experimental log:
-\begin{description}
-    \item[H1:] Models trained with higher modality-dropout probability $p \in \{0.0, 0.1, 0.25, 0.5\}$ have lower $\mi$ under the \emph{removed} null (i.e., $\mi$ is monotonically non-increasing in $p$, allowing for ties within confidence intervals).
-    \item[H2:] Clean accuracy drops by less than 3 percentage points between $p=0.0$ and $p=0.25$.
-    \item[H3:] If H1 fails, the failure is reported directly without post hoc dataset alteration or grid tuning.
-\end{description}
+\paragraph{Pre-declared hypotheses.}
+We declared before training: (H1) the Misalignment Index is non-increasing
+in $p$; (H2) clean accuracy falls by less than three points between $p=0$
+and $p=0.25$.
 
-\subsection{Empirical Findings and Hypothesis Testing}
-The results across the 20-run late-fusion grid on the Fashion-MNIST two-view benchmark ($p \in \{0.0, 0.1, 0.25, 0.5\}$, 5 seeds each) are summarized in Table~\ref{tab:fusion_summary}.
-
+\paragraph{Results.}
+Table~\ref{tab:fusion} reports the outcome. H2 holds. H1 does \emph{not}:
+the Misalignment Index is higher for every $p>0$ than for $p=0$. Between
+$p=0$ and $p=0.25$, clean accuracy changes from
+\checknum{0.8879}{fusion:0.0:clean_acc} to
+\checknum{0.8843}{fusion:0.25:clean_acc}, a decrease of only
+\checknum{0.0036}{fusion:diff_0_25:clean_acc} percentage points
+($<0.4$\,pp), well within the pre-declared three-point bound.
+Dropout-trained models achieve much higher accuracy when view A is removed
+(increasing from \checknum{0.5620}{fusion:0.0:acc_null_removed} at $p=0$ to
+\checknum{0.8396}{fusion:0.1:acc_null_removed}--\checknum{0.8584}{fusion:0.5:acc_null_removed}
+for $p\ge 0.1$) and when it is fully degraded
+(increasing from \checknum{0.2761}{fusion:0.0:acc_deg_1} at $p=0$ to
+\checknum{0.4480}{fusion:0.1:acc_deg_1}--\checknum{0.7256}{fusion:0.5:acc_deg_1}
+for $p\ge 0.1$).
 \input{tables/fusion_summary.tex}
 
-\paragraph{Clean Accuracy Preservation (H2 Passed).}
-Hypothesis H2 predicted that clean multimodal accuracy would drop by less than 3 percentage points between $p=0.0$ and $p=0.25$. As reported in Table~\ref{tab:fusion_summary}, clean accuracy at $p=0.0$ is $88.79\%$ and at $p=0.25$ is $88.43\%$, representing an empirical drop of merely $0.36$ percentage points ($95\%$ bootstrap CI well within the 3\% bound). Thus, \textbf{H2 is decisively supported}.
+\paragraph{Why the normalized measures behave this way (post hoc).}
+Reliance at clean input, $R(0)$, falls by more than an order of
+magnitude as $p$ grows, because a model trained with dropout already
+makes similar predictions with and without view A. Since $\hat R$ and the
+Misalignment Index divide by $R(0)$, they are inflated when $R(0)$ is
+small, and their comparison across $p$ is not informative. Raw terminal
+reliance $R(1)$ decreases with $p$ (falling monotonically from
+\checknum{0.6106}{fusion:0.0:R_1_raw} at $p=0$ to
+\checknum{0.4516}{fusion:0.1:R_1_raw} at $p=0.1$,
+\checknum{0.3303}{fusion:0.25:R_1_raw} at $p=0.25$, and
+\checknum{0.1478}{fusion:0.5:R_1_raw} at $p=0.5$). We
+report this as a post hoc observation and not as support for H1.
 
-\paragraph{Non-Monotonic Reliance Misalignment (H1 Failed).}
-Hypothesis H1 pre-registered that $\mi$ would be monotonically non-increasing in dropout probability $p$. Empirically, $\mi$ does not decrease with $p$; instead, it exhibits a non-monotonic pattern: $\mi = 1.66$ at $p=0.0$, rising sharply to $4.59$ at $p=0.1$ and $4.51$ at $p=0.25$, before slightly declining to $3.68$ at $p=0.50$. In accordance with protocol rule \textbf{H3}, we report this failure transparently without altering datasets or tuning the grid.
-
-\paragraph{Mechanism Analysis.}
-The root cause of the $\mi$ increase under modality dropout is a pronounced upward shift in unimodal baseline accuracy. When trained with $p=0.0$, the network under-utilizes the unimodal branch when modality A is ablated, attaining only $56.20\%$ null-removed accuracy. Because multimodal performance remains above $56\%$ across moderate severities, utility crosses zero late at $S^* = 0.50$. In contrast, training with modality dropout forces the network to master unimodal prediction ($83.96\%$ at $p=0.1$ and $84.77\%$ at $p=0.25$). Consequently, degraded inputs drop below the now-stringent unimodal benchmark much earlier, shifting $S^*$ to $0.25$. This dramatically expands the integration interval $[S^*, 1]$ over which the model still places non-zero behavioral reliance on modality A, yielding a higher aggregate misalignment index despite improved unimodal robustness.
-
-Furthermore, as reported in Table~\ref{tab:fusion_summary}, baseline reliance $R(0)$ decreases from $0.33$ to $0.02$ as $p$ increases. Because normalized reliance is defined as $\hat{R}(S) = R(S)/R(0)$, this denominator contraction mechanically inflates $\hat{R}(1)$ ($1.85 \to 8.36$). In contrast, unnormalized terminal reliance $R(1)$ monotonically drops from $0.61$ to $0.15$, indicating that the inflated $\hat{R}(1)$ and elevated $\mi$ values under high dropout are largely driven by this normalization artifact.
+\paragraph{Scope.}
+This is a small proxy with one dataset and simple encoders. It shows that
+dropout preserves clean accuracy and improves accuracy on degraded input
+while lowering raw reliance on it, and it exposes a weakness of
+$R(0)$-normalized measures. It does not show a general property of large
+multimodal models.
