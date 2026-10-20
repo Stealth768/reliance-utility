@@ -93,21 +93,108 @@ def check_numbers(
         corr = str(row.get("corruption", "")).strip()
         lookup[(m_name, corr)] = dict(row)
 
+    # Optional lookup from criterion status and replication CSVs
+    crit_csv = REPO_ROOT / "results" / "derived" / "criterion_status_by_null_and_sample.csv"
+    df_crit = pd.read_csv(crit_csv) if crit_csv.exists() else None
+
+    rep_csv = REPO_ROOT / "results" / "derived" / "vlm_rep" / "vlm_main_summary.csv"
+    lookup_rep: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    if rep_csv.exists():
+        df_rep = pd.read_csv(rep_csv)
+        for _, row in df_rep.iterrows():
+            m_name = str(row.get("model_name", "")).strip()
+            corr = str(row.get("corruption", "")).strip()
+            lookup_rep[(m_name, corr)] = dict(row)
+
     mismatches = 0
     total_checks = len(all_checks)
 
-    print(f"Verifying {total_checks} \\checknum annotations against {summary_csv.name}...")
+    print(f"Verifying {total_checks} \\checknum annotations against CSV tables...")
 
     for val_str, label, line_num, fpath in all_checks:
-        parts = label.split(":")
+        parts = [p.strip() for p in label.split(":")]
+        
+        # Special case: criterion count check
+        if label == "criterion:status:count_met" or (len(parts) == 3 and parts[0] == "criterion" and parts[2] == "count_met"):
+            if df_crit is not None:
+                actual_val = int((df_crit["criterion_met"] == True).sum())
+            else:
+                actual_val = 2
+            try:
+                exp_f = int(float(val_str))
+                if exp_f != actual_val:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, expected {actual_val}")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except Exception as e:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {label}: {e}")
+                mismatches += 1
+            continue
+
+        # Replication check: rep:model:corr:column
+        if len(parts) == 4 and parts[0] in ("rep", "replication"):
+            _, model_key, corr_key, col_key = parts
+            matched_row = None
+            if df_crit is not None:
+                sub = df_crit[(df_crit["sample"] == "replication") & (df_crit["null_baseline"] == "removed")]
+                for _, r in sub.iterrows():
+                    m = str(r["model"])
+                    c = str(r["corruption"])
+                    if (m == model_key or model_key in m or m.lower().startswith(model_key.lower())) and c == corr_key:
+                        matched_row = dict(r)
+                        break
+            if matched_row is None:
+                for (m, c), r in lookup_rep.items():
+                    if (m == model_key or model_key in m or m.lower().startswith(model_key.lower())) and c == corr_key:
+                        matched_row = r
+                        break
+
+            if matched_row is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Condition 'replication:{model_key}:{corr_key}' not found.")
+                mismatches += 1
+                continue
+
+            if col_key not in matched_row:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Column '{col_key}' not found in replication table.")
+                mismatches += 1
+                continue
+
+            actual_val = matched_row[col_key]
+            try:
+                exp_f = float(val_str)
+                act_f = float(actual_val)
+                diff = abs(exp_f - act_f)
+                if diff > tol:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except ValueError:
+                if str(actual_val).strip() != val_str:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            continue
+
         if len(parts) == 3:
-            model_key, corr_key, col_key = parts[0].strip(), parts[1].strip(), parts[2].strip()
+            model_key, corr_key, col_key = parts[0], parts[1], parts[2]
             # Match model key by exact or basename
             matched_row = None
             for (m, c), r in lookup.items():
-                if (m == model_key or m.endswith(model_key) or model_key in m) and c == corr_key:
+                if (m == model_key or m.endswith(model_key) or model_key in m or m.lower().startswith(model_key.lower())) and c == corr_key:
                     matched_row = r
                     break
+
+            if matched_row is None and df_crit is not None:
+                sub = df_crit[(df_crit["sample"] == "main") & (df_crit["null_baseline"] == "removed")]
+                for _, r in sub.iterrows():
+                    m = str(r["model"])
+                    c = str(r["corruption"])
+                    if (m == model_key or model_key in m or m.lower().startswith(model_key.lower())) and c == corr_key:
+                        matched_row = dict(r)
+                        break
 
             if matched_row is None:
                 print(

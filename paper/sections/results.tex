@@ -15,7 +15,10 @@ image removed from the prompt unless stated otherwise.
 Table~\ref{tab:headline} reports normalized terminal reliance
 $\hat R(1)$ and terminal utility $U(1)$ for each model and corruption.
 \TODO{state in one sentence the range of swapblend $\hat R(1)$ across the
-three models, taken from Table~\ref{tab:headline}.}
+three models, taken from Table~\ref{tab:headline}: across models, $\hat{R}(1)$
+ranges from \checknum{0.4872}{Qwen:swapblend:R_hat_s1} (Qwen2-VL) to
+\checknum{0.5784}{llava:swapblend:R_hat_s1} (LLaVA-1.5), with SmolVLM at
+\checknum{0.4932}{SmolVLM:swapblend:R_hat_s1}.}
 Under Gaussian blending and patch masking, reliance at maximum severity is
 lower for every model, and the paired difference between swapped and
 Gaussian conditions is reported in Table~\ref{tab:paired}; its intervals
@@ -25,40 +28,51 @@ exclude zero for all three models.
 
 \paragraph{Utility inversion.}
 Terminal utility is significantly below zero under the swapped condition
-for Qwen2-VL in both samples, and for LLaVA-1.5 in the main sample under
-the removed-image baseline only; it is not significantly below zero for
-SmolVLM. Gaussian and patch corruptions do not produce a significant
-inversion for any model. Section~\ref{sec:nullsens} shows how these
-statements depend on the baseline.
+for Qwen2-VL in both samples, and for LLaVA-1.5 in the main and pooled
+samples under the removed-image baseline only; it is not significantly below
+zero for SmolVLM. Gaussian and patch corruptions do not produce a significant
+inversion for any model under either baseline (with Gaussian utility under
+the black null remaining non-negative for LLaVA-1.5). Section~\ref{sec:nullsens}
+shows how these statements depend on the baseline.
 
 \paragraph{Replication.}
 Table~\ref{tab:replication} repeats the analysis on held-out questions.
 \TODO{state whether swapblend $\hat R(1)$ lies in the same range as the main
-sample, from Table~\ref{tab:replication}.}
+sample, from Table~\ref{tab:replication}: in replication, swapblend $\hat{R}(1)$
+spans from \checknum{0.4700}{rep:Qwen:swapblend:R_hat_1} (Qwen2-VL) to
+\checknum{0.5634}{rep:llava:swapblend:R_hat_1} (LLaVA-1.5), with SmolVLM at
+\checknum{0.5528}{rep:SmolVLM:swapblend:R_hat_1}, falling within the same
+overall range as the main sample.}
 This replicates the result over questions and pairings, not over models or
 datasets.
 \input{tables/headline_replication.tex}
 
 \paragraph{Pre-registered criterion.}
-Before running the main experiment we specified that a model would show
-over-reliance if $U(1)$ was significantly negative while the lower interval
-bound of $\hat R(1)$ exceeded $0.5$ under the swapped corruption.
-Table~\ref{tab:criterion} reports this for every model, corruption,
-sample and baseline. \TODO{state the count of satisfying combinations and
-which they are, from Table~\ref{tab:criterion}.} We therefore treat the
-pre-registered hypothesis as largely unsupported, and describe the
-persistent reliance as a descriptive finding.
+Before running the main experiment we recorded that a model would show
+over-reliance if utility was clearly negative at high severity while
+normalized reliance stayed above $0.5$ under the swapped corruption. The
+original statement did not specify how ``clearly'' and ``above'' were to
+be assessed under sampling uncertainty. We therefore operationalized it
+\emph{post hoc} as: the upper bound of the interval for $U(1)$ is below
+zero and the lower bound of the interval for $\hat R(1)$ is above $0.5$.
+Table~\ref{tab:criterion} reports this for every model, corruption, sample
+and baseline. \TODO{state the count and which combinations satisfy it: exactly
+\checknum{2}{criterion:status:count_met} of 42 evaluated combinations satisfy
+both requirements, namely LLaVA-1.5 under the swapped corruption with the
+removed-image baseline in the main ($N=500$) and pooled ($N=945$) samples.}
+We treat the pre-registered hypothesis as largely unsupported and describe
+the persistent reliance as a descriptive finding.
 \input{tables/criterion_status_compact.tex}
 
 \paragraph{Sensitivity to the no-input baseline.}
 \label{sec:nullsens}
 Table~\ref{tab:nullsens} compares conclusions when the baseline is the
 removed image versus a black image. Reliance under the swapped condition
-changes little. Reliance under Gaussian blending drops for two of the
-three models, and the divergence between the black-image and removed-image
-predictions is far larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL.
-We hypothesize, without testing it, that this reflects how each model
-handles inserted image tokens.
+changes little. Reliance under Gaussian blending under the black null drops
+for two of the three models, and the divergence between the black-image and
+removed-image predictions is far larger for SmolVLM and LLaVA-1.5 than for
+Qwen2-VL. We hypothesize, without testing it, that this reflects how each
+model handles inserted image tokens.
 \input{tables/null_sensitivity.tex}
 
 \paragraph{Comparison with answer-level measures.}
