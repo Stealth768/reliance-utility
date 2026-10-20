@@ -112,6 +112,9 @@ def check_numbers(
     floor_csv = REPO_ROOT / "results" / "derived" / "floor_fraction.csv"
     df_floor = pd.read_csv(floor_csv) if floor_csv.exists() else None
 
+    paired_csv = REPO_ROOT / "results" / "derived" / "paired_swap_vs_gauss.csv"
+    df_paired = pd.read_csv(paired_csv) if paired_csv.exists() else None
+
     mismatches = 0
     total_checks = len(all_checks)
 
@@ -246,7 +249,62 @@ def check_numbers(
                 print(f"  [FAIL] {fpath.name}:{line_num} - Model '{model_key}' not found in floor table.")
                 mismatches += 1
                 continue
-            actual_val = matched_row[metric_key]
+            tol_use = tol
+            if metric_key in ("fraction_pct", "floor_fraction_pct"):
+                actual_val = float(matched_row["floor_fraction"]) * 100.0
+                tol_use = 0.6  # Allow rounding (e.g. 3.6 vs 3.55, 43 vs 43.24, 42 vs 42.36)
+            elif metric_key in matched_row:
+                actual_val = matched_row[metric_key]
+            else:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Column '{metric_key}' not found in floor table.")
+                mismatches += 1
+                continue
+            try:
+                exp_f = float(val_str)
+                act_f = float(actual_val)
+                diff = abs(exp_f - act_f)
+                if diff > tol_use:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol_use})")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except ValueError:
+                if str(actual_val).strip() != val_str:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            continue
+
+        # Paired check: paired:model:metric
+        if len(parts) == 3 and parts[0] == "paired":
+            _, model_key, metric_key = parts
+            if df_paired is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {paired_csv} not found.")
+                mismatches += 1
+                continue
+            matched_row = None
+            for _, r in df_paired.iterrows():
+                m = str(r["model"])
+                if m == model_key or model_key in m or m.lower().startswith(model_key.lower()):
+                    matched_row = r
+                    break
+            if matched_row is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Model '{model_key}' not found in paired table.")
+                mismatches += 1
+                continue
+            col_target = metric_key.lower()
+            if col_target not in matched_row:
+                # Try finding matching column
+                for c in matched_row.index:
+                    if c.lower() == col_target:
+                        col_target = c
+                        break
+            if col_target not in matched_row:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Column '{metric_key}' not found in paired table.")
+                mismatches += 1
+                continue
+            actual_val = matched_row[col_target]
             try:
                 exp_f = float(val_str)
                 act_f = float(actual_val)

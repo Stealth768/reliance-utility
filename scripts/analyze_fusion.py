@@ -141,6 +141,7 @@ def analyze_dataset_p_condition(
     rng = np.random.default_rng(seed)
     n_seeds = len(seed_runs)
     boot_mi = []
+    boot_u1 = []
 
     for b in range(n_boot):
         b_seed_idx = rng.integers(0, n_seeds, size=n_seeds)
@@ -159,6 +160,7 @@ def analyze_dataset_p_condition(
         b_D = np.mean(np.concatenate(b_jsd_list, axis=1), axis=1)
 
         b_u = utility(b_acc_deg, b_acc_null)
+        boot_u1.append(float(b_u[-1]))
         b_s = utility_crossing(b_u, S_grid, window=3)
 
         if b_s is not None:
@@ -178,6 +180,9 @@ def analyze_dataset_p_condition(
     else:
         ci_low, ci_high = np.nan, np.nan
 
+    u1_ci_low = float(np.percentile(boot_u1, 2.5))
+    u1_ci_high = float(np.percentile(boot_u1, 97.5))
+
     return {
         "dataset": dataset,
         "dropout_p": dropout_p,
@@ -186,6 +191,8 @@ def analyze_dataset_p_condition(
         "acc_null_removed": acc_null,
         "acc_deg_1": float(acc_deg[-1]),
         "U_1": float(acc_deg[-1]) - acc_null,
+        "U_1_ci_low": u1_ci_low,
+        "U_1_ci_high": u1_ci_high,
         "R_0": float(R_S[0]),
         "R_1_raw": float(R_S[-1]),
         "R_hat_1": float(R_hat_S[-1]) if len(R_hat_S) > 0 else np.nan,

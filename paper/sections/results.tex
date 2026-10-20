@@ -75,10 +75,10 @@ substantially under the black null for SmolVLM and LLaVA-1.5 and slightly
 for Qwen2-VL. The divergence between the black-image and removed-image
 predictions is far larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL; as a
 heuristic (since JSD is not additive), the raw unimodal floor accounts for
-about \checknum{0.0355}{floor:Qwen2-VL-2B-Instruct:floor_fraction} of
+about \checknum{3.6}{floor:Qwen2-VL-2B-Instruct:fraction_pct}\% of
 swapblend $R(1)$ for Qwen2-VL, compared to
-\checknum{0.4324}{floor:SmolVLM-Instruct:floor_fraction} for SmolVLM and
-\checknum{0.4236}{floor:llava-1.5-7b-hf:floor_fraction} for LLaVA-1.5. We
+\checknum{43}{floor:SmolVLM-Instruct:fraction_pct}\% for SmolVLM and
+\checknum{42}{floor:llava-1.5-7b-hf:fraction_pct}\% for LLaVA-1.5. We
 hypothesize, without testing it, that this reflects how each model handles
 inserted image tokens.
 \input{tables/null_sensitivity.tex}

@@ -1,6 +1,32 @@
 \section{Introduction}
 \label{sec:intro}
 
-Modern multimodal architectures achieve strong benchmark performance by jointly modeling vision, language, and other sensory streams. However, standard training paradigms rarely train models to explicitly estimate input quality or abstain from incorporating degraded inputs. Consequently, when an input modality undergoes sensor degradation, environmental noise, or adversarial corruption, the model may continue to rely on the degraded signal even after its informational content has fallen below that of a pure unimodal baseline.
+When one input to a multimodal system degrades, the usual evaluation asks
+whether task performance falls. A drop has at least two causes. The
+information needed for the task may have been destroyed. Or the information
+may remain available in another input while the model keeps relying on the
+degraded one. Accuracy alone does not distinguish these cases.
 
-This work addresses the gap between \emph{behavioral reliance} (how much the model's output distribution depends on a given modality) and \emph{multimodal utility} (whether incorporating that modality yields higher task accuracy than ignoring it). We provide a formal framework, metric definitions, and \TODO{state key empirical findings across benchmarks and model families once final results are tabulated}.
+Substituting or removing an input to probe a model's dependence on it is
+established practice (Section~\ref{sec:related}). What we study is a
+severity-graded version: how performance and reliance change together as
+one input is degraded step by step. For each severity we measure
+\emph{utility}, the task performance with the degraded input relative to
+removing it, and \emph{reliance}, the divergence between the model's
+answer distributions with the degraded and with the removed input. We
+locate where utility first reaches zero and ask how much reliance remains
+there. To our knowledge, this pairing along a severity path has not been
+studied in the work we reviewed.
+
+\paragraph{Contributions.}
+(i) We define the diagnostic: utility, reliance, a normalized reliance
+$\hat R$, a utility-crossing severity, and a Misalignment Index (MI)
+summarizing reliance beyond the crossing. (ii) We evaluate it on synthetic
+fusion models with controlled reliance, including an oracle control. Our
+first pre-set success criterion failed, and the revised criterion is
+reported as post hoc. (iii) We apply it to three open VLMs on
+multiple-choice VQA, with a held-out replication and an analysis of how
+conclusions depend on the no-input baseline. (iv) We report a
+pre-registered over-reliance criterion that is met in only
+\checknum{2}{criterion:status:count_met} of 42 combinations. (v) We
+include a small modality-dropout proxy study.
