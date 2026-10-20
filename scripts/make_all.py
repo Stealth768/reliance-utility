@@ -42,7 +42,13 @@ def main():
         [py, "scripts/make_synthetic_figs.py"],
     )
 
-    # 3. Hash raw results
+    # 3. Generate Paper Tables
+    run_step(
+        "Generate Paper Tables",
+        [py, "scripts/generate_paper_tables.py"],
+    )
+
+    # 4. Hash raw results
     run_step(
         "Hash Raw Results",
         [py, "scripts/hash_results.py"],

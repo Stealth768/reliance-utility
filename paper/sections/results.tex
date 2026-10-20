@@ -1,24 +1,78 @@
-\section{Empirical Evaluation on Vision-Language Models}
+\section{Results}
 \label{sec:results}
 
-We evaluate reliance-utility alignment on open-weights Vision-Language Models evaluated on the A-OKVQA benchmark ($N=500$ disjoint validation items):
-\begin{itemize}
-    \item \textbf{Qwen2-VL-2B-Instruct} (native resolution vision transformer)
-    \item \textbf{SmolVLM-Instruct} (compact vision-language model)
-    \item \textbf{LLaVA-1.5-7B-hf} (4-bit NF4 quantized instruction model)
-\end{itemize}
-Each model is evaluated across three corruption types: \emph{Gaussian blur/noise blend}, \emph{random patch occlusion}, and \emph{deceptive visual swap-blend}.
+\paragraph{Setup.}
+We evaluate three open VLMs (Qwen2-VL-2B-Instruct, LLaVA-1.5-7B in 4-bit,
+and SmolVLM-Instruct) on A-OKVQA multiple-choice questions, reading the
+next-token distribution over the four option letters. The main sample
+contains the questions of \texttt{main\_ids}; a replication uses disjoint
+held-out questions, a new random image-pairing seed, and only the swapped
+and Gaussian corruptions. All intervals are 95\% bootstrap intervals over
+questions (1000 resamples, fixed seed). The no-input baseline is the
+image removed from the prompt unless stated otherwise.
 
-\begin{table*}[t]
-\centering
-\caption{Cross-Model VLM Reliance-Utility Main Benchmark Summary ($N=500$).}
-\label{tab:vlm_main_summary}
-\small
-\input{tables/vlm_main_summary.tex}
-\end{table*}
+\paragraph{Residual reliance under a swapped image.}
+Table~\ref{tab:headline} reports normalized terminal reliance
+$\hat R(1)$ and terminal utility $U(1)$ for each model and corruption.
+\TODO{state in one sentence the range of swapblend $\hat R(1)$ across the
+three models, taken from Table~\ref{tab:headline}.}
+Under Gaussian blending and patch masking, reliance at maximum severity is
+lower for every model, and the paired difference between swapped and
+Gaussian conditions is reported in Table~\ref{tab:paired}; its intervals
+exclude zero for all three models.
+\input{tables/headline_main.tex}
+\input{tables/paired_swap_vs_gauss.tex}
 
-\subsection{Analysis of Utility Inversion and Reliance}
-% TODO: Analyze empirical crossing points S* and significant crossings once full runs complete.
-% TODO: Discuss behavior under swapblend (pre-registered hypothesis: test whether R_hat remains > 0.5 when utility is negative).
-% TODO: Compare correlation between Misalignment Index and plain accuracy drop across models.
-\noindent [TODO: Detailed empirical discussion will be populated from completed benchmark runs.]
+\paragraph{Utility inversion.}
+Terminal utility is significantly below zero under the swapped condition
+for Qwen2-VL in both samples, and for LLaVA-1.5 in the main sample under
+the removed-image baseline only; it is not significantly below zero for
+SmolVLM. Gaussian and patch corruptions do not produce a significant
+inversion for any model. Section~\ref{sec:nullsens} shows how these
+statements depend on the baseline.
+
+\paragraph{Replication.}
+Table~\ref{tab:replication} repeats the analysis on held-out questions.
+\TODO{state whether swapblend $\hat R(1)$ lies in the same range as the main
+sample, from Table~\ref{tab:replication}.}
+This replicates the result over questions and pairings, not over models or
+datasets.
+\input{tables/headline_replication.tex}
+
+\paragraph{Pre-registered criterion.}
+Before running the main experiment we specified that a model would show
+over-reliance if $U(1)$ was significantly negative while the lower interval
+bound of $\hat R(1)$ exceeded $0.5$ under the swapped corruption.
+Table~\ref{tab:criterion} reports this for every model, corruption,
+sample and baseline. \TODO{state the count of satisfying combinations and
+which they are, from Table~\ref{tab:criterion}.} We therefore treat the
+pre-registered hypothesis as largely unsupported, and describe the
+persistent reliance as a descriptive finding.
+\input{tables/criterion_status_compact.tex}
+
+\paragraph{Sensitivity to the no-input baseline.}
+\label{sec:nullsens}
+Table~\ref{tab:nullsens} compares conclusions when the baseline is the
+removed image versus a black image. Reliance under the swapped condition
+changes little. Reliance under Gaussian blending drops for two of the
+three models, and the divergence between the black-image and removed-image
+predictions is far larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL.
+We hypothesize, without testing it, that this reflects how each model
+handles inserted image tokens.
+\input{tables/null_sensitivity.tex}
+
+\paragraph{Comparison with answer-level measures.}
+Table~\ref{tab:baseline} reports a visual reliance score, blank-image
+drop, answer-change rate, and benefit and harm rates for the swapped
+image. We report orderings only; with three models no inferential claim
+about their relation to $\hat R(1)$ is supported. On questions where the
+swapped-image and no-image answers coincide, the distributional divergence
+is still above the black-versus-removed floor for every model, by a large
+factor only for Qwen2-VL.
+\input{tables/baseline_metrics.tex}
+
+\paragraph{Misalignment Index.}
+The severity at which utility first reaches zero lies at the last grid
+point or is absent in most real conditions, so the Misalignment Index is
+undefined there and we do not rely on it for the VLM results. It is
+validated on the synthetic models of Section~\ref{sec:synthetic}.

@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\centering
+\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). A condition passes if and only if both pre-registered requirements are satisfied simultaneously: terminal utility is significantly negative ($U(1)$ upper 95\% CI $< 0$) and terminal normalized reliance strictly exceeds threshold ($\hat{R}(1)$ lower 95\% CI $> 0.50$).}
+\label{tab:criterion}
+\small
+\begin{tabular}{llcccccc}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{Main ($N=500$)}} & \multicolumn{2}{c}{\textbf{Replication ($N=445$)}} & \multicolumn{2}{c}{\textbf{Pooled ($N=945$)}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+\textbf{Model} & \textbf{Corruption} & \textbf{Removed} & \textbf{Black} & \textbf{Removed} & \textbf{Black} & \textbf{Removed} & \textbf{Black} \\
+\midrule
+\textbf{Qwen2-VL-2B} & Swapped (Swapblend) & Fail ($\hat{R} \le 0.5$) & Fail ($\hat{R} \le 0.5$) & Fail ($\hat{R} \le 0.5$) & Fail ($\hat{R} \le 0.5$) & Fail ($\hat{R} \le 0.5$) & Fail ($\hat{R} \le 0.5$) \\
+ & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
+ & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
+\midrule
+\textbf{SmolVLM-Instruct} & Swapped (Swapblend) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
+ & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
+ & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
+\midrule
+\textbf{LLaVA-1.5-7B} & Swapped (Swapblend) & \textbf{Pass} & Fail (both) & Fail (both) & Fail (both) & \textbf{Pass} & Fail (both) \\
+ & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
+ & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}

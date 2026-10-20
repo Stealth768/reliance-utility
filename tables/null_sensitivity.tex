@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\centering
+\caption{Sensitivity of terminal reliance $\hat{R}(1)$, terminal utility $U(1)$, and unimodal divergence to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42), alongside empirical unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$.}
+\label{tab:nullsens}
+\small
+\begin{tabular}{llccccc}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{Removed Null Baseline}} & \multicolumn{2}{c}{\textbf{Black Null Baseline}} & \textbf{Unimodal Floor} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-7}
+\textbf{Model} & \textbf{Corruption} & $U(1)$ [95\% CI] & $\hat{R}(1)$ [95\% CI] & $U(1)$ [95\% CI] & $\hat{R}(1)$ [95\% CI] & $\text{JSD}(\text{blk} \parallel \text{rem})$ [95\% CI] \\
+\midrule
+\textbf{Qwen2-VL-2B} & Swapped (Swapblend) & -0.0640 [-0.1141, -0.0180] & 0.4872 [0.4366, 0.5422] & -0.0480 [-0.0961, -0.0020] & 0.4681 [0.4197, 0.5203] & 0.0038 [0.0033, 0.0045] \\
+ & Gaussian Blur & -0.0300 [-0.0680, +0.0060] & 0.1681 [0.1473, 0.1889] & -0.0140 [-0.0520, +0.0240] & 0.1501 [0.1310, 0.1704] &  \\
+ & Patch Occlusion & -0.0060 [-0.0300, +0.0200] & 0.0290 [0.0255, 0.0327] & +0.0100 [-0.0120, +0.0300] & 0.0100 [0.0086, 0.0116] &  \\
+\midrule
+\textbf{SmolVLM-Instruct} & Swapped (Swapblend) & -0.0160 [-0.0620, +0.0300] & 0.4932 [0.4461, 0.5468] & -0.0020 [-0.0460, +0.0420] & 0.5098 [0.4593, 0.5679] & 0.0580 [0.0494, 0.0676] \\
+ & Gaussian Blur & -0.0220 [-0.0680, +0.0220] & 0.3808 [0.3368, 0.4244] & -0.0080 [-0.0480, +0.0300] & 0.2630 [0.2306, 0.3008] &  \\
+ & Patch Occlusion & +0.0040 [-0.0320, +0.0420] & 0.2331 [0.2058, 0.2651] & +0.0180 [-0.0020, +0.0380] & 0.0323 [0.0262, 0.0394] &  \\
+\midrule
+\textbf{LLaVA-1.5-7B} & Swapped (Swapblend) & -0.0480 [-0.0920, -0.0040] & 0.5784 [0.5143, 0.6533] & -0.0400 [-0.0820, +0.0020] & 0.4947 [0.4364, 0.5628] & 0.0452 [0.0375, 0.0533] \\
+ & Gaussian Blur & -0.0220 [-0.0580, +0.0140] & 0.2947 [0.2548, 0.3357] & -0.0140 [-0.0420, +0.0140] & 0.1125 [0.0912, 0.1370] &  \\
+ & Patch Occlusion & -0.0200 [-0.0541, +0.0160] & 0.2585 [0.2240, 0.2928] & -0.0120 [-0.0380, +0.0140] & 0.0705 [0.0572, 0.0845] &  \\
+\bottomrule
+\end{tabular}
+\end{table*}
