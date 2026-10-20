@@ -1,19 +1,25 @@
-% Secondary synthesis: Pooled Main + Replication (N=945)
+% Secondary synthesis: Pooled Main + Replication (N=945) under Removed and Black Nulls
 \begin{table}[t]
 \centering
-\caption{Secondary Synthesis: Pooled Main and Replication Performance ($N=945$).}
+\caption{Secondary Synthesis: Pooled Main and Replication Performance ($N=945$) across Null Baselines.}
 \label{tab:vlm_pooled_summary}
 \small
-\begin{tabular}{llrrrrr}
+\begin{tabular}{lllrrrr}
 \toprule
-model_name & corruption & n_samples & clean_acc & null_removed_acc & U_1 & R_hat_1 \\
+model_name & corruption & null_baseline & clean_acc & null_acc & U_1 & R_hat_1 \\
 \midrule
-Qwen/Qwen2-VL-2B-Instruct & swapblend & 945 & 0.823280 & 0.447619 & -0.082540 & 0.478864 \\
-Qwen/Qwen2-VL-2B-Instruct & gaussian & 945 & 0.823280 & 0.447619 & -0.023280 & 0.168411 \\
-HuggingFaceTB/SmolVLM-Instruct & swapblend & 945 & 0.756614 & 0.379894 & -0.026455 & 0.520894 \\
-HuggingFaceTB/SmolVLM-Instruct & gaussian & 945 & 0.756614 & 0.379894 & -0.025397 & 0.353975 \\
-llava-hf/llava-1.5-7b-hf & swapblend & 945 & 0.792593 & 0.489947 & -0.037037 & 0.571410 \\
-llava-hf/llava-1.5-7b-hf & gaussian & 945 & 0.792593 & 0.489947 & -0.012698 & 0.278809 \\
+Qwen/Qwen2-VL-2B-Instruct & swapblend & removed & 0.823280 & 0.447619 & -0.082540 & 0.478864 \\
+Qwen/Qwen2-VL-2B-Instruct & swapblend & black & 0.823280 & 0.446561 & -0.081481 & 0.468577 \\
+Qwen/Qwen2-VL-2B-Instruct & gaussian & removed & 0.823280 & 0.447619 & -0.023280 & 0.168411 \\
+Qwen/Qwen2-VL-2B-Instruct & gaussian & black & 0.823280 & 0.446561 & -0.022222 & 0.152887 \\
+HuggingFaceTB/SmolVLM-Instruct & swapblend & removed & 0.756614 & 0.379894 & -0.026455 & 0.520894 \\
+HuggingFaceTB/SmolVLM-Instruct & swapblend & black & 0.756614 & 0.375661 & -0.022222 & 0.528142 \\
+HuggingFaceTB/SmolVLM-Instruct & gaussian & removed & 0.756614 & 0.379894 & -0.025397 & 0.353975 \\
+HuggingFaceTB/SmolVLM-Instruct & gaussian & black & 0.756614 & 0.375661 & -0.021164 & 0.249182 \\
+llava-hf/llava-1.5-7b-hf & swapblend & removed & 0.792593 & 0.489947 & -0.037037 & 0.571410 \\
+llava-hf/llava-1.5-7b-hf & swapblend & black & 0.792593 & 0.476190 & -0.023280 & 0.501493 \\
+llava-hf/llava-1.5-7b-hf & gaussian & removed & 0.792593 & 0.489947 & -0.012698 & 0.278809 \\
+llava-hf/llava-1.5-7b-hf & gaussian & black & 0.792593 & 0.476190 & 0.001058 & 0.118228 \\
 \bottomrule
 \end{tabular}
 

@@ -1,0 +1,54 @@
+\begin{table}[t]
+\centering
+\caption{Pre-Registered Criterion Status by Null Baseline and Sample Size.}
+\label{tab:criterion_status_by_null_and_sample}
+\small
+\begin{tabular}{llllrlrrllr}
+\toprule
+Model & Corruption & Sample & Null & U(1) & U(1) 95% CI & U(1)<0 & R_hat(1) & R_hat 95% CI & R_hat vs 0.5 & Met? \\
+\midrule
+Qwen2-VL-2B-Instruct & swapblend & main & removed & -0.064000 & [-0.1141, -0.0180] & True & 0.487180 & [0.4366, 0.5422] & Straddles 0.50 & False \\
+Qwen2-VL-2B-Instruct & swapblend & main & black & -0.048000 & [-0.0961, -0.0020] & True & 0.468143 & [0.4197, 0.5203] & Straddles 0.50 & False \\
+Qwen2-VL-2B-Instruct & gaussian & main & removed & -0.030000 & [-0.0680, +0.0060] & False & 0.168062 & [0.1473, 0.1889] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & gaussian & main & black & -0.014000 & [-0.0520, +0.0240] & False & 0.150112 & [0.1310, 0.1704] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & patch & main & removed & -0.006000 & [-0.0300, +0.0200] & False & 0.028960 & [0.0255, 0.0327] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & patch & main & black & 0.010000 & [-0.0120, +0.0300] & False & 0.010028 & [0.0086, 0.0116] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & swapblend & main & removed & -0.016000 & [-0.0620, +0.0300] & False & 0.493164 & [0.4461, 0.5468] & Straddles 0.50 & False \\
+SmolVLM-Instruct & swapblend & main & black & -0.002000 & [-0.0460, +0.0420] & False & 0.509764 & [0.4593, 0.5679] & Straddles 0.50 & False \\
+SmolVLM-Instruct & gaussian & main & removed & -0.022000 & [-0.0680, +0.0220] & False & 0.380784 & [0.3368, 0.4244] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & gaussian & main & black & -0.008000 & [-0.0480, +0.0300] & False & 0.263018 & [0.2306, 0.3008] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & patch & main & removed & 0.004000 & [-0.0320, +0.0420] & False & 0.233094 & [0.2058, 0.2651] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & patch & main & black & 0.018000 & [-0.0020, +0.0380] & False & 0.032303 & [0.0262, 0.0394] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & swapblend & main & removed & -0.048000 & [-0.0920, -0.0040] & True & 0.578361 & [0.5143, 0.6533] & Strictly > 0.50 & True \\
+llava-1.5-7b-hf & swapblend & main & black & -0.040000 & [-0.0820, +0.0020] & False & 0.494679 & [0.4364, 0.5628] & Straddles 0.50 & False \\
+llava-1.5-7b-hf & gaussian & main & removed & -0.022000 & [-0.0580, +0.0140] & False & 0.294713 & [0.2548, 0.3357] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & gaussian & main & black & -0.014000 & [-0.0420, +0.0140] & False & 0.112510 & [0.0912, 0.1370] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & patch & main & removed & -0.020000 & [-0.0541, +0.0160] & False & 0.258470 & [0.2240, 0.2928] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & patch & main & black & -0.012000 & [-0.0380, +0.0140] & False & 0.070496 & [0.0572, 0.0845] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & swapblend & replication & removed & -0.103371 & [-0.1528, -0.0516] & True & 0.469967 & [0.4182, 0.5227] & Straddles 0.50 & False \\
+Qwen2-VL-2B-Instruct & swapblend & replication & black & -0.119101 & [-0.1685, -0.0674] & True & 0.469044 & [0.4172, 0.5233] & Straddles 0.50 & False \\
+Qwen2-VL-2B-Instruct & gaussian & replication & removed & -0.015730 & [-0.0584, +0.0270] & False & 0.168783 & [0.1445, 0.1956] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & gaussian & replication & black & -0.031461 & [-0.0697, +0.0112] & False & 0.155875 & [0.1330, 0.1816] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & swapblend & replication & removed & -0.038202 & [-0.0899, +0.0135] & False & 0.552788 & [0.4907, 0.6200] & Straddles 0.50 & False \\
+SmolVLM-Instruct & swapblend & replication & black & -0.044944 & [-0.0944, +0.0067] & False & 0.549146 & [0.4881, 0.6112] & Straddles 0.50 & False \\
+SmolVLM-Instruct & gaussian & replication & removed & -0.029213 & [-0.0742, +0.0135] & False & 0.323142 & [0.2838, 0.3660] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & gaussian & replication & black & -0.035955 & [-0.0742, +0.0045] & False & 0.233369 & [0.2006, 0.2672] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & swapblend & replication & removed & -0.024719 & [-0.0719, +0.0225] & False & 0.563385 & [0.4972, 0.6383] & Straddles 0.50 & False \\
+llava-1.5-7b-hf & swapblend & replication & black & -0.004494 & [-0.0494, +0.0404] & False & 0.509214 & [0.4468, 0.5813] & Straddles 0.50 & False \\
+llava-1.5-7b-hf & gaussian & replication & removed & -0.002247 & [-0.0427, +0.0382] & False & 0.260447 & [0.2261, 0.3009] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & gaussian & replication & black & 0.017978 & [-0.0135, +0.0517] & False & 0.124706 & [0.1000, 0.1543] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & swapblend & pooled & removed & -0.082540 & [-0.1196, -0.0476] & True & 0.478864 & [0.4429, 0.5168] & Straddles 0.50 & False \\
+Qwen2-VL-2B-Instruct & swapblend & pooled & black & -0.081481 & [-0.1175, -0.0455] & True & 0.468577 & [0.4327, 0.5062] & Straddles 0.50 & False \\
+Qwen2-VL-2B-Instruct & gaussian & pooled & removed & -0.023280 & [-0.0519, +0.0053] & False & 0.168411 & [0.1538, 0.1853] & Strictly < 0.50 & False \\
+Qwen2-VL-2B-Instruct & gaussian & pooled & black & -0.022222 & [-0.0487, +0.0053] & False & 0.152887 & [0.1395, 0.1683] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & swapblend & pooled & removed & -0.026455 & [-0.0614, +0.0095] & False & 0.520894 & [0.4812, 0.5643] & Straddles 0.50 & False \\
+SmolVLM-Instruct & swapblend & pooled & black & -0.022222 & [-0.0582, +0.0138] & False & 0.528142 & [0.4866, 0.5732] & Straddles 0.50 & False \\
+SmolVLM-Instruct & gaussian & pooled & removed & -0.025397 & [-0.0550, +0.0053] & False & 0.353975 & [0.3236, 0.3881] & Strictly < 0.50 & False \\
+SmolVLM-Instruct & gaussian & pooled & black & -0.021164 & [-0.0487, +0.0074] & False & 0.249182 & [0.2257, 0.2765] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & swapblend & pooled & removed & -0.037037 & [-0.0698, -0.0053] & True & 0.571410 & [0.5219, 0.6202] & Strictly > 0.50 & True \\
+llava-1.5-7b-hf & swapblend & pooled & black & -0.023280 & [-0.0561, +0.0085] & False & 0.501493 & [0.4515, 0.5472] & Straddles 0.50 & False \\
+llava-1.5-7b-hf & gaussian & pooled & removed & -0.012698 & [-0.0402, +0.0148] & False & 0.278809 & [0.2512, 0.3093] & Strictly < 0.50 & False \\
+llava-1.5-7b-hf & gaussian & pooled & black & 0.001058 & [-0.0201, +0.0191] & False & 0.118228 & [0.1008, 0.1380] & Strictly < 0.50 & False \\
+\bottomrule
+\end{tabular}
+\end{table}
