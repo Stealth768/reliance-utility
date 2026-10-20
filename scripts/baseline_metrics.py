@@ -25,6 +25,8 @@ the A-OKVQA benchmark. It does not alter metric functions or raw data.
 4. Item-Level Agreement Analysis:
    Among questions where argmax(swapped) == argmax(removed), reports:
    - Mean per-question JSD(P_swap_S1, P_removed) with 95% bootstrap CI
+   - Black-vs-removed floor JSD(P_black, P_removed) for the exact same items with 95% CI
+   - Excess JSD (Swap JSD - Floor JSD)
    - Full distribution of JSD (std, min, 25%, median, 75%, max)
    - Fraction of total R(1) mass coming from those questions with 95% bootstrap CI
    (B=1000, seed 42).
@@ -153,65 +155,91 @@ def compute_item_level_agreement_analysis(
     n_boot: int = 1000,
     seed: int = 42,
 ) -> Dict[str, Any]:
-    """Item-level analysis among questions where argmax(swapped) == argmax(removed)."""
+    """Item-level analysis among questions where argmax(swapped) == argmax(removed).
+
+    Evaluates both:
+      1. swap JSD: JSD(P_swap_S1, P_removed)
+      2. floor JSD: JSD(P_black, P_removed) for the exact same items
+    """
     n_total = len(items)
-    per_item_jsd = np.array([jsd(it["probs_per_S"][-1], it["null_probs"]["removed"]) for it in items])
+    per_item_swap_jsd = np.array([jsd(it["probs_per_S"][-1], it["null_probs"]["removed"]) for it in items])
+    per_item_floor_jsd = np.array([jsd(it["null_probs"]["black"], it["null_probs"]["removed"]) for it in items])
+
     y_sw = np.array([np.argmax(it["swapped_probs"]) for it in items])
     y_rem = np.array([np.argmax(it["null_probs"]["removed"]) for it in items])
 
     mask = (y_sw == y_rem)
     n_agree = int(np.sum(mask))
-    agree_jsd = per_item_jsd[mask]
+    agree_swap = per_item_swap_jsd[mask]
+    agree_floor = per_item_floor_jsd[mask]
 
-    mean_jsd = float(np.mean(agree_jsd)) if n_agree > 0 else 0.0
-    total_r1_mass = float(np.sum(per_item_jsd))
-    agree_r1_mass = float(np.sum(agree_jsd))
+    mean_swap = float(np.mean(agree_swap)) if n_agree > 0 else 0.0
+    mean_floor = float(np.mean(agree_floor)) if n_agree > 0 else 0.0
+    excess_jsd = mean_swap - mean_floor
+
+    total_r1_mass = float(np.sum(per_item_swap_jsd))
+    agree_r1_mass = float(np.sum(agree_swap))
     mass_fraction = float(agree_r1_mass / total_r1_mass) if total_r1_mass > 0 else 0.0
 
-    dist = {
-        "mean": mean_jsd,
-        "std": float(np.std(agree_jsd)) if n_agree > 0 else 0.0,
-        "min": float(np.min(agree_jsd)) if n_agree > 0 else 0.0,
-        "q25": float(np.percentile(agree_jsd, 25)) if n_agree > 0 else 0.0,
-        "median": float(np.median(agree_jsd)) if n_agree > 0 else 0.0,
-        "q75": float(np.percentile(agree_jsd, 75)) if n_agree > 0 else 0.0,
-        "max": float(np.max(agree_jsd)) if n_agree > 0 else 0.0,
+    dist_swap = {
+        "mean": mean_swap,
+        "std": float(np.std(agree_swap)) if n_agree > 0 else 0.0,
+        "min": float(np.min(agree_swap)) if n_agree > 0 else 0.0,
+        "q25": float(np.percentile(agree_swap, 25)) if n_agree > 0 else 0.0,
+        "median": float(np.median(agree_swap)) if n_agree > 0 else 0.0,
+        "q75": float(np.percentile(agree_swap, 75)) if n_agree > 0 else 0.0,
+        "max": float(np.max(agree_swap)) if n_agree > 0 else 0.0,
     }
 
-    # Bootstrap CIs for mean_jsd and mass_fraction
+    dist_floor = {
+        "mean": mean_floor,
+        "std": float(np.std(agree_floor)) if n_agree > 0 else 0.0,
+        "min": float(np.min(agree_floor)) if n_agree > 0 else 0.0,
+        "q25": float(np.percentile(agree_floor, 25)) if n_agree > 0 else 0.0,
+        "median": float(np.median(agree_floor)) if n_agree > 0 else 0.0,
+        "q75": float(np.percentile(agree_floor, 75)) if n_agree > 0 else 0.0,
+        "max": float(np.max(agree_floor)) if n_agree > 0 else 0.0,
+    }
+
+    # Bootstrap CIs
     rng = np.random.default_rng(seed)
-    boot_means = np.zeros(n_boot, dtype=float)
+    boot_means_swap = np.zeros(n_boot, dtype=float)
+    boot_means_floor = np.zeros(n_boot, dtype=float)
     boot_mass_fracs = np.zeros(n_boot, dtype=float)
 
     for b in range(n_boot):
         idx = rng.integers(0, n_total, size=n_total)
-        b_jsd = per_item_jsd[idx]
+        b_swap = per_item_swap_jsd[idx]
+        b_floor = per_item_floor_jsd[idx]
         b_mask = mask[idx]
-        b_agree_jsd = b_jsd[b_mask]
 
-        boot_means[b] = np.mean(b_agree_jsd) if len(b_agree_jsd) > 0 else np.nan
-        b_tot = np.sum(b_jsd)
-        boot_mass_fracs[b] = np.sum(b_agree_jsd) / b_tot if b_tot > 0 else np.nan
+        b_ag_swap = b_swap[b_mask]
+        b_ag_floor = b_floor[b_mask]
 
-    valid_means = boot_means[~np.isnan(boot_means)]
+        boot_means_swap[b] = np.mean(b_ag_swap) if len(b_ag_swap) > 0 else np.nan
+        boot_means_floor[b] = np.mean(b_ag_floor) if len(b_ag_floor) > 0 else np.nan
+        b_tot = np.sum(b_swap)
+        boot_mass_fracs[b] = np.sum(b_ag_swap) / b_tot if b_tot > 0 else np.nan
+
+    valid_swap = boot_means_swap[~np.isnan(boot_means_swap)]
+    valid_floor = boot_means_floor[~np.isnan(boot_means_floor)]
     valid_fracs = boot_mass_fracs[~np.isnan(boot_mass_fracs)]
 
-    mean_ci = (
-        float(np.percentile(valid_means, 2.5)),
-        float(np.percentile(valid_means, 97.5)),
-    )
-    mass_frac_ci = (
-        float(np.percentile(valid_fracs, 2.5)),
-        float(np.percentile(valid_fracs, 97.5)),
-    )
+    swap_ci = (float(np.percentile(valid_swap, 2.5)), float(np.percentile(valid_swap, 97.5)))
+    floor_ci = (float(np.percentile(valid_floor, 2.5)), float(np.percentile(valid_floor, 97.5)))
+    mass_frac_ci = (float(np.percentile(valid_fracs, 2.5)), float(np.percentile(valid_fracs, 97.5)))
 
     return {
         "n_total": n_total,
         "n_agree": n_agree,
         "frac_agree": float(n_agree / n_total),
-        "mean_jsd": mean_jsd,
-        "mean_jsd_ci": mean_ci,
-        "distribution": dist,
+        "mean_swap_jsd": mean_swap,
+        "swap_jsd_ci": swap_ci,
+        "dist_swap": dist_swap,
+        "mean_floor_jsd": mean_floor,
+        "floor_jsd_ci": floor_ci,
+        "dist_floor": dist_floor,
+        "excess_jsd": excess_jsd,
         "mass_fraction": mass_fraction,
         "mass_fraction_ci": mass_frac_ci,
     }
@@ -423,10 +451,10 @@ def run_baseline_metrics(
     else:
         corr_df = pd.DataFrame()
 
-    # 5. Item-Level Analysis: argmax(swapped) == argmax(removed)
+    # 5. Item-Level Analysis: argmax(swapped) == argmax(removed) with floor JSD comparison
     print("\n" + "=" * 80)
     print("ITEM-LEVEL ANALYSIS: argmax(swapped) == argmax(removed)")
-    print("Under swapblend: JSD(P_swap_S1, P_removed) distribution and fraction of total R(1) mass")
+    print("Under swapblend: Swap JSD vs Black-vs-Removed Floor JSD on the EXACT SAME items")
     print("=" * 80)
 
     item_level_records = []
@@ -439,13 +467,17 @@ def run_baseline_metrics(
 
             items = groups[key]["items"]
             res = compute_item_level_agreement_analysis(items, n_boot=n_boot, seed=seed)
-            d = res["distribution"]
+            ds = res["dist_swap"]
+            df = res["dist_floor"]
 
             print(f"\nModel: {m}")
             print(f"  Questions where argmax(swapped) == argmax(removed): {res['n_agree']} / {res['n_total']} ({res['frac_agree']:.1%})")
-            print(f"  Mean per-question JSD : {res['mean_jsd']:.4f}  95% CI [{res['mean_jsd_ci'][0]:.4f}, {res['mean_jsd_ci'][1]:.4f}]")
-            print(f"  JSD Distribution      : min={d['min']:.4f}, 25%={d['q25']:.4f}, med={d['median']:.4f}, 75%={d['q75']:.4f}, max={d['max']:.4f}, std={d['std']:.4f}")
-            print(f"  Fraction of R(1) mass : {res['mass_fraction']:.4f} ({res['mass_fraction']:.1%})  95% CI [{res['mass_fraction_ci'][0]:.4f}, {res['mass_fraction_ci'][1]:.4f}]")
+            print(f"  Swap JSD (S=1 vs removed)  : mean={res['mean_swap_jsd']:.4f}  95% CI [{res['swap_jsd_ci'][0]:.4f}, {res['swap_jsd_ci'][1]:.4f}]")
+            print(f"    Swap Distribution        : min={ds['min']:.4f}, 25%={ds['q25']:.4f}, med={ds['median']:.4f}, 75%={ds['q75']:.4f}, max={ds['max']:.4f}, std={ds['std']:.4f}")
+            print(f"  Floor JSD (black vs removed): mean={res['mean_floor_jsd']:.4f}  95% CI [{res['floor_jsd_ci'][0]:.4f}, {res['floor_jsd_ci'][1]:.4f}]")
+            print(f"    Floor Distribution       : min={df['min']:.4f}, 25%={df['q25']:.4f}, med={df['median']:.4f}, 75%={df['q75']:.4f}, max={df['max']:.4f}, std={df['std']:.4f}")
+            print(f"  Excess JSD (Swap - Floor)  : {res['excess_jsd']:+.4f}")
+            print(f"  Fraction of R(1) mass      : {res['mass_fraction']:.4f} ({res['mass_fraction']:.1%})  95% CI [{res['mass_fraction_ci'][0]:.4f}, {res['mass_fraction_ci'][1]:.4f}]")
 
             item_level_records.append({
                 "split": split_name,
@@ -453,15 +485,25 @@ def run_baseline_metrics(
                 "n_total": res["n_total"],
                 "n_agree": res["n_agree"],
                 "frac_agree": res["frac_agree"],
-                "mean_jsd": res["mean_jsd"],
-                "mean_jsd_ci_lo": res["mean_jsd_ci"][0],
-                "mean_jsd_ci_hi": res["mean_jsd_ci"][1],
-                "jsd_std": d["std"],
-                "jsd_min": d["min"],
-                "jsd_q25": d["q25"],
-                "jsd_median": d["median"],
-                "jsd_q75": d["q75"],
-                "jsd_max": d["max"],
+                "mean_swap_jsd": res["mean_swap_jsd"],
+                "swap_jsd_ci_lo": res["swap_jsd_ci"][0],
+                "swap_jsd_ci_hi": res["swap_jsd_ci"][1],
+                "swap_jsd_std": ds["std"],
+                "swap_jsd_min": ds["min"],
+                "swap_jsd_q25": ds["q25"],
+                "swap_jsd_median": ds["median"],
+                "swap_jsd_q75": ds["q75"],
+                "swap_jsd_max": ds["max"],
+                "mean_floor_jsd": res["mean_floor_jsd"],
+                "floor_jsd_ci_lo": res["floor_jsd_ci"][0],
+                "floor_jsd_ci_hi": res["floor_jsd_ci"][1],
+                "floor_jsd_std": df["std"],
+                "floor_jsd_min": df["min"],
+                "floor_jsd_q25": df["q25"],
+                "floor_jsd_median": df["median"],
+                "floor_jsd_q75": df["q75"],
+                "floor_jsd_max": df["max"],
+                "excess_jsd": res["excess_jsd"],
                 "mass_fraction": res["mass_fraction"],
                 "mass_fraction_ci_lo": res["mass_fraction_ci"][0],
                 "mass_fraction_ci_hi": res["mass_fraction_ci"][1],
