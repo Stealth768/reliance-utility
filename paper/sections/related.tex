@@ -1,0 +1,70 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Modality interference.}
+Cai et al.~\cite{cai2025interference} study how signals from a
+non-essential modality distort multimodal LLM decisions. They perturb the
+irrelevant modality (misleading text, unrelated or blank images) and
+measure whether the predicted answer changes, using an indicator of
+argmax change as the effect measure. Their perturbations are discrete and
+target the modality that is \emph{not} needed for the task. We instead
+degrade the modality that \emph{is} informative, along a continuous
+severity path, and relate the resulting behaviour change to task utility.
+
+\paragraph{Counterfactual grounding probes.}
+Substituting blank or mismatched images to test visual dependence is
+established practice. Zafar et al.~\cite{zafar2026grounding} compare real,
+blank and shuffled images in medical VQA and report a visual reliance
+score (accuracy with the real image minus accuracy with a shuffled one),
+a blank-image accuracy drop, and an answer-change rate under shuffling;
+they note that accuracy-based and answer-level metrics can disagree. Work
+on over-reliance on visual context in VQA~\cite{gupta2022swapmix}
+\TODO{verify: read the full paper before citing} and on language priors
+in VLMs \TODO{add and verify citations} is closely related. Our swapped
+condition at maximum severity is comparable to a shuffled-image probe. The
+difference is that we trace a trajectory over severity, measure reliance
+as divergence between full answer distributions rather than answer
+changes, and locate the severity at which utility falls below the
+no-image level.
+
+\paragraph{Conflicting and corrupted modalities.}
+OMD-Bench~\cite{nazi2026omd} replaces whole modality channels in
+initially congruent video, audio and text inputs and evaluates
+accuracy, calibrated abstention and confidence. It defines reliance as the
+fractional accuracy drop when a modality is corrupted, and its authors
+note that its binary corruption model may not transfer to graded
+degradation. Our severity path addresses that regime directly, although
+we restrict ourselves to one visual modality and a multiple-choice
+format.
+
+\paragraph{Quality-aware fusion.}
+Moon et al.~\cite{moon2026quality} ask whether reliability scores used by
+fusion models actually influence decisions, by shuffling them across
+test examples after training; they also separate modality outage from
+degradation and use positive controls to show that the diagnostic can
+detect dependence when it exists. We borrow the positive-control idea in
+our synthetic validation, where an oracle model that discards the
+degraded input provides a reading near zero. Our target differs: we
+measure reliance on the degraded data itself, not on a quality estimate.
+
+\paragraph{Missing modalities and modality dropout.}
+Robustness to absent modalities has been studied extensively
+\cite{ma2022missing} \TODO{verify; add survey and dropout references}.
+Our fusion study in Section~\ref{sec:fusion} trains small two-view models
+with different modality-dropout rates and reports clean accuracy,
+no-input accuracy and reliance; it is a proxy study and not a claim about
+large multimodal systems.
+
+\paragraph{Calibration under degradation.}
+Prior reports indicate that confidence often fails to fall in proportion
+to accuracy as inputs are corrupted \TODO{add and verify citations; read
+the full papers first}. We do not evaluate confidence calibration, but
+residual reliance on an unhelpful input is a related symptom.
+
+\paragraph{Positioning.}
+Measuring reliance by substituting or removing an input is established.
+Our contribution is narrower: a severity-indexed pairing of utility and
+distributional reliance, a crossing point where the input stops helping,
+validation of the measures on synthetic models with controlled reliance,
+and an evaluation of how conclusions depend on the choice of no-input
+baseline.
