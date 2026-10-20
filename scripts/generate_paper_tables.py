@@ -274,7 +274,7 @@ def generate_criterion_status_compact(df_crit: pd.DataFrame, out_path: Path):
         if met:
             return r"\textbf{Pass}"
         elif u1_sig and rhat_status != "Strictly > 0.50":
-            return r"Fail ($\hat{R} \le 0.5$)"
+            return r"Fail (lower CI of $\hat{R} \le 0.5$)"
         elif not u1_sig and rhat_status == "Strictly > 0.50":
             return r"Fail ($U \ge 0$)"
         else:
@@ -283,7 +283,7 @@ def generate_criterion_status_compact(df_crit: pd.DataFrame, out_path: Path):
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). A condition passes if and only if both pre-registered requirements are satisfied simultaneously: terminal utility is significantly negative ($U(1)$ upper 95\% CI $< 0$) and terminal normalized reliance strictly exceeds threshold ($\hat{R}(1)$ lower 95\% CI $> 0.50$).}",
+        r"\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). The confidence interval operationalization (upper bound of $U(1) < 0$ and lower bound of $\hat{R}(1) > 0.50$) is \emph{post hoc}. Gaussian blur and patch occlusion rows are included for completeness. Pass indicates both requirements are satisfied simultaneously.}",
         r"\label{tab:criterion}",
         r"\small",
         r"\begin{tabular}{llcccccc}",
@@ -314,14 +314,44 @@ def generate_criterion_status_compact(df_crit: pd.DataFrame, out_path: Path):
     print(f"[OK] Wrote {out_path}")
 
 
-def generate_null_sensitivity(df_crit: pd.DataFrame, df_agree: pd.DataFrame, out_path: Path):
+def compute_full_sample_floor_jsd() -> Dict[str, str]:
+    """Compute full-sample (all N=500 main items) floor JSD per model."""
+    models_dir = {
+        "Qwen2-VL-2B": REPO_ROOT / "results" / "raw" / "vlm_main",
+        "SmolVLM-Instruct": REPO_ROOT / "results" / "raw" / "vlm_smol",
+        "LLaVA-1.5-7B": REPO_ROOT / "results" / "raw" / "vlm_llava",
+    }
+    floor_res = {}
+    for m_short, raw_dir in models_dir.items():
+        shards = [f for f in raw_dir.glob("*swapblend*.json") if "manifest" not in f.name]
+        items = []
+        seen = set()
+        for s in sorted(shards):
+            d = json.loads(s.read_text(encoding="utf-8"))
+            for it in d["items"]:
+                qid = str(it["question_id"])
+                if qid not in seen:
+                    seen.add(qid)
+                    items.append(it)
+        N = len(items)
+        p_blk = np.array([it["null_probs"]["black"] for it in items])
+        p_rem = np.array([it["null_probs"]["removed"] for it in items])
+        floor_jsd = calc_jsd(p_blk, p_rem)
+        mean_val = float(np.mean(floor_jsd))
+
+        rng = np.random.default_rng(42)
+        boot = [float(np.mean(floor_jsd[rng.integers(0, N, size=N)])) for _ in range(1000)]
+        ci_lo = float(np.percentile(boot, 2.5))
+        ci_hi = float(np.percentile(boot, 97.5))
+        floor_res[m_short] = f"{mean_val:.4f} [{ci_lo:.4f}, {ci_hi:.4f}]"
+    return floor_res
+
+
+def generate_null_sensitivity(df_crit: pd.DataFrame, out_path: Path):
     """Generate Table 5: null_sensitivity.tex (tab:nullsens)."""
     sub = df_crit[df_crit["sample"] == "main"].copy()
 
-    floor_lookup = {}
-    for _, r in df_agree[df_agree["split"] == "main"].iterrows():
-        m_short = format_model_name(r["model_name"])
-        floor_lookup[m_short] = f"{r['mean_floor_jsd']:.4f} [{r['floor_jsd_ci_lo']:.4f}, {r['floor_jsd_ci_hi']:.4f}]"
+    floor_lookup = compute_full_sample_floor_jsd()
 
     model_order = ["Qwen2-VL-2B-Instruct", "SmolVLM-Instruct", "llava-1.5-7b-hf"]
     corr_order = ["swapblend", "gaussian", "patch"]
@@ -329,12 +359,12 @@ def generate_null_sensitivity(df_crit: pd.DataFrame, df_agree: pd.DataFrame, out
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\caption{Sensitivity of terminal reliance $\hat{R}(1)$, terminal utility $U(1)$, and unimodal divergence to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42), alongside empirical unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$.}",
+        r"\caption{Sensitivity of terminal reliance $\hat{R}(1)$, terminal utility $U(1)$, and unimodal divergence to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42). The unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ is computed over the full sample of all $N=500$ questions (not restricted to the agreement subset) and reported once per model.}",
         r"\label{tab:nullsens}",
         r"\small",
         r"\begin{tabular}{llccccc}",
         r"\toprule",
-        r" & & \multicolumn{2}{c}{\textbf{Removed Null Baseline}} & \multicolumn{2}{c}{\textbf{Black Null Baseline}} & \textbf{Unimodal Floor} \\",
+        r" & & \multicolumn{2}{c}{\textbf{Removed Null Baseline}} & \multicolumn{2}{c}{\textbf{Black Null Baseline}} & \textbf{Full-Sample Unimodal Floor} \\",
         r"\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-7}",
         r"\textbf{Model} & \textbf{Corruption} & $U(1)$ [95\% CI] & $\hat{R}(1)$ [95\% CI] & $U(1)$ [95\% CI] & $\hat{R}(1)$ [95\% CI] & $\text{JSD}(\text{blk} \parallel \text{rem})$ [95\% CI] \\",
         r"\midrule",
@@ -374,12 +404,12 @@ def generate_baseline_metrics(df_base: pd.DataFrame, out_path: Path):
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\caption{Static visual reliance and sensitivity baseline metrics on the swapped image across models on main ($N=500$) and replication ($N=445$) samples (bootstrap $B=1000$, seed 42). Metrics: Visual Reliance Score ($\text{VRS} = \text{acc}_{\text{clean}} - \text{acc}_{\text{swapped}}$), Blank Drop ($\text{acc}_{\text{clean}} - \text{acc}_{\text{black}}$), Image Sensitivity ($P[\arg\max(\text{clean}) \ne \arg\max(\text{swapped})]$), Visual Benefit Rate ($P[\text{clean correct} \land \text{swapped wrong}]$), and Visual Harm Rate ($P[\text{clean wrong} \land \text{swapped correct}]$).}",
+        r"\caption{Static visual reliance and sensitivity baseline metrics on the swapped image across models on main ($N=500$) and replication ($N=445$) samples (bootstrap $B=1000$, seed 42). Metrics: Visual Reliance Score ($\text{VRS} = \text{acc}_{\text{clean}} - \text{acc}_{\text{swapped}}$), Black-image drop ($\text{acc}_{\text{clean}} - \text{acc}_{\text{black}}$), Image Sensitivity ($P[\arg\max(\text{clean}) \ne \arg\max(\text{swapped})]$), and Visual Harm Rate ($P[\text{clean wrong} \land \text{swapped correct}]$).}",
         r"\label{tab:baseline}",
         r"\small",
-        r"\begin{tabular}{llccccc}",
+        r"\begin{tabular}{llcccc}",
         r"\toprule",
-        r"\textbf{Model} & \textbf{Sample} & \textbf{VRS} [95\% CI] & \textbf{Blank Drop} [95\% CI] & \textbf{Sensitivity} [95\% CI] & \textbf{Benefit Rate} [95\% CI] & \textbf{Harm Rate} [95\% CI] \\",
+        r"\textbf{Model} & \textbf{Sample} & \textbf{VRS} [95\% CI] & \textbf{Black-image drop} [95\% CI] & \textbf{Sensitivity} [95\% CI] & \textbf{Harm Rate} [95\% CI] \\",
         r"\midrule",
     ]
 
@@ -390,10 +420,9 @@ def generate_baseline_metrics(df_base: pd.DataFrame, out_path: Path):
             vrs = f"{r['VRS']:.3f} [{r['VRS_ci_lo']:.3f}, {r['VRS_ci_hi']:.3f}]"
             bdrop = f"{r['Blank_Drop']:.3f} [{r['Blank_Drop_ci_lo']:.3f}, {r['Blank_Drop_ci_hi']:.3f}]"
             sens = f"{r['Image_Sensitivity']:.3f} [{r['Image_Sensitivity_ci_lo']:.3f}, {r['Image_Sensitivity_ci_hi']:.3f}]"
-            ben = f"{r['Visual_Benefit_Rate']:.3f} [{r['Visual_Benefit_Rate_ci_lo']:.3f}, {r['Visual_Benefit_Rate_ci_hi']:.3f}]"
             harm = f"{r['Visual_Harm_Rate']:.3f} [{r['Visual_Harm_Rate_ci_lo']:.3f}, {r['Visual_Harm_Rate_ci_hi']:.3f}]"
 
-            lines.append(f"{m_display} & {split_label} & {vrs} & {bdrop} & {sens} & {ben} & {harm} \\\\")
+            lines.append(f"{m_display} & {split_label} & {vrs} & {bdrop} & {sens} & {harm} \\\\")
         if split_val == "main":
             lines.append(r"\midrule")
 
@@ -430,7 +459,7 @@ def main():
     generate_paired_swap_vs_gauss(tables_dir / "paired_swap_vs_gauss.tex", derived_dir / "paired_swap_vs_gauss.csv")
     generate_headline_replication(df_crit, tables_dir / "headline_replication.tex")
     generate_criterion_status_compact(df_crit, tables_dir / "criterion_status_compact.tex")
-    generate_null_sensitivity(df_crit, df_agree, tables_dir / "null_sensitivity.tex")
+    generate_null_sensitivity(df_crit, tables_dir / "null_sensitivity.tex")
     generate_baseline_metrics(df_base, tables_dir / "baseline_metrics.tex")
     print("[SUCCESS] All 6 paper tables generated.")
 
