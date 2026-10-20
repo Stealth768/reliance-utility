@@ -39,7 +39,9 @@ In the replication sample, normalized terminal reliance under the swapped
 condition lies in the same range as the main sample, spanning from
 \checknum{0.4700}{rep:Qwen:swapblend:R_hat_1} for Qwen2-VL to
 \checknum{0.5634}{rep:llava:swapblend:R_hat_1} for LLaVA-1.5, with SmolVLM at
-\checknum{0.5528}{rep:SmolVLM:swapblend:R_hat_1}.
+\checknum{0.5528}{rep:SmolVLM:swapblend:R_hat_1}. All three replication
+intervals include $0.5$ (lower bound for LLaVA-1.5 is
+\checknum{0.497}{rep:llava:swapblend:R_hat_1_ci_lo}).
 This replicates the result over questions and pairings, not over models or
 datasets.
 \input{tables/headline_replication.tex}
@@ -56,7 +58,8 @@ Table~\ref{tab:criterion} reports this for every model, corruption, sample
 and baseline. Only \checknum{2}{criterion:status:count_met} of the 42
 evaluated combinations satisfy both requirements: LLaVA-1.5 under the
 swapped corruption with the removed-image baseline in the main ($N=500$)
-and pooled ($N=945$) samples.
+and pooled ($N=945$) samples; none satisfies it in the replication alone
+or under the black-image baseline.
 We treat the pre-registered hypothesis as largely unsupported and describe
 the persistent reliance as a descriptive finding.
 \input{tables/criterion_status_compact.tex}
@@ -64,12 +67,20 @@ the persistent reliance as a descriptive finding.
 \paragraph{Sensitivity to the no-input baseline.}
 \label{sec:nullsens}
 Table~\ref{tab:nullsens} compares conclusions when the baseline is the
-removed image versus a black image. Reliance under the swapped condition
-changes little. Reliance under Gaussian blending drops substantially under
-the black null for SmolVLM and LLaVA-1.5 and slightly for Qwen2-VL. The
-divergence between the black-image and removed-image predictions is far
-larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL. We hypothesize, without
-testing it, that this reflects how each model handles inserted image tokens.
+removed image versus a black image. Swapblend reliance changes little for
+Qwen2-VL and SmolVLM and falls by about
+\checknum{0.08}{nullsens:llava:swapblend:R_hat_drop} for LLaVA-1.5, moving
+its interval across $0.5$. Reliance under Gaussian blending drops
+substantially under the black null for SmolVLM and LLaVA-1.5 and slightly
+for Qwen2-VL. The divergence between the black-image and removed-image
+predictions is far larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL; as a
+heuristic (since JSD is not additive), the raw unimodal floor accounts for
+about \checknum{0.0355}{floor:Qwen2-VL-2B-Instruct:floor_fraction} of
+swapblend $R(1)$ for Qwen2-VL, compared to
+\checknum{0.4324}{floor:SmolVLM-Instruct:floor_fraction} for SmolVLM and
+\checknum{0.4236}{floor:llava-1.5-7b-hf:floor_fraction} for LLaVA-1.5. We
+hypothesize, without testing it, that this reflects how each model handles
+inserted image tokens.
 \input{tables/null_sensitivity.tex}
 
 \paragraph{Comparison with answer-level measures.}

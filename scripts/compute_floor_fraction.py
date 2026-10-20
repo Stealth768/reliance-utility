@@ -1,5 +1,9 @@
 """Compute raw floor JSD as a fraction of swapblend R(1) per model on main sample.
 
+Note: Because Jensen-Shannon Divergence is not additive, the ratio of unimodal
+floor JSD to swapblend R(1) is an informal descriptive heuristic rather than an
+additive decomposition of reliance.
+
 Saves results with 95% bootstrap CI (B=1000, seed=42), labeled post hoc,
 to results/derived/floor_fraction.csv.
 """

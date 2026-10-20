@@ -185,6 +185,7 @@ def analyze_dataset_p_condition(
         "clean_acc": float(acc_deg[0]),
         "acc_null_removed": acc_null,
         "acc_deg_1": float(acc_deg[-1]),
+        "U_1": float(acc_deg[-1]) - acc_null,
         "R_0": float(R_S[0]),
         "R_1_raw": float(R_S[-1]),
         "R_hat_1": float(R_hat_S[-1]) if len(R_hat_S) > 0 else np.nan,

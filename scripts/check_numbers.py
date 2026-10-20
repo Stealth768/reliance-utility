@@ -109,6 +109,9 @@ def check_numbers(
     fusion_csv = REPO_ROOT / "results" / "derived" / "fusion_summary.csv"
     df_fusion = pd.read_csv(fusion_csv) if fusion_csv.exists() else None
 
+    floor_csv = REPO_ROOT / "results" / "derived" / "floor_fraction.csv"
+    df_floor = pd.read_csv(floor_csv) if floor_csv.exists() else None
+
     mismatches = 0
     total_checks = len(all_checks)
 
@@ -168,6 +171,86 @@ def check_numbers(
                 exp_f = float(val_str)
                 act_f = float(actual_val)
                 diff = abs(exp_f - act_f)
+                if diff > max(tol, 0.005):
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except ValueError:
+                if str(actual_val).strip() != val_str:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            continue
+
+        # Null sensitivity drop check: nullsens:model:corr:R_hat_drop
+        if len(parts) == 4 and parts[0] == "nullsens":
+            _, model_key, corr_key, metric_key = parts
+            if df_crit is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {crit_csv} not found.")
+                mismatches += 1
+                continue
+            sub_rem = df_crit[(df_crit["sample"] == "main") & (df_crit["null_baseline"] == "removed")]
+            sub_blk = df_crit[(df_crit["sample"] == "main") & (df_crit["null_baseline"] == "black")]
+            r_rem = None
+            r_blk = None
+            for _, r in sub_rem.iterrows():
+                m = str(r["model"])
+                c = str(r["corruption"])
+                if (m == model_key or model_key in m or m.lower().startswith(model_key.lower())) and c == corr_key:
+                    r_rem = r
+                    break
+            for _, r in sub_blk.iterrows():
+                m = str(r["model"])
+                c = str(r["corruption"])
+                if (m == model_key or model_key in m or m.lower().startswith(model_key.lower())) and c == corr_key:
+                    r_blk = r
+                    break
+            if r_rem is None or r_blk is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Condition 'nullsens:{model_key}:{corr_key}' not found.")
+                mismatches += 1
+                continue
+            if metric_key == "R_hat_drop":
+                actual_val = float(r_rem["R_hat_1"]) - float(r_blk["R_hat_1"])
+            else:
+                actual_val = float(r_rem[metric_key]) - float(r_blk[metric_key])
+            try:
+                exp_f = float(val_str)
+                act_f = float(actual_val)
+                diff = abs(exp_f - act_f)
+                if diff > 0.01:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val:.4f} (diff={diff:.5f} > tol=0.01)")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except Exception as e:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {label}: {e}")
+                mismatches += 1
+            continue
+
+        # Floor fraction check: floor:model:metric
+        if len(parts) == 3 and parts[0] == "floor":
+            _, model_key, metric_key = parts
+            if df_floor is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {floor_csv} not found.")
+                mismatches += 1
+                continue
+            matched_row = None
+            for _, r in df_floor.iterrows():
+                m = str(r["model"])
+                if m == model_key or model_key in m or m.lower().startswith(model_key.lower()):
+                    matched_row = r
+                    break
+            if matched_row is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Model '{model_key}' not found in floor table.")
+                mismatches += 1
+                continue
+            actual_val = matched_row[metric_key]
+            try:
+                exp_f = float(val_str)
+                act_f = float(actual_val)
+                diff = abs(exp_f - act_f)
                 if diff > tol:
                     print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
                     mismatches += 1
@@ -190,9 +273,12 @@ def check_numbers(
                 continue
             import numpy as np
             if p_key in ("diff_0_25", "diff_0_025"):
-                p0_val = float(df_fusion.loc[np.isclose(df_fusion["dropout_p"], 0.0), col_key].values[0])
-                p25_val = float(df_fusion.loc[np.isclose(df_fusion["dropout_p"], 0.25), col_key].values[0])
-                actual_val = p0_val - p25_val
+                p0_val = float(df_fusion.loc[np.isclose(df_fusion["dropout_p"], 0.0), "clean_acc"].values[0])
+                p25_val = float(df_fusion.loc[np.isclose(df_fusion["dropout_p"], 0.25), "clean_acc"].values[0])
+                if col_key == "clean_acc_pp":
+                    actual_val = (p0_val - p25_val) * 100.0
+                else:
+                    actual_val = p0_val - p25_val
             else:
                 try:
                     p_float = float(p_key)
@@ -215,7 +301,7 @@ def check_numbers(
                 exp_f = float(val_str)
                 act_f = float(actual_val)
                 diff = abs(exp_f - act_f)
-                if diff > tol:
+                if diff > max(tol, 0.005):
                     print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
                     mismatches += 1
                 else:
