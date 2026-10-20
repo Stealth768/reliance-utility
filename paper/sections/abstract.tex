@@ -1,3 +1,21 @@
 \begin{abstract}
-Multimodal machine learning models frequently integrate information across modalities without explicitly assessing whether degraded inputs remain beneficial to task performance. When a sensor or modality deteriorates under severe corruption, continued behavioral reliance on that modality can actively degrade predictive accuracy below unimodal performance---a failure mode we formalize as \emph{reliance-utility misalignment}. In this work, we introduce an information-theoretic framework to quantify this phenomenon. We define multimodal utility $U(S)$ as task accuracy relative to a unimodal null baseline, operationalize behavioral reliance $R(S)$ via the Jensen-Shannon divergence from that baseline, and compute the Misalignment Index ($\text{MI}$) as normalized reliance integrated over the negative-utility regime $[S^*, 1]$. \TODO{Summarize empirical findings on synthetic fusion benchmark, open-weights Vision-Language Models across corruptions, and modality dropout mitigation once final runs are completed.}
+Multimodal models are usually evaluated by whether task performance
+drops when one input is degraded. This conflates two different things:
+information that is genuinely lost, and a model that keeps relying on an
+input after it has stopped helping. We propose a black-box diagnostic that
+separates them. Along a severity path we pair \emph{utility} (task
+performance relative to removing the input) with \emph{reliance}
+(divergence between predictions with the degraded and with the removed
+input) and locate where utility falls below the no-input level. We
+validate the measures on synthetic fusion models with controlled reliance,
+including an oracle control. On three open VLMs and a multiple-choice
+VQA task, a swapped-image corruption leaves normalized reliance at about
+half to 60\% of its clean level, 0.1 to 0.3 above Gaussian noise,
+and produces a significant utility inversion for one model. A
+pre-registered over-reliance criterion is met in only 2 of 42 combinations,
+and conclusions for individual models depend on how the no-input baseline
+is defined. A small modality-dropout study preserves clean accuracy and
+lowers raw reliance, while exposing a weakness of $R(0)$-normalized
+measures.
+\keywords{multimodal learning \and robustness \and vision-language models}
 \end{abstract}
