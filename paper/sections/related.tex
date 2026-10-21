@@ -19,8 +19,8 @@ score (accuracy with the real image minus accuracy with a shuffled one),
 a blank-image accuracy drop, and an answer-change rate under shuffling;
 they note that accuracy-based and answer-level metrics can disagree. Work
 on over-reliance on visual context in VQA~\cite{gupta2022swapmix}
-\TODO{verify: read the full paper before citing} and on language priors
-in VLMs \TODO{add and verify citations} is closely related. Our swapped
+and on language priors in VLMs~\cite{goyal2017making,agrawal2018dont} is
+closely related. Our swapped
 condition at maximum severity is comparable to a shuffled-image probe. The
 difference is that we trace a trajectory over severity, measure reliance
 as divergence between full answer distributions rather than answer
@@ -49,7 +49,9 @@ measure reliance on the degraded data itself, not on a quality estimate.
 
 \paragraph{Missing modalities and modality dropout.}
 Robustness to absent modalities has been studied extensively
-\cite{ma2022missing} \TODO{verify; add survey and dropout references}.
+\cite{ma2022missing}; modality dropout as a training
+technique~\cite{neverova2016moddrop} forces networks to learn robust
+cross-modal features.
 Our fusion study in Section~\ref{sec:fusion} trains small two-view models
 with different modality-dropout rates and reports clean accuracy,
 no-input accuracy and reliance; it is a proxy study and not a claim about
@@ -57,8 +59,7 @@ large multimodal systems.
 
 \paragraph{Calibration under degradation.}
 Prior reports indicate that confidence often fails to fall in proportion
-to accuracy as inputs are corrupted \TODO{add and verify citations; read
-the full papers first}. We do not evaluate confidence calibration, but
+to accuracy as inputs are corrupted~\cite{ovadia2019can,hendrycks2019benchmarking}. We do not evaluate confidence calibration, but
 residual reliance on an unhelpful input is a related symptom.
 
 \paragraph{Positioning.}

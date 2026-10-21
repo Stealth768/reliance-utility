@@ -38,6 +38,15 @@ intervals reported in Table~\ref{tab:fusion}) and not monotone in $p$
 (reported post hoc).
 \input{tables/fusion_summary.tex}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/fusion_mi_vs_p.pdf}
+\caption{Raw terminal reliance $R(1)$ and Misalignment Index versus
+  dropout probability $p$. $R(1)$ decreases monotonically with $p$,
+  while MI increases because $R(0)$ shrinks faster.}
+\label{fig:fusion_mi}
+\end{figure}
+
 \paragraph{Why the normalized measures behave this way (post hoc).}
 Reliance at clean input, $R(0)$, falls by more than an order of
 magnitude as $p$ grows, because a model trained with dropout already

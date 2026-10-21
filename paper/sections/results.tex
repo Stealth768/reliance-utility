@@ -11,6 +11,17 @@ and Gaussian corruptions. All intervals are 95\% bootstrap intervals over
 questions (1000 resamples, fixed seed). The no-input baseline is the
 image removed from the prompt unless stated otherwise.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/vlm_utility_curves.pdf}%
+\hfill
+\includegraphics[width=0.48\textwidth]{figures/vlm_reliance_curves.pdf}
+\caption{Utility (left) and normalized reliance (right) as a function of
+  corruption severity for three VLMs under swapped, Gaussian and patch
+  corruptions. Shaded bands are 95\% bootstrap intervals.}
+\label{fig:vlm_curves}
+\end{figure*}
+
 \paragraph{Residual reliance under a swapped image.}
 Table~\ref{tab:headline} reports normalized terminal reliance
 $\hat R(1)$ and terminal utility $U(1)$ for each model and corruption.
@@ -92,6 +103,16 @@ swapped-image and no-image answers coincide, the distributional divergence
 is still above the black-versus-removed floor for every model, by a large
 factor only for Qwen2-VL.
 \input{tables/baseline_metrics.tex}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/vlm_mi_bar.pdf}
+\caption{Misalignment Index for the three VLMs under each corruption,
+  where defined. Error bars are 95\% bootstrap CIs. In most VLM
+  conditions the MI is undefined because utility does not cross zero
+  before the final severity.}
+\label{fig:vlm_mi}
+\end{figure}
 
 \paragraph{Misalignment Index.}
 The severity at which utility first reaches zero lies at the last grid

@@ -1,42 +1,47 @@
 \section{Limitations}
 \label{sec:limitations}
 
-We explicitly delineate several structural and methodological limitations of this study:
-
-\begin{enumerate}
-    \item \textbf{Null-Baseline Dependence}: Both utility $U(S)$ and behavioral reliance $R(S)$ are measured relative to a chosen unimodal null baseline $B_{\text{null}}$. While our primary evaluations utilize the \emph{removed} condition (true unimodal ablation), alternative nulls (such as black, mean, or noise images) yield different baseline accuracies and can shift both $S^*$ and $\mi$.
-    
-    \item \textbf{Conflation of Gate Sharpness and Crossing Timing in $\mi$}: The Misalignment Index integrates normalized reliance over $[S^*, 1]$. Consequently, a model that crosses zero utility very early (small $S^*$) with a gradual gating transition can yield a similar $\mi$ value to a model that crosses late with sharp, persistent reliance.
-    
-    \item \textbf{Residual Reliance in Smooth Sigmoid Gating}: In parametric gating models utilizing smooth activations (such as sigmoid or softmax), the gate weight assigned to a degraded modality rarely reaches strict mathematical zero, leading to non-zero residual reliance even under complete informational corruption.
-    
-    \item \textbf{4-Bit Quantization Effects in LLaVA-1.5-7B}: Due to GPU accelerator memory constraints on single T4 instances, LLaVA-1.5-7B is evaluated in 4-bit NormalFloat (NF4) quantization. Quantization may alter predictive logit calibration relative to full-precision weights.
-    
-    \item \textbf{Evaluation Benchmark Scope}: Our empirical VLM evaluation is conducted exclusively on the 4-choice multiple-choice formulation of A-OKVQA ($N=500$ validation items), rather than open-ended free-form generation.
-    
-    \item \textbf{Prompt-Format-Dependent Letter Mass}: In modern instruction-tuned VLMs, the proportion of softmax probability mass assigned to choice letters at the initial generation position is highly sensitive to the prompt template and assistant pre-fill prefix. Models whose letter mass fails the $\ge 0.90$ threshold cannot be reliably evaluated under a fixed single-token multiple-choice readout.
-    
-    \item \textbf{Exclusion of InternVL2}: InternVL2-2B was dropped from our multi-model benchmark due to an unresolvable library incompatibility between its custom remote repository code and `transformers>=4.50` (missing `all_tied_weights_keys` attribute during model instantiation).
-    
-    \item \textbf{Autonomous Driving (BEV) Study --- Proposed, Not Frozen}: A standalone Camera-LiDAR BEV architecture and physical corruption suite were developed as a feasibility probe; however, no pre-declared hypotheses were formalized for this case study. Per the pre-registration protocol, the BEV analysis remains outside the frozen paper scope and is deferred to future work pending formal hypothesis declaration.
-\end{enumerate}
-
 \begin{itemize}
-\item \textbf{Null-baseline dependence.} Conclusions for individual
-  models depend on whether the no-input baseline is a removed image or a
-  black image; the divergence between the two is about two orders of
-  magnitude larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL, and part of
-  their residual reliance may reflect the presence of image tokens.
-\item \textbf{Multiple comparisons.} The criterion is evaluated in 42
-  combinations without correction, and the two that satisfy it overlap.
-\item \textbf{Operationalization after the fact.} The interval-based form
-  of the pre-registered criterion was fixed after seeing data.
-\item \textbf{Normalization by $R(0)$.} $\hat R$ and MI are unreliable
-  when clean-input reliance is small, as in the fusion study.
-\item \textbf{Misalignment Index.} Undefined in most real conditions;
-  validated mainly on synthetic models; conflates gate sharpness and
+\item \textbf{Null-baseline dependence.} Both utility and reliance are
+  defined relative to a no-input baseline. Conclusions for individual
+  models depend on whether that baseline is a removed image or a black
+  image; the divergence between the two is about two orders of magnitude
+  larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL, and part of their
+  residual reliance may reflect the presence of image tokens rather than
+  image content.
+
+\item \textbf{Multiple comparisons.} The pre-registered criterion is
+  evaluated across 42 model--corruption--sample--baseline combinations
+  without correction, and the two that satisfy it overlap (same model,
+  same corruption, different sample sizes).
+
+\item \textbf{Operationalization after the fact.} The interval-based
+  operationalization of the pre-registered criterion was fixed after
+  seeing data.
+
+\item \textbf{Normalization by $R(0)$.} Normalized reliance $\hat R$ and
+  the Misalignment Index divide by clean-input reliance. When $R(0)$ is
+  small, as in the dropout study at high $p$, both measures are inflated
+  and cross-condition comparisons are not informative.
+
+\item \textbf{Misalignment Index.} Undefined in most VLM conditions
+  (utility does not cross zero before the last grid point); validated
+  mainly on synthetic models; conflates gate sharpness and crossing
   timing.
-\item \textbf{Scope.} One dataset, one multiple-choice format, three
-  models (one in 4-bit), one swap pairing per sample, and no autonomous
-  driving evaluation.
+
+\item \textbf{Scope.} One VQA dataset (A-OKVQA, $N=500$ main, $N=445$
+  replication), one multiple-choice format, three models (one in 4-bit
+  NF4 quantization), one swap pairing per sample, and no autonomous
+  driving evaluation. The fusion study uses a two-view Fashion-MNIST
+  proxy with simple encoders.
+
+\item \textbf{4-bit quantization.} LLaVA-1.5-7B is evaluated in 4-bit
+  NormalFloat quantization due to GPU memory constraints. Quantization may
+  alter logit calibration relative to full-precision weights.
+
+\item \textbf{Prompt sensitivity.} The proportion of probability mass
+  assigned to choice letters is sensitive to the prompt template. Models
+  whose letter mass falls below 90\% cannot be reliably evaluated under
+  our single-token readout; InternVL2-2B was dropped for a separate
+  library incompatibility.
 \end{itemize}

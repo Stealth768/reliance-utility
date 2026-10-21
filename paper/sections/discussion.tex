@@ -6,3 +6,41 @@ We do not claim that VLMs over-trust degraded images in general. The MI is
 undefined in most real conditions, so our VLM results rest on terminal
 reliance and utility. The data are one dataset and one answer format; the
 fusion study is a two-view proxy; and no driving evaluation is reported.
+
+\paragraph{What the measures reveal.}
+The pairing of utility and reliance along a severity path exposes
+behaviour that accuracy alone does not. Two models can lose the same
+amount of accuracy under corruption yet differ in how much of that loss
+comes from information destruction versus persistent reliance on an
+unhelpful input. The swapped-image condition, which replaces information
+with misinformation, consistently produces higher terminal reliance than
+Gaussian noise, and this gap is statistically significant for all three
+models. The gap means that the model's output distribution remains
+further from its no-image behaviour when given a wrong image than when
+given noise, even though both are equally uninformative for the task.
+
+\paragraph{Baseline sensitivity as a finding.}
+The dependence of conclusions on the no-input baseline is not a nuisance
+but a substantive result. For SmolVLM and LLaVA-1.5, roughly 40\% of
+the raw reliance measured under the removed-image baseline can be
+attributed (heuristically) to the presence of image tokens rather than
+image content. This suggests that studies comparing predictions with and
+without image tokens may overestimate a model's dependence on the visual
+signal. The black-image baseline, which preserves the token structure,
+gives a more conservative estimate.
+
+\paragraph{Implications for evaluation.}
+Our pre-registered criterion was met in only two of 42 combinations.
+This does not mean over-reliance is absent; it means that a strict,
+pre-specified criterion is hard to satisfy when both reliance and utility
+carry sampling uncertainty and when conclusions shift with the baseline.
+We recommend that future evaluations report results under at least two
+baselines and state how the no-input condition is constructed.
+
+\paragraph{Dropout and raw versus normalized reliance.}
+The fusion study shows that modality dropout is effective at reducing raw
+reliance and improving degraded-input accuracy, but the normalized
+measures $\hat R$ and MI give the opposite signal because the denominator
+$R(0)$ shrinks faster than the numerator. This is a limitation of any
+ratio-based measure and should be kept in mind when comparing models
+whose clean-input reliance differs substantially.
