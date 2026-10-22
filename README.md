@@ -15,7 +15,7 @@ Using Vision-Language Models (VLMs) on Visual Question Answering (A-OKVQA) as ou
 ```text
 reliance-utility/
 ├── CITATION.cff              # Citation metadata (TODO: author info)
-├── DEVIATIONS.md             # Formal audit log of all design decisions and pre-registered hypotheses
+├── DEVIATIONS.md             # Formal audit log of all design decisions and pre-declared hypotheses
 ├── FREEZE.md                 # Closed experiment specification (no new models/features)
 ├── README.md                 # Project overview and quickstart guide
 ├── RUNBOOK.md                # Multi-account Kaggle GPU orchestration manual

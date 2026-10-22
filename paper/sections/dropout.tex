@@ -5,7 +5,10 @@
 To examine whether training with modality dropout changes reliance on a
 degraded input, we train small late-fusion networks on Fashion-MNIST with
 each image split into a left half (view A) and a right half (view B). This
-is a \emph{two-view proxy} and not a multimodal benchmark. View A is
+is a \emph{two-view proxy} and not a multimodal benchmark. Rather than using
+the standard 10,000-image evaluation split, the data pipeline loads the 60,000-image
+training split and partitions it deterministically into 50,000 training, 5,000 validation,
+and 5,000 test images (indices 55,000--60,000). View A is
 degraded by interpolation toward noise on a nine-point severity grid; the
 no-input baseline replaces view A by a learned null embedding. The fusion
 gate does not receive the severity. We train with view-A dropout
