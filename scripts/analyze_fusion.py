@@ -187,6 +187,7 @@ def analyze_dataset_p_condition(
         "dataset": dataset,
         "dropout_p": dropout_p,
         "n_seeds": n_seeds,
+        "n_test": len(seed_runs[0]["items"]),
         "clean_acc": float(acc_deg[0]),
         "acc_null_removed": acc_null,
         "acc_deg_1": float(acc_deg[-1]),
@@ -233,18 +234,52 @@ def run_full_fusion_analysis(
     df.to_csv(csv_path, index=False)
     print(f"Saved: {csv_path}")
 
-    # LaTeX Table
-    tex_path = table_dir / "fusion_summary.tex"
-    lines = [
+    # Full LaTeX Table (for appendix)
+    tex_path_full = table_dir / "fusion_summary_full.tex"
+    lines_full = [
         "\\begin{table}[t]",
         "\\centering",
-        "\\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy.}",
-        "\\label{tab:fusion}\\label{tab:fusion_summary}",
+        "\\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy (Full Extended Table with Bootstrap CIs).}",
+        "\\label{tab:fusion_full}",
         "\\small",
+        "\\resizebox{\\textwidth}{!}{%",
         df.to_latex(index=False, escape=False).strip(),
+        "}",
         "\\end{table}",
     ]
-    tex_path.write_text("\n".join(lines), encoding="utf-8")
+    tex_path_full.write_text("\n".join(lines_full), encoding="utf-8")
+    print(f"Saved: {tex_path_full}")
+
+    # 9-column trimmed LaTeX Table (for main text)
+    cols_9 = ["dropout_p", "clean_acc", "acc_null_removed", "acc_deg_1", "U_1", "R_0", "R_1_raw", "R_hat_1", "MI"]
+    col_names = ["$p$", "Clean Acc", "Null Acc", "Acc ($S=1$)", "$U(1)$", "$R(0)$", "$R(1)$", "$\\hat{R}(1)$", "MI"]
+    df_9 = df[cols_9].copy()
+    df_9.columns = col_names
+    formatters = {
+        "$p$": lambda x: f"{x:.2f}",
+        "Clean Acc": lambda x: f"{x:.4f}",
+        "Null Acc": lambda x: f"{x:.4f}",
+        "Acc ($S=1$)": lambda x: f"{x:.4f}",
+        "$U(1)$": lambda x: f"{x:.4f}",
+        "$R(0)$": lambda x: f"{x:.4f}",
+        "$R(1)$": lambda x: f"{x:.4f}",
+        "$\\hat{R}(1)$": lambda x: f"{x:.4f}",
+        "MI": lambda x: f"{x:.4f}",
+    }
+    tabular_9 = df_9.to_latex(index=False, escape=False, formatters=formatters, column_format="ccccccccc").strip()
+    tex_path = table_dir / "fusion_summary.tex"
+    lines_9 = [
+        "\\begin{table}[t]",
+        "\\centering",
+        "\\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}",
+        "\\label{tab:fusion}\\label{tab:fusion_summary}",
+        "\\small",
+        "\\resizebox{\\textwidth}{!}{%",
+        tabular_9,
+        "}",
+        "\\end{table}",
+    ]
+    tex_path.write_text("\n".join(lines_9), encoding="utf-8")
     print(f"Saved: {tex_path}")
 
     # PDF Figure: MI vs p

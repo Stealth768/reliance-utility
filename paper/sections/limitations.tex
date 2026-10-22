@@ -10,14 +10,17 @@
   residual reliance may reflect the presence of image tokens rather than
   image content.
 
-\item \textbf{Multiple comparisons.} The pre-registered criterion is
-  evaluated across 42 model--corruption--sample--baseline combinations
-  without correction, and the two that satisfy it overlap (same model,
-  same corruption, different sample sizes).
+\item \textbf{Multiple comparisons.} The criterion pre-declared in a
+  version-controlled log is evaluated across 42
+  model--corruption--sample--baseline combinations without correction, and the
+  two that satisfy it overlap (same model, same corruption, different sample
+  sizes).
 
 \item \textbf{Operationalization after the fact.} The interval-based
-  operationalization of the pre-registered criterion was fixed after
-  seeing data.
+  operationalization of the criterion pre-declared in a version-controlled
+  log was fixed after seeing data. The dropout hypotheses H1 to H3 were
+  committed in the same commit as the training code, before any training
+  run; the log is not an external registry.
 
 \item \textbf{Normalization by $R(0)$.} Normalized reliance $\hat R$ and
   the Misalignment Index divide by clean-input reliance. When $R(0)$ is
