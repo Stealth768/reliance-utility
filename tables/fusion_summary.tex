@@ -1,18 +1,16 @@
 \begin{table}[t]
 \centering
-\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
-\label{tab:fusion}\label{tab:fusion_summary}
-\small
-\resizebox{\textwidth}{!}{%
+\caption{Modality-dropout impact on Misalignment Index (MI) and clean accuracy in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
+\label{tab:fusion}
+\fittable{%
 \begin{tabular}{ccccccccc}
 \toprule
 $p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & MI \\
 \midrule
-0.00 & 0.8879 & 0.5620 & 0.2761 & -0.2859 & 0.3308 & 0.6106 & 1.8456 & 1.6571 \\
-0.10 & 0.8877 & 0.8396 & 0.4480 & -0.3916 & 0.0557 & 0.4516 & 8.1051 & 4.5858 \\
-0.25 & 0.8843 & 0.8477 & 0.5550 & -0.2926 & 0.0395 & 0.3303 & 8.3619 & 4.5136 \\
-0.50 & 0.8823 & 0.8584 & 0.7256 & -0.1327 & 0.0238 & 0.1478 & 6.2005 & 3.6842 \\
+0.000 & 0.888 & 0.562 & 0.276 & -0.286 & 0.331 & 0.611 & 1.846 & 1.657 \\
+0.100 & 0.888 & 0.840 & 0.448 & -0.392 & 0.056 & 0.452 & 8.105 & 4.586 \\
+0.250 & 0.884 & 0.848 & 0.555 & -0.293 & 0.040 & 0.330 & 8.362 & 4.514 \\
+0.500 & 0.882 & 0.858 & 0.726 & -0.133 & 0.024 & 0.148 & 6.200 & 3.684 \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular}}
 \end{table}

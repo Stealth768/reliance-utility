@@ -2,8 +2,7 @@
 \centering
 \caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). The confidence interval operationalization (upper bound of $U(1) < 0$ and lower bound of $\hat{R}(1) > 0.50$) is \emph{post hoc}. Gaussian blur and patch occlusion rows are included for completeness. Pass indicates both requirements are satisfied simultaneously.}
 \label{tab:criterion}
-\small
-\resizebox{\textwidth}{!}{%
+\fittable{%
 \begin{tabular}{llcccccc}
 \toprule
  & & \multicolumn{2}{c}{\textbf{Main ($N=500$)}} & \multicolumn{2}{c}{\textbf{Replication ($N=445$)}} & \multicolumn{2}{c}{\textbf{Pooled ($N=945$)}} \\
@@ -22,6 +21,5 @@
  & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
  & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}}
 \end{table}

@@ -234,52 +234,87 @@ def run_full_fusion_analysis(
     df.to_csv(csv_path, index=False)
     print(f"Saved: {csv_path}")
 
-    # Full LaTeX Table (for appendix)
+    # Full LaTeX Table (for appendix) - split into two tables
     tex_path_full = table_dir / "fusion_summary_full.tex"
     lines_full = [
-        "\\begin{table}[t]",
-        "\\centering",
-        "\\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy (Full Extended Table with Bootstrap CIs).}",
-        "\\label{tab:fusion_full}",
-        "\\small",
-        "\\resizebox{\\textwidth}{!}{%",
-        df.to_latex(index=False, escape=False).strip(),
-        "}",
-        "\\end{table}",
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Modality-dropout impact on task accuracy and utility in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}",
+        r"\label{tab:fusion-full-acc}",
+        r"\fittable{%",
+        r"\begin{tabular}{ccccc}",
+        r"\toprule",
+        r"$p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ \\",
+        r"\midrule",
     ]
-    tex_path_full.write_text("\n".join(lines_full), encoding="utf-8")
+    for _, r in df.iterrows():
+        p_str = f"{r['dropout_p']:.3f}"
+        clean_acc = f"{r['clean_acc']:.3f}"
+        null_acc = f"{r['acc_null_removed']:.3f}"
+        acc_s1 = f"{r['acc_deg_1']:.3f}"
+        u1 = f"{r['U_1']:+.3f} ({r['U_1_ci_low']:+.3f}, {r['U_1_ci_high']:+.3f})"
+        lines_full.append(f"{p_str} & {clean_acc} & {null_acc} & {acc_s1} & {u1} \\\\")
+    lines_full.extend([
+        r"\bottomrule",
+        r"\end{tabular}}",
+        r"\end{table}",
+        "",
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Modality-dropout impact on reliance and Misalignment Index in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}",
+        r"\label{tab:fusion-full-reliance}",
+        r"\fittable{%",
+        r"\begin{tabular}{cccccc}",
+        r"\toprule",
+        r"$p$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $S^*$ & MI \\",
+        r"\midrule",
+    ])
+    for _, r in df.iterrows():
+        p_str = f"{r['dropout_p']:.3f}"
+        r0 = f"{r['R_0']:.3f}"
+        r1 = f"{r['R_1_raw']:.3f}"
+        rhat = f"{r['R_hat_1']:.3f}"
+        s_star = f"{r['S_star']:.3f}" if pd.notna(r["S_star"]) else "N/A"
+        mi = f"{r['MI']:.3f} ({r['MI_ci_low']:.3f}, {r['MI_ci_high']:.3f})"
+        lines_full.append(f"{p_str} & {r0} & {r1} & {rhat} & {s_star} & {mi} \\\\")
+    lines_full.extend([
+        r"\bottomrule",
+        r"\end{tabular}}",
+        r"\end{table}",
+    ])
+    tex_path_full.write_text("\n".join(lines_full) + "\n", encoding="utf-8")
     print(f"Saved: {tex_path_full}")
 
     # 9-column trimmed LaTeX Table (for main text)
-    cols_9 = ["dropout_p", "clean_acc", "acc_null_removed", "acc_deg_1", "U_1", "R_0", "R_1_raw", "R_hat_1", "MI"]
-    col_names = ["$p$", "Clean Acc", "Null Acc", "Acc ($S=1$)", "$U(1)$", "$R(0)$", "$R(1)$", "$\\hat{R}(1)$", "MI"]
-    df_9 = df[cols_9].copy()
-    df_9.columns = col_names
-    formatters = {
-        "$p$": lambda x: f"{x:.2f}",
-        "Clean Acc": lambda x: f"{x:.4f}",
-        "Null Acc": lambda x: f"{x:.4f}",
-        "Acc ($S=1$)": lambda x: f"{x:.4f}",
-        "$U(1)$": lambda x: f"{x:.4f}",
-        "$R(0)$": lambda x: f"{x:.4f}",
-        "$R(1)$": lambda x: f"{x:.4f}",
-        "$\\hat{R}(1)$": lambda x: f"{x:.4f}",
-        "MI": lambda x: f"{x:.4f}",
-    }
-    tabular_9 = df_9.to_latex(index=False, escape=False, formatters=formatters, column_format="ccccccccc").strip()
     tex_path = table_dir / "fusion_summary.tex"
     lines_9 = [
-        "\\begin{table}[t]",
-        "\\centering",
-        "\\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}",
-        "\\label{tab:fusion}\\label{tab:fusion_summary}",
-        "\\small",
-        "\\resizebox{\\textwidth}{!}{%",
-        tabular_9,
-        "}",
-        "\\end{table}",
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Modality-dropout impact on Misalignment Index (MI) and clean accuracy in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}",
+        r"\label{tab:fusion}",
+        r"\fittable{%",
+        r"\begin{tabular}{ccccccccc}",
+        r"\toprule",
+        r"$p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & MI \\",
+        r"\midrule",
     ]
-    tex_path.write_text("\n".join(lines_9), encoding="utf-8")
+    for _, r in df.iterrows():
+        p_str = f"{r['dropout_p']:.3f}"
+        clean_acc = f"{r['clean_acc']:.3f}"
+        null_acc = f"{r['acc_null_removed']:.3f}"
+        acc_s1 = f"{r['acc_deg_1']:.3f}"
+        u1 = f"{r['U_1']:+.3f}"
+        r0 = f"{r['R_0']:.3f}"
+        r1 = f"{r['R_1_raw']:.3f}"
+        rhat = f"{r['R_hat_1']:.3f}"
+        mi = f"{r['MI']:.3f}"
+        lines_9.append(f"{p_str} & {clean_acc} & {null_acc} & {acc_s1} & {u1} & {r0} & {r1} & {rhat} & {mi} \\\\")
+    lines_9.extend([
+        r"\bottomrule",
+        r"\end{tabular}}",
+        r"\end{table}",
+    ])
+    tex_path.write_text("\n".join(lines_9) + "\n", encoding="utf-8")
     print(f"Saved: {tex_path}")
 
     # PDF Figure: MI vs p

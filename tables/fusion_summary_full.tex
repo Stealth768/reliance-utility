@@ -1,18 +1,33 @@
 \begin{table}[t]
 \centering
-\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy (Full Extended Table with Bootstrap CIs).}
-\label{tab:fusion_full}
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrrrrrrrrrrrrrrr}
+\caption{Modality-dropout impact on task accuracy and utility in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
+\label{tab:fusion-full-acc}
+\fittable{%
+\begin{tabular}{ccccc}
 \toprule
-dataset & dropout_p & n_seeds & n_test & clean_acc & acc_null_removed & acc_deg_1 & U_1 & U_1_ci_low & U_1_ci_high & R_0 & R_1_raw & R_hat_1 & S_star & MI & MI_ci_low & MI_ci_high \\
+$p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ \\
 \midrule
-fashionmnist & 0.000000 & 5 & 5000 & 0.887920 & 0.561960 & 0.276080 & -0.285880 & -0.353603 & -0.207838 & 0.330845 & 0.610619 & 1.845638 & 0.500000 & 1.657078 & 1.441700 & 2.082123 \\
-fashionmnist & 0.100000 & 5 & 5000 & 0.887720 & 0.839600 & 0.447960 & -0.391640 & -0.441723 & -0.339759 & 0.055724 & 0.451646 & 8.105111 & 0.250000 & 4.585811 & 4.207146 & 4.922483 \\
-fashionmnist & 0.250000 & 5 & 5000 & 0.884280 & 0.847680 & 0.555040 & -0.292640 & -0.338246 & -0.244877 & 0.039503 & 0.330318 & 8.361940 & 0.250000 & 4.513616 & 4.235336 & 5.243992 \\
-fashionmnist & 0.500000 & 5 & 5000 & 0.882320 & 0.858360 & 0.725640 & -0.132720 & -0.160125 & -0.108277 & 0.023833 & 0.147774 & 6.200458 & 0.375000 & 3.684212 & 3.421911 & 3.944851 \\
+0.000 & 0.888 & 0.562 & 0.276 & -0.286 (-0.354, -0.208) \\
+0.100 & 0.888 & 0.840 & 0.448 & -0.392 (-0.442, -0.340) \\
+0.250 & 0.884 & 0.848 & 0.555 & -0.293 (-0.338, -0.245) \\
+0.500 & 0.882 & 0.858 & 0.726 & -0.133 (-0.160, -0.108) \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Modality-dropout impact on reliance and Misalignment Index in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
+\label{tab:fusion-full-reliance}
+\fittable{%
+\begin{tabular}{cccccc}
+\toprule
+$p$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $S^*$ & MI \\
+\midrule
+0.000 & 0.331 & 0.611 & 1.846 & 0.500 & 1.657 (1.442, 2.082) \\
+0.100 & 0.056 & 0.452 & 8.105 & 0.250 & 4.586 (4.207, 4.922) \\
+0.250 & 0.040 & 0.330 & 8.362 & 0.250 & 4.514 (4.235, 5.244) \\
+0.500 & 0.024 & 0.148 & 6.200 & 0.375 & 3.684 (3.422, 3.945) \\
+\bottomrule
+\end{tabular}}
 \end{table}

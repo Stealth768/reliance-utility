@@ -2,14 +2,14 @@
 \centering
 \caption{Within-model paired differences in terminal normalized reliance $\Delta \hat{R}(1) = \hat{R}(1)_{\text{swap}} - \hat{R}(1)_{\text{gauss}}$ on the main sample ($N=500$, bootstrap $B=1000$, seed 42).}
 \label{tab:paired}
-\small
+\fittable{%
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Model} & $\hat{R}(1)_{\text{swap}}$ & $\hat{R}(1)_{\text{gauss}}$ & $\Delta \hat{R}(1)$ [95\% CI] & \textbf{Zero Excluded?} \\
+\textbf{Model} & $\hat{R}(1)_{\text{swap}}$ & $\hat{R}(1)_{\text{gauss}}$ & $\Delta \hat{R}(1)$ & \textbf{Zero Excluded?} \\
 \midrule
-Qwen2-VL-2B & 0.4872 & 0.1681 & +0.3191 [+0.2763, +0.3661] & Yes \\
-SmolVLM-Instruct & 0.4932 & 0.3808 & +0.1124 [+0.0629, +0.1659] & Yes \\
-LLaVA-1.5-7B & 0.5784 & 0.2947 & +0.2836 [+0.2267, +0.3507] & Yes \\
+Qwen2-VL-2B & 0.487 & 0.168 & +0.319 (+0.276, +0.366) & Yes \\
+SmolVLM-Instruct & 0.493 & 0.381 & +0.112 (+0.063, +0.166) & Yes \\
+LLaVA-1.5-7B & 0.578 & 0.295 & +0.284 (+0.227, +0.351) & Yes \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

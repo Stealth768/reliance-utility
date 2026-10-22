@@ -1,21 +1,22 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
 \caption{Multimodal Reliance-Utility Benchmark Summary across Models and Corruptions.}
-\label{tab:vlm_main_summary}
-\small
-\begin{tabular}{llrrrrrrrrrllllllrrlrrrrrrr}
+\label{tab:vlm-main-summary}
+\fittable{%
+\begin{tabular}{llrrlllllllllllllllllrlrrrr}
 \toprule
-model_name & corruption & n_seeds & n_items & clean_acc & acc_s1 & acc_drop & null_removed_acc & null_black_acc & swapped_acc & mean_letter_mass & S_star & sig_S_star & MI & MI_ci_pooled & MI_ci_hierarchical & conditional_mi_range & frac_usable_resamples & R_hat_s1 & R_hat_s1_ci & no_crossing_frac & n_no_usable_crossing & frac_no_usable_crossing & n_no_usable_crossing_no_cross & n_no_usable_crossing_edge & n_no_usable_crossing_r0_zero & n_no_usable_crossing_other \\
+model\_name & corruption & n\_seeds & n\_items & clean\_acc & acc\_s1 & acc\_drop & null\_removed\_acc & null\_black\_acc & swapped\_acc & mean\_letter\_mass & S\_star & sig\_S\_star & MI & MI\_ci\_pooled & MI\_ci\_hierarchical & conditional\_mi\_range & frac\_usable\_resamples & R\_hat\_s1 & R\_hat\_s1\_ci & no\_crossing\_frac & n\_no\_usable\_crossing & frac\_no\_usable\_crossing & n\_no\_usable\_crossing\_no\_cross & n\_no\_usable\_crossing\_edge & n\_no\_usable\_crossing\_r0\_zero & n\_no\_usable\_crossing\_other \\
 \midrule
-HuggingFaceTB/SmolVLM-Instruct & gaussian & 1 & 500 & 0.766000 & 0.346000 & 0.420000 & 0.368000 & 0.354000 & 0.344000 & 0.999600 & 1.000 (edge) & None & undefined & None & None & [0.3173, 0.3929] & 0.231000 & 0.380800 & [0.3373, 0.4263] & 0.303000 & 769 & 0.769000 & 303 & 466 & 0 & 0 \\
-HuggingFaceTB/SmolVLM-Instruct & patch & 1 & 500 & 0.766000 & 0.372000 & 0.394000 & 0.368000 & 0.354000 & 0.344000 & 0.999700 & None & None & undefined & None & None & None & 0.000000 & 0.233100 & [0.2282, 0.2488] & 0.998000 & 1000 & 1.000000 & 998 & 2 & 0 & 0 \\
-HuggingFaceTB/SmolVLM-Instruct & swapblend & 1 & 500 & 0.766000 & 0.352000 & 0.414000 & 0.368000 & 0.354000 & 0.344000 & 0.999700 & 1.000 (edge) & None & undefined & None & None & [0.4462, 0.5470] & 0.429000 & 0.493200 & [0.4477, 0.5479] & 0.370000 & 571 & 0.571000 & 370 & 201 & 0 & 0 \\
-Qwen/Qwen2-VL-2B-Instruct & gaussian & 1 & 500 & 0.820000 & 0.406000 & 0.414000 & 0.436000 & 0.420000 & 0.368000 & 0.998900 & 1.000 (edge) & 0.875 & undefined & None & None & [0.1480, 0.1891] & 0.377000 & 0.168100 & [0.1475, 0.1891] & 0.018000 & 623 & 0.623000 & 18 & 605 & 0 & 0 \\
-Qwen/Qwen2-VL-2B-Instruct & patch & 1 & 500 & 0.820000 & 0.430000 & 0.390000 & 0.436000 & 0.420000 & 0.368000 & 0.999000 & None & None & undefined & None & None & None & 0.000000 & 0.029000 & [0.0271, 0.0315] & 0.993000 & 1000 & 1.000000 & 993 & 7 & 0 & 0 \\
-Qwen/Qwen2-VL-2B-Instruct & swapblend & 1 & 500 & 0.820000 & 0.372000 & 0.448000 & 0.436000 & 0.420000 & 0.368000 & 0.998900 & 0.875 & 1.000 & 0.4848 & [0.4448, 0.5368] & [0.4426, 0.5413] & [0.4448, 0.5368] & 0.519000 & 0.487200 & [0.4368, 0.5433] & 0.038000 & 481 & 0.481000 & 38 & 443 & 0 & 0 \\
-llava-hf/llava-1.5-7b-hf & gaussian & 1 & 500 & 0.794000 & 0.462000 & 0.332000 & 0.484000 & 0.476000 & 0.428000 & 0.999500 & 1.000 (edge) & None & undefined & None & None & [0.2678, 0.3521] & 0.058000 & 0.294700 & [0.2544, 0.3365] & 0.302000 & 942 & 0.942000 & 302 & 640 & 0 & 0 \\
-llava-hf/llava-1.5-7b-hf & patch & 1 & 500 & 0.794000 & 0.464000 & 0.330000 & 0.484000 & 0.476000 & 0.428000 & 0.999500 & None & None & undefined & None & None & None & 0.000000 & 0.258500 & [0.2311, 0.3029] & 0.980000 & 1000 & 1.000000 & 980 & 20 & 0 & 0 \\
-llava-hf/llava-1.5-7b-hf & swapblend & 1 & 500 & 0.794000 & 0.436000 & 0.358000 & 0.484000 & 0.476000 & 0.428000 & 0.999500 & 1.000 (edge) & 1.000 & undefined & None & None & [0.5345, 0.6682] & 0.472000 & 0.578400 & [0.5167, 0.6548] & 0.114000 & 528 & 0.528000 & 114 & 414 & 0 & 0 \\
+HuggingFaceTB/SmolVLM-Instruct & gaussian & 1 & 500 & 0.766 & 0.346 & 0.420 & 0.368 & 0.354 & 0.344 & 1.000 & 1.000 (edge) & None & undefined & None & None & [0.3173, 0.3929] & 0.231 & 0.381 & [0.3373, 0.4263] & 0.303 & 769 & 0.769 & 303 & 466 & 0 & 0 \\
+HuggingFaceTB/SmolVLM-Instruct & patch & 1 & 500 & 0.766 & 0.372 & 0.394 & 0.368 & 0.354 & 0.344 & 1.000 & None & None & undefined & None & None & None & 0.000 & 0.233 & [0.2282, 0.2488] & 0.998 & 1000 & 1.000 & 998 & 2 & 0 & 0 \\
+HuggingFaceTB/SmolVLM-Instruct & swapblend & 1 & 500 & 0.766 & 0.352 & 0.414 & 0.368 & 0.354 & 0.344 & 1.000 & 1.000 (edge) & None & undefined & None & None & [0.4462, 0.5470] & 0.429 & 0.493 & [0.4477, 0.5479] & 0.370 & 571 & 0.571 & 370 & 201 & 0 & 0 \\
+Qwen/Qwen2-VL-2B-Instruct & gaussian & 1 & 500 & 0.820 & 0.406 & 0.414 & 0.436 & 0.420 & 0.368 & 0.999 & 1.000 (edge) & 0.875 & undefined & None & None & [0.1480, 0.1891] & 0.377 & 0.168 & [0.1475, 0.1891] & 0.018 & 623 & 0.623 & 18 & 605 & 0 & 0 \\
+Qwen/Qwen2-VL-2B-Instruct & patch & 1 & 500 & 0.820 & 0.430 & 0.390 & 0.436 & 0.420 & 0.368 & 0.999 & None & None & undefined & None & None & None & 0.000 & 0.029 & [0.0271, 0.0315] & 0.993 & 1000 & 1.000 & 993 & 7 & 0 & 0 \\
+Qwen/Qwen2-VL-2B-Instruct & swapblend & 1 & 500 & 0.820 & 0.372 & 0.448 & 0.436 & 0.420 & 0.368 & 0.999 & 0.875 & 1.000 & 0.4848 & [0.4448, 0.5368] & [0.4426, 0.5413] & [0.4448, 0.5368] & 0.519 & 0.487 & [0.4368, 0.5433] & 0.038 & 481 & 0.481 & 38 & 443 & 0 & 0 \\
+llava-hf/llava-1.5-7b-hf & gaussian & 1 & 500 & 0.794 & 0.462 & 0.332 & 0.484 & 0.476 & 0.428 & 1.000 & 1.000 (edge) & None & undefined & None & None & [0.2678, 0.3521] & 0.058 & 0.295 & [0.2544, 0.3365] & 0.302 & 942 & 0.942 & 302 & 640 & 0 & 0 \\
+llava-hf/llava-1.5-7b-hf & patch & 1 & 500 & 0.794 & 0.464 & 0.330 & 0.484 & 0.476 & 0.428 & 1.000 & None & None & undefined & None & None & None & 0.000 & 0.259 & [0.2311, 0.3029] & 0.980 & 1000 & 1.000 & 980 & 20 & 0 & 0 \\
+llava-hf/llava-1.5-7b-hf & swapblend & 1 & 500 & 0.794 & 0.436 & 0.358 & 0.484 & 0.476 & 0.428 & 1.000 & 1.000 (edge) & 1.000 & undefined & None & None & [0.5345, 0.6682] & 0.472 & 0.578 & [0.5167, 0.6548] & 0.114 & 528 & 0.528 & 114 & 414 & 0 & 0 \\
 \bottomrule
 \end{tabular}
-\end{table*}
+}
+\end{table}

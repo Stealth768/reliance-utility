@@ -2,20 +2,18 @@
 \centering
 \caption{Static visual reliance and sensitivity baseline metrics on the swapped image across models on main ($N=500$) and replication ($N=445$) samples (bootstrap $B=1000$, seed 42). Metrics: Visual Reliance Score ($\text{VRS} = \text{acc}_{\text{clean}} - \text{acc}_{\text{swapped}}$), Black-image drop ($\text{acc}_{\text{clean}} - \text{acc}_{\text{black}}$), Image Sensitivity ($P[\arg\max(\text{clean}) \ne \arg\max(\text{swapped})]$), and Visual Harm Rate ($P[\text{clean wrong} \land \text{swapped correct}]$).}
 \label{tab:baseline}
-\small
-\resizebox{\textwidth}{!}{%
+\fittable{%
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Model} & \textbf{Sample} & \textbf{VRS} [95\% CI] & \textbf{Black-image drop} [95\% CI] & \textbf{Sensitivity} [95\% CI] & \textbf{Harm Rate} [95\% CI] \\
+\textbf{Model} & \textbf{Sample} & \textbf{VRS} & \textbf{Black-image drop} & \textbf{Sensitivity} & \textbf{Harm Rate} \\
 \midrule
-Qwen2-VL-2B & Main ($N=500$) & 0.452 [0.398, 0.502] & 0.400 [0.354, 0.448] & 0.592 [0.548, 0.632] & 0.044 [0.026, 0.064] \\
-SmolVLM-Instruct & Main ($N=500$) & 0.422 [0.366, 0.476] & 0.412 [0.358, 0.464] & 0.620 [0.574, 0.662] & 0.064 [0.044, 0.086] \\
-LLaVA-1.5-7B & Main ($N=500$) & 0.366 [0.316, 0.416] & 0.318 [0.270, 0.366] & 0.518 [0.474, 0.558] & 0.050 [0.032, 0.070] \\
+Qwen2-VL-2B & Main ($N=500$) & 0.452 (0.398, 0.502) & 0.400 (0.354, 0.448) & 0.592 (0.548, 0.632) & 0.044 (0.026, 0.064) \\
+SmolVLM-Instruct & Main ($N=500$) & 0.422 (0.366, 0.476) & 0.412 (0.358, 0.464) & 0.620 (0.574, 0.662) & 0.064 (0.044, 0.086) \\
+LLaVA-1.5-7B & Main ($N=500$) & 0.366 (0.316, 0.416) & 0.318 (0.270, 0.366) & 0.518 (0.474, 0.558) & 0.050 (0.032, 0.070) \\
 \midrule
-Qwen2-VL-2B & Replication ($N=445$) & 0.461 [0.409, 0.515] & 0.351 [0.306, 0.409] & 0.607 [0.562, 0.654] & 0.043 [0.025, 0.063] \\
-SmolVLM-Instruct & Replication ($N=445$) & 0.398 [0.342, 0.456] & 0.346 [0.294, 0.400] & 0.600 [0.555, 0.647] & 0.058 [0.038, 0.081] \\
-LLaVA-1.5-7B & Replication ($N=445$) & 0.312 [0.263, 0.364] & 0.315 [0.263, 0.373] & 0.456 [0.407, 0.506] & 0.045 [0.027, 0.065] \\
+Qwen2-VL-2B & Replication ($N=445$) & 0.461 (0.409, 0.515) & 0.351 (0.306, 0.409) & 0.607 (0.562, 0.654) & 0.043 (0.025, 0.063) \\
+SmolVLM-Instruct & Replication ($N=445$) & 0.398 (0.342, 0.456) & 0.346 (0.294, 0.400) & 0.600 (0.555, 0.647) & 0.058 (0.038, 0.081) \\
+LLaVA-1.5-7B & Replication ($N=445$) & 0.312 (0.263, 0.364) & 0.315 (0.263, 0.373) & 0.456 (0.407, 0.506) & 0.045 (0.027, 0.065) \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}}
 \end{table}

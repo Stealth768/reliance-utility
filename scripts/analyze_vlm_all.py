@@ -618,21 +618,31 @@ def generate_plots(
 
 
 def export_latex_table(df: pd.DataFrame, out_path: Path, caption: str, label: str):
-    """Export clean booktabs LaTeX table."""
+    """Export clean booktabs LaTeX table wrapped in fittable with 3 decimals."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    lines = [
-        "\\begin{table*}[t]",
-        "\\centering",
-        f"\\caption{{{caption}}}",
-        f"\\label{{{label}}}",
-        "\\small",
-    ]
-    # Format table using pandas to_latex with booktabs
-    latex_content = df.to_latex(index=False, escape=False)
-    lines.append(latex_content.strip())
-    lines.append("\\end{table*}")
+    clean_label = label.replace("_", "-")
 
-    out_path.write_text("\n".join(lines), encoding="utf-8")
+    clean_df = df.copy()
+    clean_df.columns = [str(c).replace("_", r"\_") for c in clean_df.columns]
+    for col in clean_df.columns:
+        if clean_df[col].dtype == float or np.issubdtype(clean_df[col].dtype, np.floating):
+            clean_df[col] = clean_df[col].apply(lambda x: f"{x:.3f}" if pd.notna(x) else "N/A")
+        elif clean_df[col].dtype == object:
+            clean_df[col] = clean_df[col].apply(lambda x: str(x).replace("_", r"\_").replace("%", r"\%") if pd.notna(x) else "")
+
+    tabular_str = clean_df.to_latex(index=False, escape=False).strip()
+    lines = [
+        r"\begin{table}[t]",
+        r"\centering",
+        f"\\caption{{{caption}}}",
+        f"\\label{{{clean_label}}}",
+        r"\fittable{%",
+        tabular_str,
+        r"}",
+        r"\end{table}",
+    ]
+
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def run_full_analysis(

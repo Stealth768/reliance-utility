@@ -18,6 +18,7 @@ Outputs:
 
 import argparse
 from pathlib import Path
+import re
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -257,26 +258,50 @@ def build_criterion_status_table(
 
     # Save LaTeX table
     tex_path = table_dir / "criterion_status_by_null_and_sample.tex"
-    export_df = df[[
-        "model", "corruption", "sample", "null_baseline",
-        "U_1", "U_1_ci_str", "u1_significant",
-        "R_hat_1", "R_hat_1_ci_str", "R_hat_1_status", "criterion_met"
-    ]].copy()
-    export_df.columns = [
-        "Model", "Corruption", "Sample", "Null",
-        "U(1)", "U(1) 95% CI", "U(1)<0",
-        "R_hat(1)", "R_hat 95% CI", "R_hat vs 0.5", "Met?"
-    ]
     tex_lines = [
-        "\\begin{table}[t]",
-        "\\centering",
-        "\\caption{Pre-Registered Criterion Status by Null Baseline and Sample Size.}",
-        "\\label{tab:criterion_status_by_null_and_sample}",
-        "\\small",
-        export_df.to_latex(index=False, escape=False).strip(),
-        "\\end{table}",
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Pre-Declared Criterion Status by Null Baseline and Sample Size ($B=1000$, seed 42).}",
+        r"\label{tab:criterion-status-by-null-and-sample}",
+        r"\fittable{%",
+        r"\begin{tabular}{llllcccc}",
+        r"\toprule",
+        r"\textbf{Model} & \textbf{Corruption} & \textbf{Sample} & \textbf{Null} & $U(1)$ & $U(1)<0$ & $\hat{R}(1)$ & \textbf{Met?} \\",
+        r"\midrule",
     ]
-    tex_path.write_text("\n".join(tex_lines), encoding="utf-8")
+    for _, r in df.iterrows():
+        m_disp = str(r["model"]).replace("_", r"\_")
+        corr_disp = str(r["corruption"]).replace("_", r"\_")
+        sample_disp = str(r["sample"]).replace("_", r"\_")
+        null_disp = str(r["null_baseline"]).replace("_", r"\_")
+
+        # Parse CI
+        u1_m = re.search(r"\[([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*)\]", str(r["U_1_ci_str"]))
+        if u1_m:
+            u1_lo, u1_hi = float(u1_m.group(1)), float(u1_m.group(2))
+            u1_cell = f"{r['U_1']:+.3f} ({u1_lo:+.3f}, {u1_hi:+.3f})"
+        else:
+            u1_cell = f"{r['U_1']:+.3f}"
+
+        u1_sig = "True" if r["u1_significant"] else "False"
+
+        rhat_m = re.search(r"\[([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*)\]", str(r["R_hat_1_ci_str"]))
+        if rhat_m:
+            rhat_lo, rhat_hi = float(rhat_m.group(1)), float(rhat_m.group(2))
+            rhat_cell = f"{r['R_hat_1']:.3f} ({rhat_lo:.3f}, {rhat_hi:.3f})"
+        else:
+            rhat_cell = f"{r['R_hat_1']:.3f}"
+
+        met_str = r"\textbf{True}" if r["criterion_met"] else "False"
+
+        tex_lines.append(f"{m_disp} & {corr_disp} & {sample_disp} & {null_disp} & {u1_cell} & {u1_sig} & {rhat_cell} & {met_str} \\\\")
+
+    tex_lines.extend([
+        r"\bottomrule",
+        r"\end{tabular}}",
+        r"\end{table}",
+    ])
+    tex_path.write_text("\n".join(tex_lines) + "\n", encoding="utf-8")
     print(f"Saved LaTeX: {tex_path}")
 
     return df
