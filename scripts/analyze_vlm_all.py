@@ -623,6 +623,11 @@ def export_latex_table(df: pd.DataFrame, out_path: Path, caption: str, label: st
     clean_label = label.replace("_", "-")
 
     clean_df = df.copy()
+    from scripts.generate_paper_tables import format_model_name
+    for col in clean_df.columns:
+        if "model" in col:
+            clean_df[col] = clean_df[col].apply(lambda x: format_model_name(str(x)) if pd.notna(x) else "")
+
     clean_df.columns = [str(c).replace("_", r"\_") for c in clean_df.columns]
     for col in clean_df.columns:
         if clean_df[col].dtype == float or np.issubdtype(clean_df[col].dtype, np.floating):

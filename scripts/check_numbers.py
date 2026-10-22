@@ -125,6 +125,32 @@ def check_numbers(
 
     for val_str, label, line_num, fpath in all_checks:
         parts = [p.strip() for p in label.split(":")]
+
+        def verify_num(act_val: Any, is_pct: bool = False, pct_tol: float = 0.6) -> bool:
+            try:
+                exp_f = float(val_str)
+                act_f = float(act_val)
+                if is_pct:
+                    diff = abs(exp_f - act_f)
+                    if diff > pct_tol:
+                        print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, expected ~{act_f:.1f}% (diff={diff:.3f} > {pct_tol})")
+                        return False
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+                    return True
+                act_rnd = round(act_f, 3)
+                exp_rnd = round(exp_f, 3)
+                diff = abs(exp_rnd - act_rnd)
+                if diff > 1e-4:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str} (rounded: {exp_rnd:.3f}), table has {act_f:.4f} (rounded 3 dec: {act_rnd:.3f}, diff={diff:.5f} > 1e-4)")
+                    return False
+                print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+                return True
+            except ValueError:
+                if str(act_val).strip() != val_str:
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{act_val}'")
+                    return False
+                print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+                return True
         
         # Special case: criterion count check
         if label == "criterion:status:count_met" or (len(parts) == 3 and parts[0] == "criterion" and parts[2] == "count_met"):
@@ -173,21 +199,8 @@ def check_numbers(
                 continue
 
             actual_val = matched_row[col_key]
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > max(tol, 0.005):
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except ValueError:
-                if str(actual_val).strip() != val_str:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            if not verify_num(actual_val):
+                mismatches += 1
             continue
 
         # Null sensitivity drop check: nullsens:model:corr:R_hat_drop
@@ -221,17 +234,7 @@ def check_numbers(
                 actual_val = float(r_rem["R_hat_1"]) - float(r_blk["R_hat_1"])
             else:
                 actual_val = float(r_rem[metric_key]) - float(r_blk[metric_key])
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > 0.01:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val:.4f} (diff={diff:.5f} > tol=0.01)")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except Exception as e:
-                print(f"  [FAIL] {fpath.name}:{line_num} - {label}: {e}")
+            if not verify_num(actual_val):
                 mismatches += 1
             continue
 
@@ -252,31 +255,17 @@ def check_numbers(
                 print(f"  [FAIL] {fpath.name}:{line_num} - Model '{model_key}' not found in floor table.")
                 mismatches += 1
                 continue
-            tol_use = tol
-            if metric_key in ("fraction_pct", "floor_fraction_pct", "floor_pct"):
+            is_pct = metric_key in ("fraction_pct", "floor_fraction_pct", "floor_pct")
+            if is_pct:
                 actual_val = float(matched_row["floor_fraction"]) * 100.0
-                tol_use = 0.6  # Allow rounding (e.g. 3.6 vs 3.55, 43 vs 43.24, 42 vs 42.36)
             elif metric_key in matched_row:
                 actual_val = matched_row[metric_key]
             else:
                 print(f"  [FAIL] {fpath.name}:{line_num} - Column '{metric_key}' not found in floor table.")
                 mismatches += 1
                 continue
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > tol_use:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol_use})")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except ValueError:
-                if str(actual_val).strip() != val_str:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            if not verify_num(actual_val, is_pct=is_pct, pct_tol=0.6):
+                mismatches += 1
             continue
 
         # Paired check: paired:model:metric
@@ -308,21 +297,8 @@ def check_numbers(
                 mismatches += 1
                 continue
             actual_val = matched_row[col_target]
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > tol:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except ValueError:
-                if str(actual_val).strip() != val_str:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            if not verify_num(actual_val):
+                mismatches += 1
             continue
 
         # Fusion check: fusion:dropout_p:column
@@ -358,21 +334,8 @@ def check_numbers(
                     mismatches += 1
                     continue
 
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > max(tol, 0.005):
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except ValueError:
-                if str(actual_val).strip() != val_str:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            if not verify_num(actual_val):
+                mismatches += 1
             continue
 
         # Synthetic check: synthetic:model:metric
@@ -404,17 +367,7 @@ def check_numbers(
                 mismatches += 1
                 continue
             actual_val = matched_row[metric_key]
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > max(tol, 0.02):
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol=0.02)")
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except Exception as e:
-                print(f"  [FAIL] {fpath.name}:{line_num} - {label}: {e}")
+            if not verify_num(actual_val):
                 mismatches += 1
             continue
 
@@ -451,26 +404,8 @@ def check_numbers(
                 continue
 
             actual_val = matched_row[col_key]
-            try:
-                exp_f = float(val_str)
-                act_f = float(actual_val)
-                diff = abs(exp_f - act_f)
-                if diff > tol:
-                    print(
-                        f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol={tol})"
-                    )
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
-            except ValueError:
-                # String comparison
-                if str(actual_val).strip() != val_str:
-                    print(
-                        f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has '{val_str}', table has '{actual_val}'"
-                    )
-                    mismatches += 1
-                else:
-                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            if not verify_num(actual_val):
+                mismatches += 1
         else:
             print(f"  [WARN] {fpath.name}:{line_num} - Label '{label}' does not follow 'model:corr:column' format.")
 

@@ -1,6 +1,6 @@
 \begin{table}[t]
 \centering
-\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). The confidence interval operationalization (upper bound of $U(1) < 0$ and lower bound of $\hat{R}(1) > 0.50$) is \emph{post hoc}. Gaussian blur and patch occlusion rows are included for completeness. Pass indicates both requirements are satisfied simultaneously.}
+\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). The confidence interval operationalization (upper bound of $U(1) < 0$ and lower bound of $\hat{R}(1) > 0.50$) is \emph{post hoc}. Gaussian blur and patch occlusion rows are included for completeness. \checkmark\ indicates that the pre-declared criterion is met; -- indicates failure or not tested.}
 \label{tab:criterion}
 \fittable{%
 \begin{tabular}{llcccccc}
@@ -9,17 +9,17 @@
 \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
 \textbf{Model} & \textbf{Corruption} & \textbf{Removed} & \textbf{Black} & \textbf{Removed} & \textbf{Black} & \textbf{Removed} & \textbf{Black} \\
 \midrule
-\textbf{Qwen2-VL-2B} & Swapped (Swapblend) & Fail (lower CI of $\hat{R} \le 0.5$) & Fail (lower CI of $\hat{R} \le 0.5$) & Fail (lower CI of $\hat{R} \le 0.5$) & Fail (lower CI of $\hat{R} \le 0.5$) & Fail (lower CI of $\hat{R} \le 0.5$) & Fail (lower CI of $\hat{R} \le 0.5$) \\
- & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
- & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
+\textbf{Qwen2-VL} & Swapped (Swapblend) & -- & -- & -- & -- & -- & -- \\
+ & Gaussian Blur & -- & -- & -- & -- & -- & -- \\
+ & Patch Occlusion & -- & -- & -- & -- & -- & -- \\
 \midrule
-\textbf{SmolVLM-Instruct} & Swapped (Swapblend) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
- & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
- & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
+\textbf{SmolVLM} & Swapped (Swapblend) & -- & -- & -- & -- & -- & -- \\
+ & Gaussian Blur & -- & -- & -- & -- & -- & -- \\
+ & Patch Occlusion & -- & -- & -- & -- & -- & -- \\
 \midrule
-\textbf{LLaVA-1.5-7B} & Swapped (Swapblend) & \textbf{Pass} & Fail (both) & Fail (both) & Fail (both) & \textbf{Pass} & Fail (both) \\
- & Gaussian Blur & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) & Fail (both) \\
- & Patch Occlusion & Fail (both) & Fail (both) & -- & -- & -- & -- \\
+\textbf{LLaVA-1.5} & Swapped (Swapblend) & \checkmark & -- & -- & -- & \checkmark & -- \\
+ & Gaussian Blur & -- & -- & -- & -- & -- & -- \\
+ & Patch Occlusion & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
 \end{table}

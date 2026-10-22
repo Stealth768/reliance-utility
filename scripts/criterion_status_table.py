@@ -269,8 +269,9 @@ def build_criterion_status_table(
         r"\textbf{Model} & \textbf{Corruption} & \textbf{Sample} & \textbf{Null} & $U(1)$ & $U(1)<0$ & $\hat{R}(1)$ & \textbf{Met?} \\",
         r"\midrule",
     ]
+    from scripts.generate_paper_tables import format_model_name
     for _, r in df.iterrows():
-        m_disp = str(r["model"]).replace("_", r"\_")
+        m_disp = format_model_name(str(r["model"]))
         corr_disp = str(r["corruption"]).replace("_", r"\_")
         sample_disp = str(r["sample"]).replace("_", r"\_")
         null_disp = str(r["null_baseline"]).replace("_", r"\_")

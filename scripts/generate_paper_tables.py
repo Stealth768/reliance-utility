@@ -68,14 +68,31 @@ def fmt_interval(
     return v_str
 
 
+MODEL_DISPLAY_NAMES = {
+    "Qwen2-VL-2B-Instruct": "Qwen2-VL",
+    "Qwen2-VL-2B": "Qwen2-VL",
+    "Qwen/Qwen2-VL-2B-Instruct": "Qwen2-VL",
+    "SmolVLM-Instruct": "SmolVLM",
+    "HuggingFaceTB/SmolVLM-Instruct": "SmolVLM",
+    "llava-1.5-7b-hf": "LLaVA-1.5",
+    "llava-hf/llava-1.5-7b-hf": "LLaVA-1.5",
+    "LLaVA-1.5-7B": "LLaVA-1.5",
+    "FixedModel": "Fixed",
+    "PartialGatedModel": "Partial Gated",
+    "GatedModel": "Gated",
+    "OracleGatedModel": "Oracle Gated",
+    "SharpGatedModel_0.5": "Sharp gate x0.5",
+    "SharpGatedModel_1.0": "Sharp gate x1.0",
+    "SharpGatedModel_2.0": "Sharp gate x2",
+    "SharpGatedModel_4.0": "Sharp gate x4",
+    "SharpGatedModel_8.0": "Sharp gate x8",
+    "SharpGatedModel_16.0": "Sharp gate x16",
+}
+
+
 def format_model_name(raw_name: str) -> str:
-    if "Qwen" in raw_name:
-        return "Qwen2-VL-2B"
-    elif "Smol" in raw_name:
-        return "SmolVLM-Instruct"
-    elif "llava" in raw_name.lower():
-        return "LLaVA-1.5-7B"
-    return raw_name
+    raw = str(raw_name).strip()
+    return MODEL_DISPLAY_NAMES.get(raw, raw)
 
 
 def format_corruption(corr: str) -> str:
@@ -317,18 +334,14 @@ def generate_criterion_status_compact(df_crit: pd.DataFrame, out_path: Path):
         met = bool(r["criterion_met"])
 
         if met:
-            return r"\textbf{Pass}"
-        elif u1_sig and rhat_status != "Strictly > 0.50":
-            return r"Fail (lower CI of $\hat{R} \le 0.5$)"
-        elif not u1_sig and rhat_status == "Strictly > 0.50":
-            return r"Fail ($U \ge 0$)"
+            return r"\checkmark"
         else:
-            return r"Fail (both)"
+            return "--"
 
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). The confidence interval operationalization (upper bound of $U(1) < 0$ and lower bound of $\hat{R}(1) > 0.50$) is \emph{post hoc}. Gaussian blur and patch occlusion rows are included for completeness. Pass indicates both requirements are satisfied simultaneously.}",
+        r"\caption{Criterion status across models, corruptions, sample sizes ($N=500$ main, $N=445$ replication, $N=945$ pooled), and null baselines (bootstrap $B=1000$, seed 42). The confidence interval operationalization (upper bound of $U(1) < 0$ and lower bound of $\hat{R}(1) > 0.50$) is \emph{post hoc}. Gaussian blur and patch occlusion rows are included for completeness. \checkmark\ indicates that the pre-declared criterion is met; -- indicates failure or not tested.}",
         r"\label{tab:criterion}",
         r"\fittable{%",
         r"\begin{tabular}{llcccccc}",
@@ -362,9 +375,9 @@ def generate_criterion_status_compact(df_crit: pd.DataFrame, out_path: Path):
 def compute_full_sample_floor_jsd() -> Dict[str, str]:
     """Compute full-sample (all N=500 main items) floor JSD per model formatted with 3 decimals."""
     models_dir = {
-        "Qwen2-VL-2B": REPO_ROOT / "results" / "raw" / "vlm_main",
-        "SmolVLM-Instruct": REPO_ROOT / "results" / "raw" / "vlm_smol",
-        "LLaVA-1.5-7B": REPO_ROOT / "results" / "raw" / "vlm_llava",
+        "Qwen2-VL": REPO_ROOT / "results" / "raw" / "vlm_main",
+        "SmolVLM": REPO_ROOT / "results" / "raw" / "vlm_smol",
+        "LLaVA-1.5": REPO_ROOT / "results" / "raw" / "vlm_llava",
     }
     floor_res = {}
     for m_short, raw_dir in models_dir.items():
@@ -392,35 +405,31 @@ def compute_full_sample_floor_jsd() -> Dict[str, str]:
     return floor_res
 
 
-def generate_null_sensitivity(df_crit: pd.DataFrame, out_path: Path):
-    """Generate Table 5: null_sensitivity.tex (tab:nullsens)."""
+def generate_null_sensitivity_tables(df_crit: pd.DataFrame, tables_dir: Path):
+    """Generate the three split null sensitivity tables (tab:nullsens-u, tab:nullsens-rhat, tab:nullsens-floor)."""
     sub = df_crit[df_crit["sample"] == "main"].copy()
     floor_lookup = compute_full_sample_floor_jsd()
 
     model_order = ["Qwen2-VL-2B-Instruct", "SmolVLM-Instruct", "llava-1.5-7b-hf"]
     corr_order = ["swapblend", "gaussian", "patch"]
 
-    lines = [
+    # (a) U(1) under removed and black
+    lines_u = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{Sensitivity of terminal reliance $\hat{R}(1)$, terminal utility $U(1)$, and unimodal divergence to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42). The unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ is computed over the full sample of all $N=500$ questions (not restricted to the agreement subset) and reported once per model.}",
-        r"\label{tab:nullsens}",
+        r"\caption{Sensitivity of terminal utility $U(1)$ to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42).}",
+        r"\label{tab:nullsens-u}",
         r"\fittable{%",
-        r"\begin{tabular}{llccccc}",
+        r"\begin{tabular}{llcc}",
         r"\toprule",
-        r" & & \multicolumn{2}{c}{\textbf{Removed Null Baseline}} & \multicolumn{2}{c}{\textbf{Black Null Baseline}} & \textbf{Full-Sample Unimodal Floor} \\",
-        r"\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-7}",
-        r"\textbf{Model} & \textbf{Corruption} & $U(1)$ & $\hat{R}(1)$ & $U(1)$ & $\hat{R}(1)$ & $\text{JSD}(\text{blk} \parallel \text{rem})$ \\",
+        r"\textbf{Model} & \textbf{Corruption} & \textbf{Removed Null} & \textbf{Black Null} \\",
         r"\midrule",
     ]
-
     for m in model_order:
         m_display = format_model_name(m)
-        m_floor = floor_lookup.get(m_display, "N/A")
         first_row = True
         for c in corr_order:
             prefix = f"\\textbf{{{m_display}}}" if first_row else ""
-            floor_str = m_floor if first_row else ""
             first_row = False
             corr_display = format_corruption(c)
 
@@ -430,24 +439,69 @@ def generate_null_sensitivity(df_crit: pd.DataFrame, out_path: Path):
             u1_rem_lo, u1_rem_hi = parse_ci_bounds(str(r_rem["U_1_ci_str"]))
             u1_rem = fmt_interval(r_rem["U_1"], u1_rem_lo, u1_rem_hi, signed=True)
 
-            rhat_rem_lo, rhat_rem_hi = parse_ci_bounds(str(r_rem["R_hat_1_ci_str"]))
-            rhat_rem = fmt_interval(r_rem["R_hat_1"], rhat_rem_lo, rhat_rem_hi)
-
             u1_blk_lo, u1_blk_hi = parse_ci_bounds(str(r_blk["U_1_ci_str"]))
             u1_blk = fmt_interval(r_blk["U_1"], u1_blk_lo, u1_blk_hi, signed=True)
+
+            lines_u.append(f"{prefix} & {corr_display} & {u1_rem} & {u1_blk} \\\\")
+        lines_u.append(r"\midrule" if m != model_order[-1] else r"\bottomrule")
+    lines_u.extend([r"\end{tabular}}", r"\end{table}"])
+    (tables_dir / "null_sensitivity_u.tex").write_text("\n".join(lines_u) + "\n", encoding="utf-8")
+    print(f"[OK] Wrote {tables_dir / 'null_sensitivity_u.tex'}")
+
+    # (b) R_hat(1) under removed and black
+    lines_rhat = [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Sensitivity of normalized terminal reliance $\hat{R}(1)$ to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42).}",
+        r"\label{tab:nullsens-rhat}",
+        r"\fittable{%",
+        r"\begin{tabular}{llcc}",
+        r"\toprule",
+        r"\textbf{Model} & \textbf{Corruption} & \textbf{Removed Null} & \textbf{Black Null} \\",
+        r"\midrule",
+    ]
+    for m in model_order:
+        m_display = format_model_name(m)
+        first_row = True
+        for c in corr_order:
+            prefix = f"\\textbf{{{m_display}}}" if first_row else ""
+            first_row = False
+            corr_display = format_corruption(c)
+
+            r_rem = sub[(sub["model"] == m) & (sub["corruption"] == c) & (sub["null_baseline"] == "removed")].iloc[0]
+            r_blk = sub[(sub["model"] == m) & (sub["corruption"] == c) & (sub["null_baseline"] == "black")].iloc[0]
+
+            rhat_rem_lo, rhat_rem_hi = parse_ci_bounds(str(r_rem["R_hat_1_ci_str"]))
+            rhat_rem = fmt_interval(r_rem["R_hat_1"], rhat_rem_lo, rhat_rem_hi)
 
             rhat_blk_lo, rhat_blk_hi = parse_ci_bounds(str(r_blk["R_hat_1_ci_str"]))
             rhat_blk = fmt_interval(r_blk["R_hat_1"], rhat_blk_lo, rhat_blk_hi)
 
-            lines.append(f"{prefix} & {corr_display} & {u1_rem} & {rhat_rem} & {u1_blk} & {rhat_blk} & {floor_str} \\\\")
-        lines.append(r"\midrule" if m != model_order[-1] else r"\bottomrule")
+            lines_rhat.append(f"{prefix} & {corr_display} & {rhat_rem} & {rhat_blk} \\\\")
+        lines_rhat.append(r"\midrule" if m != model_order[-1] else r"\bottomrule")
+    lines_rhat.extend([r"\end{tabular}}", r"\end{table}"])
+    (tables_dir / "null_sensitivity_rhat.tex").write_text("\n".join(lines_rhat) + "\n", encoding="utf-8")
+    print(f"[OK] Wrote {tables_dir / 'null_sensitivity_rhat.tex'}")
 
-    lines.extend([
-        r"\end{tabular}}",
-        r"\end{table}",
-    ])
-    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"[OK] Wrote {out_path}")
+    # (c) Floor JSD per model (3 rows)
+    lines_floor = [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ per model on the full sample of $N=500$ questions (bootstrap $B=1000$, seed 42).}",
+        r"\label{tab:nullsens-floor}",
+        r"\fittable{%",
+        r"\begin{tabular}{lc}",
+        r"\toprule",
+        r"\textbf{Model} & $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ \\",
+        r"\midrule",
+    ]
+    for m in model_order:
+        m_display = format_model_name(m)
+        m_floor = floor_lookup.get(m_display, "N/A")
+        lines_floor.append(f"{m_display} & {m_floor} \\\\")
+    lines_floor.extend([r"\bottomrule", r"\end{tabular}}", r"\end{table}"])
+    (tables_dir / "null_sensitivity_floor.tex").write_text("\n".join(lines_floor) + "\n", encoding="utf-8")
+    print(f"[OK] Wrote {tables_dir / 'null_sensitivity_floor.tex'}")
 
 
 def generate_baseline_metrics(df_base: pd.DataFrame, out_path: Path):
@@ -502,7 +556,7 @@ def generate_synthetic_summary(synth_csv: Path, out_path: Path):
     ]
 
     for _, r in df.iterrows():
-        m_name = str(r["model"]).replace("_", r"\_")
+        m_name = format_model_name(str(r["model"]))
         null_k = str(r["null_kind"]).replace("_", r"\_")
         clean_acc = fmt_num(r["clean_acc"])
         null_acc = fmt_num(r["null_acc"])
@@ -562,7 +616,7 @@ def main():
     generate_paired_swap_vs_gauss(tables_dir / "paired_swap_vs_gauss.tex", derived_dir / "paired_swap_vs_gauss.csv")
     generate_headline_replication(df_crit, tables_dir / "headline_replication.tex")
     generate_criterion_status_compact(df_crit, tables_dir / "criterion_status_compact.tex")
-    generate_null_sensitivity(df_crit, tables_dir / "null_sensitivity.tex")
+    generate_null_sensitivity_tables(df_crit, tables_dir)
     generate_baseline_metrics(df_base, tables_dir / "baseline_metrics.tex")
     generate_synthetic_summary(synth_csv, tables_dir / "synthetic_summary.tex")
     print("[SUCCESS] All 7 paper tables generated.")
