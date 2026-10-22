@@ -87,6 +87,7 @@ def compute_floor_fraction(
             "floor_fraction_ci_hi": float(np.percentile(boot_frac, 97.5)),
             "ratio_swap_over_floor": m_s / m_f,
             "analysis_status": "post hoc",
+            "floor_pct": round(pt_frac * 100.0, 1),
         })
 
     df = pd.DataFrame(rows)

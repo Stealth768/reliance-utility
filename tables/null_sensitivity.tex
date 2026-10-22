@@ -1,8 +1,9 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
 \caption{Sensitivity of terminal reliance $\hat{R}(1)$, terminal utility $U(1)$, and unimodal divergence to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42). The unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ is computed over the full sample of all $N=500$ questions (not restricted to the agreement subset) and reported once per model.}
 \label{tab:nullsens}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llccccc}
 \toprule
  & & \multicolumn{2}{c}{\textbf{Removed Null Baseline}} & \multicolumn{2}{c}{\textbf{Black Null Baseline}} & \textbf{Full-Sample Unimodal Floor} \\
@@ -21,5 +22,6 @@
  & Gaussian Blur & -0.0220 [-0.0580, +0.0140] & 0.2947 [0.2548, 0.3357] & -0.0140 [-0.0420, +0.0140] & 0.1125 [0.0912, 0.1370] &  \\
  & Patch Occlusion & -0.0200 [-0.0541, +0.0160] & 0.2585 [0.2240, 0.2928] & -0.0120 [-0.0380, +0.0140] & 0.0705 [0.0572, 0.0845] &  \\
 \bottomrule
-\end{tabular}
-\end{table*}
+\end{tabular}%
+}
+\end{table}

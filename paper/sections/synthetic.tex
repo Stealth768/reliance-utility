@@ -18,25 +18,27 @@ Table~\ref{tab:synthetic_summary} reports the empirical crossing points $S^*$ an
 \includegraphics[width=0.32\textwidth]{figures/fig2_reliance_curves_v04.pdf}%
 \hfill
 \includegraphics[width=0.32\textwidth]{figures/fig3_mi_bar_v04.pdf}
-\caption{Synthetic benchmark. Left: utility $U(S)$ versus severity for
+\caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for
   Fixed, PartialGated, and Gated models. Centre: normalized reliance
   $\hat R(S)$. Right: Misalignment Index (MI) with 95\% CIs. The
   quality-aware Gated model achieves the lowest MI.}
 \label{fig:synthetic}
 \end{figure*}
 
-\begin{table*}[t]
+\begin{table}[t]
 \centering
 \caption{Synthetic Benchmark Results across Architectures and Null Baselines (Iteration v0.4).}
 \label{tab:synthetic_summary}
 \small
-\input{tables/synthetic_summary.tex}
-\end{table*}
+\resizebox{\textwidth}{!}{%
+\input{tables/synthetic_summary.tex}%
+}
+\end{table}
 
 Under the canonical \emph{removed} null baseline:
 \begin{itemize}
-    \item The quality-blind \textbf{FixedModel} crosses zero utility at $S^* \approx 0.65$ but maintains heavy predictive reliance, resulting in high misalignment ($\mi \approx 1.49$, 95\% CI $[1.45, 1.51]$).
-    \item The \textbf{PartialGatedModel} yields moderate misalignment ($\mi \approx 1.29$, 95\% CI $[1.27, 1.30]$).
-    \item The quality-aware \textbf{GatedModel} exhibits substantially lower misalignment ($\mi \approx 0.65$, 95\% CI $[0.64, 0.66]$).
+    \item The quality-blind \textbf{FixedModel} crosses zero utility at $S^* \approx 0.65$ but maintains heavy predictive reliance, resulting in high misalignment ($\mi \approx \checknum{1.48}{synthetic:FixedModel:MI}$, 95\% CI $[\checknum{1.454}{synthetic:FixedModel:MI_lo}, \checknum{1.507}{synthetic:FixedModel:MI_hi}]$).
+    \item The \textbf{PartialGatedModel} yields moderate misalignment ($\mi \approx \checknum{1.29}{synthetic:PartialGatedModel:MI}$, 95\% CI $[\checknum{1.267}{synthetic:PartialGatedModel:MI_lo}, \checknum{1.305}{synthetic:PartialGatedModel:MI_hi}]$).
+    \item The quality-aware \textbf{GatedModel} exhibits substantially lower misalignment ($\mi \approx \checknum{0.65}{synthetic:GatedModel:MI}$, 95\% CI $[\checknum{0.639}{synthetic:GatedModel:MI_lo}, \checknum{0.661}{synthetic:GatedModel:MI_hi}]$).
 \end{itemize}
-The paired bootstrap analysis confirms that the architectural ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$ is statistically significant with non-overlapping confidence intervals.
+The pre-declared comparison of independent hierarchical intervals for \textbf{FixedModel} and \textbf{PartialGatedModel} overlapped narrowly ($[1.373, 1.637]$ vs.\ $[1.196, 1.405]$), and the \textbf{GatedModel} misalignment of $\mi \approx \checknum{0.65}{synthetic:GatedModel:MI}$ did not reach the original 0.2 threshold. The paired bootstrap analysis confirming the ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$ was conducted \emph{post hoc}.

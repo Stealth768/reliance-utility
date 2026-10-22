@@ -115,6 +115,9 @@ def check_numbers(
     paired_csv = REPO_ROOT / "results" / "derived" / "paired_swap_vs_gauss.csv"
     df_paired = pd.read_csv(paired_csv) if paired_csv.exists() else None
 
+    synth_csv = REPO_ROOT / "results" / "derived" / "synthetic_summary_v04.csv"
+    df_synth = pd.read_csv(synth_csv) if synth_csv.exists() else None
+
     mismatches = 0
     total_checks = len(all_checks)
 
@@ -250,7 +253,7 @@ def check_numbers(
                 mismatches += 1
                 continue
             tol_use = tol
-            if metric_key in ("fraction_pct", "floor_fraction_pct"):
+            if metric_key in ("fraction_pct", "floor_fraction_pct", "floor_pct"):
                 actual_val = float(matched_row["floor_fraction"]) * 100.0
                 tol_use = 0.6  # Allow rounding (e.g. 3.6 vs 3.55, 43 vs 43.24, 42 vs 42.36)
             elif metric_key in matched_row:
@@ -370,6 +373,49 @@ def check_numbers(
                     mismatches += 1
                 else:
                     print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            continue
+
+        # Synthetic check: synthetic:model:metric
+        if len(parts) == 3 and parts[0] == "synthetic":
+            _, model_key, metric_key = parts
+            if df_synth is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {synth_csv} not found.")
+                mismatches += 1
+                continue
+            sub = df_synth[df_synth["null_kind"] == "removed"]
+            matched_row = None
+            for _, r in sub.iterrows():
+                m = str(r["model"])
+                if m == model_key:
+                    matched_row = r
+                    break
+            if matched_row is None:
+                for _, r in sub.iterrows():
+                    m = str(r["model"])
+                    if model_key in m or m.lower().startswith(model_key.lower()):
+                        matched_row = r
+                        break
+            if matched_row is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Model '{model_key}' not found in synthetic table.")
+                mismatches += 1
+                continue
+            if metric_key not in matched_row:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Column '{metric_key}' not found in synthetic table.")
+                mismatches += 1
+                continue
+            actual_val = matched_row[metric_key]
+            try:
+                exp_f = float(val_str)
+                act_f = float(actual_val)
+                diff = abs(exp_f - act_f)
+                if diff > max(tol, 0.02):
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str}, table has {actual_val} (diff={diff:.5f} > tol=0.02)")
+                    mismatches += 1
+                else:
+                    print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
+            except Exception as e:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {label}: {e}")
+                mismatches += 1
             continue
 
         if len(parts) == 3:

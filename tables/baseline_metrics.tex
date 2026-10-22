@@ -1,8 +1,9 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
 \caption{Static visual reliance and sensitivity baseline metrics on the swapped image across models on main ($N=500$) and replication ($N=445$) samples (bootstrap $B=1000$, seed 42). Metrics: Visual Reliance Score ($\text{VRS} = \text{acc}_{\text{clean}} - \text{acc}_{\text{swapped}}$), Black-image drop ($\text{acc}_{\text{clean}} - \text{acc}_{\text{black}}$), Image Sensitivity ($P[\arg\max(\text{clean}) \ne \arg\max(\text{swapped})]$), and Visual Harm Rate ($P[\text{clean wrong} \land \text{swapped correct}]$).}
 \label{tab:baseline}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Model} & \textbf{Sample} & \textbf{VRS} [95\% CI] & \textbf{Black-image drop} [95\% CI] & \textbf{Sensitivity} [95\% CI] & \textbf{Harm Rate} [95\% CI] \\
@@ -15,5 +16,6 @@ Qwen2-VL-2B & Replication ($N=445$) & 0.461 [0.409, 0.515] & 0.351 [0.306, 0.409
 SmolVLM-Instruct & Replication ($N=445$) & 0.398 [0.342, 0.456] & 0.346 [0.294, 0.400] & 0.600 [0.555, 0.647] & 0.058 [0.038, 0.081] \\
 LLaVA-1.5-7B & Replication ($N=445$) & 0.312 [0.263, 0.364] & 0.315 [0.263, 0.373] & 0.456 [0.407, 0.506] & 0.045 [0.027, 0.065] \\
 \bottomrule
-\end{tabular}
-\end{table*}
+\end{tabular}%
+}
+\end{table}

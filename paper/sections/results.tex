@@ -18,7 +18,7 @@ image removed from the prompt unless stated otherwise.
 \includegraphics[width=0.48\textwidth]{figures/vlm_reliance_curves.pdf}
 \caption{Utility (left) and normalized reliance (right) as a function of
   corruption severity for three VLMs under swapped, Gaussian and patch
-  corruptions. Shaded bands are 95\% bootstrap intervals.}
+  corruptions ($N=500$ main sample, removed-image null baseline, bootstrap $B=1000$, seed 42). Shaded bands are 95\% bootstrap intervals.}
 \label{fig:vlm_curves}
 \end{figure*}
 
@@ -31,8 +31,8 @@ Across models under the swapped condition, $\hat R(1)$ ranges from
 \checknum{0.4932}{SmolVLM:swapblend:R_hat_s1}.
 Under Gaussian blending and patch masking, reliance at maximum severity is
 lower for every model, and the paired difference between swapped and
-Gaussian conditions is reported in Table~\ref{tab:paired}; its intervals
-exclude zero for all three models.
+Gaussian conditions is reported in Table~\ref{tab:paired}; the interval
+excludes zero for all three models.
 \input{tables/headline_main.tex}
 \input{tables/paired_swap_vs_gauss.tex}
 
@@ -108,7 +108,7 @@ factor only for Qwen2-VL.
 \centering
 \includegraphics[width=0.85\columnwidth]{figures/vlm_mi_bar.pdf}
 \caption{Misalignment Index for the three VLMs under each corruption,
-  where defined. Error bars are 95\% bootstrap CIs. In most VLM
+  where defined ($N=500$ main sample, removed-image null baseline, bootstrap $B=1000$, seed 42). Error bars are 95\% bootstrap CIs. In most VLM
   conditions the MI is undefined because utility does not cross zero
   before the final severity.}
 \label{fig:vlm_mi}

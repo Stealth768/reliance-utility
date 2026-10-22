@@ -17,30 +17,35 @@ with misinformation, consistently produces higher terminal reliance than
 Gaussian noise, and this gap is statistically significant for all three
 models. The gap means that the model's output distribution remains
 further from its no-image behaviour when given a wrong image than when
-given noise, even though both are equally uninformative for the task.
+given noise, even though neither provides task-relevant information for the query.
 
-\paragraph{Baseline sensitivity as a finding.}
-The dependence of conclusions on the no-input baseline is not a nuisance
-but a substantive result. For SmolVLM and LLaVA-1.5, roughly 40\% of
-the raw reliance measured under the removed-image baseline can be
-attributed (heuristically) to the presence of image tokens rather than
-image content. This suggests that studies comparing predictions with and
-without image tokens may overestimate a model's dependence on the visual
-signal. The black-image baseline, which preserves the token structure,
-gives a more conservative estimate.
+\paragraph{Baseline sensitivity.}
+Conclusions for individual models depend on the no-input baseline. The
+black-image and removed-image predictions differ little for Qwen2-VL and
+substantially for SmolVLM and LLaVA-1.5: as an informal heuristic (JSD is
+not additive), this divergence equals about
+\checknum{3.6}{floor:Qwen2-VL-2B-Instruct:floor_pct}\%,
+\checknum{43}{floor:SmolVLM-Instruct:floor_pct}\% and
+\checknum{42}{floor:llava-1.5-7b-hf:floor_pct}\% of swapped-image terminal
+reliance for the three models. We hypothesize, without testing it, that part
+of the reliance of SmolVLM and LLaVA-1.5 reflects the presence of image
+tokens and not their content. The black-image baseline, which keeps the
+token structure, gives lower values, but we do not claim it is more accurate.
 
 \paragraph{Implications for evaluation.}
 Our pre-registered criterion was met in only two of 42 combinations.
 This does not mean over-reliance is absent; it means that a strict,
 pre-specified criterion is hard to satisfy when both reliance and utility
 carry sampling uncertainty and when conclusions shift with the baseline.
-We recommend that future evaluations report results under at least two
-baselines and state how the no-input condition is constructed.
+Our results suggest that studies comparing predictions with and without
+image tokens may overestimate visual dependence when the token structure itself
+shifts predictions, and we recommend that future evaluations report results
+under at least two baselines and state how the no-input condition is constructed.
 
 \paragraph{Dropout and raw versus normalized reliance.}
-The fusion study shows that modality dropout is effective at reducing raw
-reliance and improving degraded-input accuracy, but the normalized
-measures $\hat R$ and MI give the opposite signal because the denominator
-$R(0)$ shrinks faster than the numerator. This is a limitation of any
-ratio-based measure and should be kept in mind when comparing models
-whose clean-input reliance differs substantially.
+In the fusion proxy, dropout lowers raw terminal reliance and raises
+accuracy with view A removed or degraded, but terminal utility remains
+negative for every $p$ and is not monotone in $p$. The normalized measures
+$\hat R$ and MI move in the opposite direction; we suggest (post hoc) that
+this reflects the shrinking denominator $R(0)$. Ratio-based measures should
+be read with caution when clean-input reliance differs across models.

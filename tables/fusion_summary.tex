@@ -1,16 +1,18 @@
 \begin{table}[t]
 \centering
-\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy.}
+\caption{Modality-Dropout Impact on Misalignment Index (MI) and Clean Accuracy in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
 \label{tab:fusion}\label{tab:fusion_summary}
 \small
-\begin{tabular}{lrrrrrrrrrrrrrrr}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ccccccccc}
 \toprule
-dataset & dropout_p & n_seeds & clean_acc & acc_null_removed & acc_deg_1 & U_1 & U_1_ci_low & U_1_ci_high & R_0 & R_1_raw & R_hat_1 & S_star & MI & MI_ci_low & MI_ci_high \\
+$p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & MI \\
 \midrule
-fashionmnist & 0.000000 & 5 & 0.887920 & 0.561960 & 0.276080 & -0.285880 & -0.353603 & -0.207838 & 0.330845 & 0.610619 & 1.845638 & 0.500000 & 1.657078 & 1.441700 & 2.082123 \\
-fashionmnist & 0.100000 & 5 & 0.887720 & 0.839600 & 0.447960 & -0.391640 & -0.441723 & -0.339759 & 0.055724 & 0.451646 & 8.105111 & 0.250000 & 4.585811 & 4.207146 & 4.922483 \\
-fashionmnist & 0.250000 & 5 & 0.884280 & 0.847680 & 0.555040 & -0.292640 & -0.338246 & -0.244877 & 0.039503 & 0.330318 & 8.361940 & 0.250000 & 4.513616 & 4.235336 & 5.243992 \\
-fashionmnist & 0.500000 & 5 & 0.882320 & 0.858360 & 0.725640 & -0.132720 & -0.160125 & -0.108277 & 0.023833 & 0.147774 & 6.200458 & 0.375000 & 3.684212 & 3.421911 & 3.944851 \\
+0.00 & 0.8879 & 0.5620 & 0.2761 & -0.2859 & 0.3308 & 0.6106 & 1.8456 & 1.6571 \\
+0.10 & 0.8877 & 0.8396 & 0.4480 & -0.3916 & 0.0557 & 0.4516 & 8.1051 & 4.5858 \\
+0.25 & 0.8843 & 0.8477 & 0.5550 & -0.2926 & 0.0395 & 0.3303 & 8.3619 & 4.5136 \\
+0.50 & 0.8823 & 0.8584 & 0.7256 & -0.1327 & 0.0238 & 0.1478 & 6.2005 & 3.6842 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
