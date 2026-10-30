@@ -1,4 +1,4 @@
-\section{Results}
+\section{Evaluation on Vision-Language Models}
 \label{sec:results}
 
 \paragraph{Setup.}
@@ -11,7 +11,7 @@ and Gaussian corruptions. All intervals are 95\% bootstrap intervals over
 questions (1000 resamples, fixed seed). The no-input baseline is the
 image removed from the prompt unless stated otherwise.
 
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.48\textwidth]{figures/vlm_utility_curves.pdf}%
 \hfill
@@ -20,7 +20,7 @@ image removed from the prompt unless stated otherwise.
   corruption severity for three VLMs under swapped, Gaussian and patch
   corruptions ($N=500$ main sample, removed-image null baseline, bootstrap $B=1000$, seed 42). Shaded bands are 95\% bootstrap intervals.}
 \label{fig:vlm_curves}
-\end{figure*}
+\end{figure}
 
 \paragraph{Residual reliance under a swapped image.}
 Table~\ref{tab:headline} reports normalized terminal reliance
