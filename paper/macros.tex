@@ -22,3 +22,14 @@
 
 % Abstract keywords macro
 \providecommand{\keywords}[1]{\vspace{0.5em}\noindent\textbf{Keywords:} #1}
+
+% Abstract environment compatibility for svmult document class
+\makeatletter
+\ifdefined\@abstract
+  \renewenvironment{abstract}{%
+    \par\noindent\textbf{\abstractname}\enspace\ignorespaces
+  }{%
+    \par\vspace{\baselineskip}
+  }
+\fi
+\makeatother

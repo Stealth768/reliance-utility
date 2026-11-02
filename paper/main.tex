@@ -1,21 +1,38 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[graybox]{svmult}
 
-\usepackage[margin=2.5cm]{geometry}
+% Springer fonts and formatting
+\usepackage{mathptmx}       % selects Times Roman as basic font
+\usepackage{helvet}         % selects Helvetica as sans-serif font
+\usepackage{courier}        % selects Courier as typewriter font
+\usepackage{type1cm}        % activate if fonts are not available on system
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
-\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{xcolor}
 
 % Custom macros and notations
-\input{paper/macros.tex}
+\IfFileExists{paper/macros.tex}{%
+  \input{paper/macros.tex}%
+}{%
+  \input{macros.tex}%
+}
 
-\title{\textbf{Reliance-Utility Misalignment in Multimodal AI:\\Formal Framework and Multi-Model Evaluation}}
-\author{Anonymous Authors}
-\date{\today}
+\makeindex             % used for the subject index
 
 \begin{document}
+
+\title*{Reliance-Utility Misalignment in Multimodal AI:\\Formal Framework and Multi-Model Evaluation}
+\titlerunning{Reliance-Utility Misalignment in Multimodal AI}
+\author{Anonymous Authors}
+\authorrunning{Anonymous Authors}
+\institute{Anonymous Institution \at Anonymous Address, \email{anonymous@example.com}}
 
 \maketitle
 
@@ -30,8 +47,11 @@
 \input{paper/sections/limitations.tex}
 \input{paper/sections/conclusion.tex}
 
-\bibliographystyle{plain}
-\bibliography{paper/refs}
-
+\bibliographystyle{spmpsci}
+\IfFileExists{paper/refs.bib}{%
+  \bibliography{paper/refs}%
+}{%
+  \bibliography{refs}%
+}
 
 \end{document}
