@@ -1,23 +1,22 @@
 \begin{table}[t]
 \centering
-\caption{Sensitivity of terminal utility $U(1)$ to the choice of null baseline (Removed vs.\ Black image) on the main sample ($N=500$, bootstrap $B=1000$, seed 42).}
+\caption{Sensitivity of $U(1)$ to null baseline (Removed vs.\ Black image),
+  main sample ($N=500$, $B=1000$, seed 42). Intervals are 95\% bootstrap CIs.}
 \label{tab:nullsens-u}
-\fittable{%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
-\textbf{Model} & \textbf{Corruption} & \textbf{Removed Null} & \textbf{Black Null} \\
+\textbf{Model} & \textbf{Corruption} & Removed null & Black null \\
 \midrule
-\textbf{Qwen2-VL} & Swapped (Swapblend) & -0.064 (-0.114, -0.018) & -0.048 (-0.096, -0.002) \\
- & Gaussian Blur & -0.030 (-0.068, +0.006) & -0.014 (-0.052, +0.024) \\
- & Patch Occlusion & -0.006 (-0.030, +0.020) & +0.010 (-0.012, +0.030) \\
-\midrule
-\textbf{SmolVLM} & Swapped (Swapblend) & -0.016 (-0.062, +0.030) & -0.002 (-0.046, +0.042) \\
- & Gaussian Blur & -0.022 (-0.068, +0.022) & -0.008 (-0.048, +0.030) \\
- & Patch Occlusion & +0.004 (-0.032, +0.042) & +0.018 (-0.002, +0.038) \\
-\midrule
-\textbf{LLaVA-1.5} & Swapped (Swapblend) & -0.048 (-0.092, -0.004) & -0.040 (-0.082, +0.002) \\
- & Gaussian Blur & -0.022 (-0.058, +0.014) & -0.014 (-0.042, +0.014) \\
- & Patch Occlusion & -0.020 (-0.054, +0.016) & -0.012 (-0.038, +0.014) \\
+Qwen2-VL  & Swapped  & $-$0.06 ($-$0.11, $-$0.02) & $-$0.05 ($-$0.10, $-$0.00) \\
+          & Gaussian & $-$0.03 ($-$0.07, $+$0.01) & $-$0.01 ($-$0.05, $+$0.02) \\
+          & Patch    & $-$0.01 ($-$0.03, $+$0.02) & $+$0.01 ($-$0.01, $+$0.03) \\
+SmolVLM   & Swapped  & $-$0.02 ($-$0.06, $+$0.03) & $-$0.00 ($-$0.05, $+$0.04) \\
+          & Gaussian & $-$0.02 ($-$0.07, $+$0.02) & $-$0.01 ($-$0.05, $+$0.03) \\
+          & Patch    & $+$0.00 ($-$0.03, $+$0.04) & $+$0.02 ($-$0.00, $+$0.04) \\
+LLaVA-1.5 & Swapped  & $-$0.05 ($-$0.09, $-$0.00) & $-$0.04 ($-$0.08, $+$0.00) \\
+           & Gaussian & $-$0.02 ($-$0.06, $+$0.01) & $-$0.01 ($-$0.04, $+$0.01) \\
+           & Patch    & $-$0.02 ($-$0.05, $+$0.02) & $-$0.01 ($-$0.04, $+$0.01) \\
 \bottomrule
 \end{tabular}}
 \end{table}

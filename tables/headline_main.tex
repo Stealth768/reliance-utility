@@ -1,23 +1,24 @@
 \begin{table}[t]
 \centering
-\caption{Main sample headline results ($N=500$, bootstrap $B=1000$, seed 42). Terminal normalized reliance $\hat{R}(1)$ and terminal utility $U(1)$ across models and corruptions under the removed-image null baseline.}
-\label{tab:headline}
-\fittable{%
+\caption{Main sample headline results ($N=500$, $B=1000$, seed 42).
+  Terminal normalized reliance $\hat{R}(1)$ and terminal utility $U(1)$
+  across models and corruptions under the removed-image null baseline.
+  Intervals are 95\% bootstrap CIs.}
+\label{tab:headline-main}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Model} & \textbf{Corruption} & \textbf{Clean Acc} & \textbf{Null Acc} & $\hat{R}(1)$ & $U(1)$ \\
+\textbf{Model} & \textbf{Corruption} & Clean Acc & Null Acc & $\hat{R}(1)$ (lo, hi) & $U(1)$ (lo, hi) \\
 \midrule
-\textbf{Qwen2-VL} & Swapped (Swapblend) & 0.820 & 0.436 & 0.487 (0.437, 0.542) & -0.064 (-0.114, -0.018) \\
- & Gaussian Blur & 0.820 & 0.436 & 0.168 (0.147, 0.189) & -0.030 (-0.068, +0.006) \\
- & Patch Occlusion & 0.820 & 0.436 & 0.029 (0.025, 0.033) & -0.006 (-0.030, +0.020) \\
-\midrule
-\textbf{SmolVLM} & Swapped (Swapblend) & 0.766 & 0.368 & 0.493 (0.446, 0.547) & -0.016 (-0.062, +0.030) \\
- & Gaussian Blur & 0.766 & 0.368 & 0.381 (0.337, 0.424) & -0.022 (-0.068, +0.022) \\
- & Patch Occlusion & 0.766 & 0.368 & 0.233 (0.206, 0.265) & +0.004 (-0.032, +0.042) \\
-\midrule
-\textbf{LLaVA-1.5} & Swapped (Swapblend) & 0.794 & 0.484 & 0.578 (0.514, 0.653) & -0.048 (-0.092, -0.004) \\
- & Gaussian Blur & 0.794 & 0.484 & 0.295 (0.255, 0.336) & -0.022 (-0.058, +0.014) \\
- & Patch Occlusion & 0.794 & 0.484 & 0.258 (0.224, 0.293) & -0.020 (-0.054, +0.016) \\
+Qwen2-VL  & Swapped & 0.820 & 0.436 & 0.49 (0.44, 0.54) & $-$0.06 ($-$0.11, $-$0.02) \\
+          & Gaussian & 0.820 & 0.436 & 0.17 (0.15, 0.19) & $-$0.03 ($-$0.07, $+$0.01) \\
+          & Patch    & 0.820 & 0.436 & 0.03 (0.03, 0.03) & $-$0.01 ($-$0.03, $+$0.02) \\
+SmolVLM   & Swapped & 0.766 & 0.368 & 0.49 (0.45, 0.55) & $-$0.02 ($-$0.06, $+$0.03) \\
+          & Gaussian & 0.766 & 0.368 & 0.38 (0.34, 0.42) & $-$0.02 ($-$0.07, $+$0.02) \\
+          & Patch    & 0.766 & 0.368 & 0.23 (0.21, 0.27) & $+$0.00 ($-$0.03, $+$0.04) \\
+LLaVA-1.5 & Swapped & 0.794 & 0.484 & 0.58 (0.51, 0.65) & $-$0.05 ($-$0.09, $-$0.00) \\
+           & Gaussian & 0.794 & 0.484 & 0.30 (0.26, 0.34) & $-$0.02 ($-$0.06, $+$0.01) \\
+           & Patch    & 0.794 & 0.484 & 0.26 (0.22, 0.29) & $-$0.02 ($-$0.05, $+$0.02) \\
 \bottomrule
 \end{tabular}}
 \end{table}

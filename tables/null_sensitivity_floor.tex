@@ -1,15 +1,17 @@
 \begin{table}[t]
 \centering
-\caption{Unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ per model on the full sample of $N=500$ questions (bootstrap $B=1000$, seed 42).}
+\caption{Unimodal floor divergence $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$
+  per model, main sample ($N=500$, $B=1000$, seed 42).
+  Intervals are 95\% bootstrap CIs.}
 \label{tab:nullsens-floor}
-\fittable{%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lc}
 \toprule
-\textbf{Model} & $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ \\
+\textbf{Model} & $\text{JSD}(B_{\text{black}} \parallel B_{\text{removed}})$ (lo, hi) \\
 \midrule
-Qwen2-VL & 0.005 (0.004, 0.005) \\
-SmolVLM & 0.077 (0.068, 0.085) \\
-LLaVA-1.5 & 0.069 (0.061, 0.078) \\
+Qwen2-VL  & 0.01 (0.00, 0.01) \\
+SmolVLM   & 0.08 (0.07, 0.09) \\
+LLaVA-1.5 & 0.07 (0.06, 0.08) \\
 \bottomrule
 \end{tabular}}
 \end{table}

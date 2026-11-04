@@ -3,46 +3,26 @@
 
 \begin{itemize}
 \item \textbf{Null-baseline dependence.} Both utility and reliance are
-  defined relative to a no-input baseline. Conclusions for individual
-  models depend on whether that baseline is a removed image or a black
-  image; the divergence between the two is about two orders of magnitude
-  larger for SmolVLM and LLaVA-1.5 than for Qwen2-VL, and part of their
-  residual reliance may reflect the presence of image tokens rather than
-  image content.
+  defined relative to a no-input baseline; conclusions for individual
+  models depend on this choice (see Section~\ref{sec:discussion}).
 
 \item \textbf{Multiple comparisons.} The pre-declared criterion is evaluated
-  across 42 model--corruption--sample--baseline combinations without correction,
-  and the two that satisfy it overlap (same model, same corruption, different
-  sample sizes).
+  across 42 model--corruption--sample--baseline combinations without
+  correction; the two satisfying combinations overlap (same model, same
+  corruption, different sample sizes).
 
 \item \textbf{Operationalization after the fact.} The interval-based
-  operationalization of the pre-declared criterion was fixed after seeing data.
-  The dropout hypotheses H1 to H3 were committed in the same commit as the
-  training code, before any training run; the log is not an external registry.
+  operationalization of the pre-declared criterion was fixed after seeing
+  data. Dropout hypotheses H1--H2 were committed in the same commit as the
+  training code; the log is not an external registry.
 
-\item \textbf{Normalization by $R(0)$.} Normalized reliance $\hat R$ and
-  the Misalignment Index divide by clean-input reliance. When $R(0)$ is
-  small, as in the dropout study at high $p$, both measures are inflated
-  and cross-condition comparisons are not informative.
-
-\item \textbf{Misalignment Index.} Undefined in most VLM conditions
-  (utility does not cross zero before the last grid point); validated
-  mainly on synthetic models; conflates gate sharpness and crossing
-  timing.
-
-\item \textbf{Scope.} One VQA dataset (A-OKVQA, $N=500$ main, $N=445$
-  replication), one multiple-choice format, three models (one in 4-bit
-  NF4 quantization), one swap pairing per sample, and no autonomous
-  driving evaluation. The fusion study uses a two-view Fashion-MNIST
-  proxy with simple encoders.
-
-\item \textbf{4-bit quantization.} LLaVA-1.5-7B is evaluated in 4-bit
-  NormalFloat quantization due to GPU memory constraints. Quantization may
-  alter logit calibration relative to full-precision weights.
+\item \textbf{Scope.} One VQA dataset (A-OKVQA, $N=500$ main,
+  $N=445$ replication), one multiple-choice format, three models (one in
+  4-bit NF4 quantization), one swap pairing per sample. The fusion study
+  uses a two-view Fashion-MNIST proxy with simple encoders.
 
 \item \textbf{Prompt sensitivity.} The proportion of probability mass
   assigned to choice letters is sensitive to the prompt template. Models
   whose letter mass falls below 90\% cannot be reliably evaluated under
-  our single-token readout; InternVL2-2B was dropped for a separate
-  library incompatibility.
+  our single-token readout.
 \end{itemize}

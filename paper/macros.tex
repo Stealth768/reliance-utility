@@ -16,20 +16,13 @@
 \newcommand{\jsd}{\text{JSD}}
 \newcommand{\dkl}{D_{\text{KL}}}
 
-% Table formatting macro for single-column LNCS layout
-\newcommand{\fittable}[1]{\begingroup\small\setlength{\tabcolsep}{4pt}
-\resizebox{\linewidth}{!}{#1}\endgroup}
+% Abstract keywords macro (used in svmult \keywords{} call)
+\providecommand{\keywords}[1]{\par\addvspace{0.5\baselineskip}\noindent\textbf{Keywords:} #1}
 
-% Abstract keywords macro
-\providecommand{\keywords}[1]{\vspace{0.5em}\noindent\textbf{Keywords:} #1}
-
-% Abstract environment compatibility for svmult document class
+% Compress paragraph heading spacing to run-in style
 \makeatletter
-\ifdefined\@abstract
-  \renewenvironment{abstract}{%
-    \par\noindent\textbf{\abstractname}\enspace\ignorespaces
-  }{%
-    \par\vspace{\baselineskip}
-  }
-\fi
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {-6\p@ \@plus -2\p@ \@minus -2\p@}%
+  {-0.5em}%
+  {\normalfont\normalsize\bfseries}}
 \makeatother

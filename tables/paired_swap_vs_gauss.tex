@@ -1,15 +1,17 @@
 \begin{table}[t]
 \centering
-\caption{Within-model paired differences in terminal normalized reliance $\Delta \hat{R}(1) = \hat{R}(1)_{\text{swap}} - \hat{R}(1)_{\text{gauss}}$ on the main sample ($N=500$, bootstrap $B=1000$, seed 42).}
+\caption{Within-model paired differences in terminal normalized reliance
+  $\Delta\hat{R}(1) = \hat{R}(1)_{\text{swap}} - \hat{R}(1)_{\text{gauss}}$,
+  main sample ($N=500$, $B=1000$, seed 42). Intervals are 95\% bootstrap CIs.}
 \label{tab:paired}
-\fittable{%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Model} & $\hat{R}(1)_{\text{swap}}$ & $\hat{R}(1)_{\text{gauss}}$ & $\Delta \hat{R}(1)$ & \textbf{Zero Excluded?} \\
+\textbf{Model} & $\hat{R}(1)_{\text{swap}}$ & $\hat{R}(1)_{\text{gauss}}$ & $\Delta\hat{R}(1)$ (lo, hi) & Zero excl.? \\
 \midrule
-Qwen2-VL & 0.487 & 0.168 & +0.319 (+0.276, +0.366) & Yes \\
-SmolVLM & 0.493 & 0.381 & +0.112 (+0.063, +0.166) & Yes \\
-LLaVA-1.5 & 0.578 & 0.295 & +0.284 (+0.227, +0.351) & Yes \\
+Qwen2-VL  & 0.49 & 0.17 & $+$0.32 ($+$0.28, $+$0.37) & Yes \\
+SmolVLM   & 0.49 & 0.38 & $+$0.11 ($+$0.06, $+$0.17) & Yes \\
+LLaVA-1.5 & 0.58 & 0.30 & $+$0.28 ($+$0.23, $+$0.35) & Yes \\
 \bottomrule
 \end{tabular}}
 \end{table}

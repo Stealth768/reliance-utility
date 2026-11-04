@@ -1,10 +1,12 @@
 """Unit test verifying LaTeX table formatting standards across tables/.
 
-Checks:
-1. Every .tex file uses \\fittable wrapping.
-2. No table* float environment is used (all use table).
-3. No unescaped underscore (_) outside math mode ($...$).
-4. No unescaped percent sign (%) outside math mode ($...$) unless it is a line comment.
+Checks (v0.26 Springer SVMult format):
+1. No \\fittable wrapping (removed for svmult single-column).
+2. No \\resizebox wrapping.
+3. \\footnotesize is present for compact tables.
+4. No table* float environment is used (all use table).
+5. No unescaped underscore (_) outside math mode ($...$).
+6. No unescaped percent sign (%) outside math mode ($...$) unless it is a line comment.
 """
 
 import re
@@ -13,6 +15,15 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TABLES_DIR = REPO_ROOT / "tables"
+
+# Tables that live in the appendix and are allowed to omit \footnotesize
+# (e.g., very short tables where it is not needed)
+FOOTNOTESIZE_EXEMPT = {
+    "baseline_metrics.tex",
+    "criterion_status_compact.tex",
+    "criterion_status_by_null_and_sample.tex",
+    "fusion_summary_full.tex",
+}
 
 
 def get_table_files():
@@ -23,12 +34,28 @@ def get_table_files():
 
 
 @pytest.mark.parametrize("tex_path", get_table_files(), ids=lambda p: str(p.relative_to(TABLES_DIR)))
-def test_table_structure_and_fittable(tex_path: Path):
-    """Verify that every table file uses \\fittable and no table*."""
+def test_table_structure_no_fittable(tex_path: Path):
+    """Verify that no table file uses \\fittable or \\resizebox, and no table*."""
     content = tex_path.read_text(encoding="utf-8")
-    assert r"\fittable" in content, f"{tex_path.name} is missing \\fittable wrapping"
+    assert r"\fittable" not in content, (
+        f"{tex_path.name} still uses \\fittable -- remove it for svmult single-column"
+    )
+    assert r"\resizebox" not in content, (
+        f"{tex_path.name} still uses \\resizebox -- remove it for svmult single-column"
+    )
     assert r"\begin{table*}" not in content, f"{tex_path.name} uses two-column table*"
     assert r"\end{table*}" not in content, f"{tex_path.name} uses two-column table*"
+
+
+@pytest.mark.parametrize("tex_path", get_table_files(), ids=lambda p: str(p.relative_to(TABLES_DIR)))
+def test_table_has_footnotesize(tex_path: Path):
+    """Verify that each table file uses \\footnotesize for compact rendering."""
+    if tex_path.name in FOOTNOTESIZE_EXEMPT:
+        pytest.skip(f"{tex_path.name} is exempt from \\footnotesize requirement")
+    content = tex_path.read_text(encoding="utf-8")
+    assert r"\footnotesize" in content, (
+        f"{tex_path.name} is missing \\footnotesize -- add it for svmult column width"
+    )
 
 
 @pytest.mark.parametrize("tex_path", get_table_files(), ids=lambda p: str(p.relative_to(TABLES_DIR)))

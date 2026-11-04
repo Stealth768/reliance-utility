@@ -1,25 +1,25 @@
 \begin{table}[t]
 \centering
-\caption{Sensitivity of Crossing Point $S^*$ and Misalignment Index (MI) to Null Baseline Choice.}
-\label{tab:vlm-null-sensitivity}
-\fittable{%
+\caption{Sensitivity of crossing point $S^*$ and Misalignment Index (MI)
+  to null baseline choice, replication sample ($N=445$, $B=1000$, seed 42).}
+\label{tab:vlm-rep-null-sensitivity}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llllll}
 \toprule
-model\_name & corruption & null\_baseline & null\_acc & S\_star & MI \\
+\textbf{Model} & \textbf{Corruption} & Null & Null Acc & $S^*$ & MI \\
 \midrule
-SmolVLM & gaussian & removed & 0.393 & 1.000 & N/A \\
-SmolVLM & gaussian & black & 0.400 & 0.875 & 0.217 \\
-SmolVLM & swapblend & removed & 0.393 & 0.875 & 0.544 \\
-SmolVLM & swapblend & black & 0.400 & 0.875 & 0.545 \\
-Qwen2-VL & gaussian & removed & 0.461 & 1.000 & N/A \\
-Qwen2-VL & gaussian & black & 0.476 & 0.875 & 0.158 \\
-Qwen2-VL & swapblend & removed & 0.461 & 0.875 & 0.481 \\
-Qwen2-VL & swapblend & black & 0.476 & 0.875 & 0.481 \\
-LLaVA-1.5 & gaussian & removed & 0.497 & 1.000 & N/A \\
-LLaVA-1.5 & gaussian & black & 0.476 & N/A & N/A \\
-LLaVA-1.5 & swapblend & removed & 0.497 & 0.875 & 0.574 \\
-LLaVA-1.5 & swapblend & black & 0.476 & N/A & N/A \\
+SmolVLM   & Gaussian & removed & 0.393 & edge  & N/A \\
+SmolVLM   & Gaussian & black   & 0.400 & 0.875 & 0.217 \\
+SmolVLM   & Swapped  & removed & 0.393 & 0.875 & 0.544 \\
+SmolVLM   & Swapped  & black   & 0.400 & 0.875 & 0.545 \\
+Qwen2-VL  & Gaussian & removed & 0.461 & edge  & N/A \\
+Qwen2-VL  & Gaussian & black   & 0.476 & 0.875 & 0.158 \\
+Qwen2-VL  & Swapped  & removed & 0.461 & 0.875 & 0.481 \\
+Qwen2-VL  & Swapped  & black   & 0.476 & 0.875 & 0.481 \\
+LLaVA-1.5 & Gaussian & removed & 0.497 & edge  & N/A \\
+LLaVA-1.5 & Gaussian & black   & 0.476 & N/A   & N/A \\
+LLaVA-1.5 & Swapped  & removed & 0.497 & 0.875 & 0.574 \\
+LLaVA-1.5 & Swapped  & black   & 0.476 & N/A   & N/A \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular}}
 \end{table}

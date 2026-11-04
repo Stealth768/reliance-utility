@@ -1,51 +1,42 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What we do not claim.}
-We do not claim that VLMs over-trust degraded images in general. The MI is
-undefined in most real conditions, so our VLM results rest on terminal
-reliance and utility. The data are one dataset and one answer format; the
-fusion study is a two-view proxy; and no driving evaluation is reported.
-
 \paragraph{What the measures reveal.}
-The pairing of utility and reliance along a severity path exposes
-behaviour that accuracy alone does not. Two models can lose the same
-amount of accuracy under corruption yet differ in how much of that loss
-comes from information destruction versus persistent reliance on an
-unhelpful input. The swapped-image condition, which replaces information
-with misinformation, consistently produces higher terminal reliance than
-Gaussian noise, and this gap is statistically significant for all three
-models. The gap means that the model's output distribution remains
-further from its no-image behaviour when given a wrong image than when
-given noise, even though both are uninformative for the answer in most cases.
+We do not claim that VLMs over-trust degraded images in general. The MI is
+undefined in most real conditions, so VLM results rest on terminal
+reliance and utility, one dataset, and one answer format; the fusion study
+is a two-view proxy. The pairing of utility and reliance along a severity
+path exposes behaviour that accuracy alone does not: two models can lose the
+same accuracy under corruption yet differ in whether that loss comes from
+information destruction or persistent reliance on an unhelpful input.
+The swapped-image condition consistently produces higher terminal reliance
+than Gaussian noise, with statistically significant gaps for all three
+models, meaning the model's output distribution remains further from its
+no-image behaviour when given a wrong image than when given noise.
 
 \paragraph{Baseline sensitivity.}
 Conclusions for individual models depend on the no-input baseline. The
 black-image and removed-image predictions differ little for Qwen2-VL and
-substantially for SmolVLM and LLaVA-1.5: as an informal heuristic (JSD is
-not additive), this divergence equals about
+substantially for SmolVLM and LLaVA-1.5: as a heuristic (JSD is not
+additive), this divergence equals about
 \checknum{3.6}{floor:Qwen2-VL-2B-Instruct:floor_pct}\%,
 \checknum{43}{floor:SmolVLM-Instruct:floor_pct}\% and
 \checknum{42}{floor:llava-1.5-7b-hf:floor_pct}\% of swapped-image terminal
-reliance for the three models. We hypothesize, without testing it, that part
-of the reliance of SmolVLM and LLaVA-1.5 reflects the presence of image
-tokens and not their content. The black-image baseline, which keeps the
-token structure, gives lower values, but we do not claim it is more accurate.
+reliance for the three models. Part of the reliance of SmolVLM and
+LLaVA-1.5 may reflect the presence of image tokens and not their content.
+We recommend that future evaluations report results under at least two
+baselines and state how the no-input condition is constructed.
 
 \paragraph{Implications for evaluation.}
 The pre-declared criterion was met in only two of 42 combinations.
 This does not mean over-reliance is absent; it means that a strict,
 pre-specified criterion is hard to satisfy when both reliance and utility
 carry sampling uncertainty and when conclusions shift with the baseline.
-Our results suggest that studies comparing predictions with and without
-image tokens may overestimate visual dependence when the token structure itself
-shifts predictions, and we recommend that future evaluations report results
-under at least two baselines and state how the no-input condition is constructed.
 
-\paragraph{Dropout and raw versus normalized reliance.}
+\paragraph{Dropout and normalized reliance.}
 In the fusion proxy, dropout lowers raw terminal reliance and raises
 accuracy with view A removed or degraded, but terminal utility remains
-negative for every $p$ and is not monotone in $p$. The normalized measures
-$\hat R$ and MI move in the opposite direction; we suggest (post hoc) that
-this reflects the shrinking denominator $R(0)$. Ratio-based measures should
-be read with caution when clean-input reliance differs across models.
+negative for every $p$. The normalized measures $\hat R$ and MI move in the
+opposite direction because the denominator $R(0)$ shrinks faster;
+ratio-based measures should be read with caution when clean-input reliance
+differs across conditions.

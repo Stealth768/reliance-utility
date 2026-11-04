@@ -57,15 +57,3 @@ with different modality-dropout rates and reports clean accuracy,
 no-input accuracy and reliance; it is a proxy study and not a claim about
 large multimodal systems.
 
-\paragraph{Calibration under degradation.}
-Prior reports indicate that confidence often fails to fall in proportion
-to accuracy as inputs are corrupted~\cite{ovadia2019can,hendrycks2019benchmarking}. We do not evaluate confidence calibration, but
-residual reliance on an unhelpful input is a related symptom.
-
-\paragraph{Positioning.}
-Measuring reliance by substituting or removing an input is established.
-Our contribution is narrower: a severity-indexed pairing of utility and
-distributional reliance, a crossing point where the input stops helping,
-validation of the measures on synthetic models with controlled reliance,
-and an evaluation of how conclusions depend on the choice of no-input
-baseline.

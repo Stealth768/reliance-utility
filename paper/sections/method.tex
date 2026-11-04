@@ -53,8 +53,4 @@ computed via the trapezoid integration rule. When $S^* = \text{None}$, $\mi = \t
 Unlike earlier formulations, $\mi$ is intentionally left unclipped at the upper boundary: if severe degradation actively causes the model's predictive divergence to exceed its clean baseline ($\hat{R}(S) > 1$), $\mi$ exceeds 1.0, reflecting genuine hyper-reliance on noise.
 
 \subsection{Bootstrap Inference and Confidence Intervals}
-To compute robust confidence intervals, we employ two resampling schemes:
-\begin{enumerate}
-    \item \textbf{Pooled Bootstrap}: $B=1000$ resamples drawn with replacement across all evaluated questions to yield basic percentile confidence intervals.
-    \item \textbf{Two-Level Hierarchical Bootstrap}: Resampling random seeds with replacement, followed by resampling evaluation questions within each resampled seed ($B=1000$). This captures both within-run item variability and across-run initialization variability.
-\end{enumerate}
+We use $B=1000$ percentile bootstrap resamples over questions (fixed seed 42) throughout; all reported intervals are 95\% bootstrap CIs. For the synthetic study a two-level hierarchical resample additionally varies random seeds to capture across-run initialization variability alongside within-run item variability.

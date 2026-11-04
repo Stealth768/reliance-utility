@@ -1,31 +1,30 @@
 \begin{table}[t]
 \centering
-\caption{Sensitivity of Crossing Point $S^*$ and Misalignment Index (MI) to Null Baseline Choice.}
+\caption{Sensitivity of crossing point $S^*$ and Misalignment Index (MI) to null baseline choice.}
 \label{tab:vlm-null-sensitivity}
-\fittable{%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llllll}
 \toprule
-model\_name & corruption & null\_baseline & null\_acc & S\_star & MI \\
+\textbf{Model} & \textbf{Corruption} & Null & Null Acc & $S^*$ & MI \\
 \midrule
-SmolVLM & gaussian & removed & 0.368 & 1.000 & N/A \\
-SmolVLM & gaussian & black & 0.354 & N/A & N/A \\
-SmolVLM & patch & removed & 0.368 & N/A & N/A \\
-SmolVLM & patch & black & 0.354 & N/A & N/A \\
-SmolVLM & swapblend & removed & 0.368 & 1.000 & N/A \\
-SmolVLM & swapblend & black & 0.354 & N/A & N/A \\
-Qwen2-VL & gaussian & removed & 0.436 & 1.000 & N/A \\
-Qwen2-VL & gaussian & black & 0.420 & 1.000 & N/A \\
-Qwen2-VL & patch & removed & 0.436 & N/A & N/A \\
-Qwen2-VL & patch & black & 0.420 & N/A & N/A \\
-Qwen2-VL & swapblend & removed & 0.436 & 0.875 & 0.485 \\
-Qwen2-VL & swapblend & black & 0.420 & 1.000 & N/A \\
-LLaVA-1.5 & gaussian & removed & 0.484 & 1.000 & N/A \\
-LLaVA-1.5 & gaussian & black & 0.476 & 1.000 & N/A \\
-LLaVA-1.5 & patch & removed & 0.484 & N/A & N/A \\
-LLaVA-1.5 & patch & black & 0.476 & N/A & N/A \\
-LLaVA-1.5 & swapblend & removed & 0.484 & 1.000 & N/A \\
-LLaVA-1.5 & swapblend & black & 0.476 & 1.000 & N/A \\
+SmolVLM   & Gaussian & removed & 0.368 & edge & N/A \\
+SmolVLM   & Gaussian & black   & 0.354 & N/A  & N/A \\
+SmolVLM   & Patch    & removed & 0.368 & N/A  & N/A \\
+SmolVLM   & Patch    & black   & 0.354 & N/A  & N/A \\
+SmolVLM   & Swapped  & removed & 0.368 & edge & N/A \\
+SmolVLM   & Swapped  & black   & 0.354 & N/A  & N/A \\
+Qwen2-VL  & Gaussian & removed & 0.436 & edge & N/A \\
+Qwen2-VL  & Gaussian & black   & 0.420 & edge & N/A \\
+Qwen2-VL  & Patch    & removed & 0.436 & N/A  & N/A \\
+Qwen2-VL  & Patch    & black   & 0.420 & N/A  & N/A \\
+Qwen2-VL  & Swapped  & removed & 0.436 & 0.875 & 0.485 \\
+Qwen2-VL  & Swapped  & black   & 0.420 & edge & N/A \\
+LLaVA-1.5 & Gaussian & removed & 0.484 & edge & N/A \\
+LLaVA-1.5 & Gaussian & black   & 0.476 & edge & N/A \\
+LLaVA-1.5 & Patch    & removed & 0.484 & N/A  & N/A \\
+LLaVA-1.5 & Patch    & black   & 0.476 & N/A  & N/A \\
+LLaVA-1.5 & Swapped  & removed & 0.484 & edge & N/A \\
+LLaVA-1.5 & Swapped  & black   & 0.476 & edge & N/A \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular}}
 \end{table}

@@ -1,19 +1,18 @@
 \begin{table}[t]
 \centering
-\caption{Multimodal Reliance-Utility Benchmark Summary across Models and Corruptions.}
-\label{tab:vlm-main-summary}
-\fittable{%
-\begin{tabular}{llrrlllllllllllllllllrlrrrr}
+\caption{Replication sample benchmark summary across models and corruptions ($N=445$).}
+\label{tab:vlm-rep-summary}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
+\begin{tabular}{llcccccc}
 \toprule
-model\_name & corruption & n\_seeds & n\_items & clean\_acc & acc\_s1 & acc\_drop & null\_removed\_acc & null\_black\_acc & swapped\_acc & mean\_letter\_mass & S\_star & sig\_S\_star & MI & MI\_ci\_pooled & MI\_ci\_hierarchical & conditional\_mi\_range & frac\_usable\_resamples & R\_hat\_s1 & R\_hat\_s1\_ci & no\_crossing\_frac & n\_no\_usable\_crossing & frac\_no\_usable\_crossing & n\_no\_usable\_crossing\_no\_cross & n\_no\_usable\_crossing\_edge & n\_no\_usable\_crossing\_r0\_zero & n\_no\_usable\_crossing\_other \\
+\textbf{Model} & \textbf{Corruption} & Clean Acc & Null Acc & $\hat{R}(1)$ (CI) & $U(1)$ & $S^*$ & MI \\
 \midrule
-SmolVLM & gaussian & 1 & 445 & 0.746 & 0.364 & 0.382 & 0.393 & 0.400 & 0.348 & 1.000 & 1.000 (edge) & None & undefined & None & None & [0.2753, 0.3541] & 0.450 & 0.323 & [0.2847, 0.3663] & 0.122 & 550 & 0.550 & 122 & 428 & 0 & 0 \\
-SmolVLM & swapblend & 1 & 445 & 0.746 & 0.355 & 0.391 & 0.393 & 0.400 & 0.348 & 1.000 & 0.875 & None & 0.5442 & [0.4844, 0.6108] & [0.4877, 0.6112] & [0.4844, 0.6108] & 0.789 & 0.553 & [0.4909, 0.6232] & 0.111 & 211 & 0.211 & 111 & 100 & 0 & 0 \\
-Qwen2-VL & gaussian & 1 & 445 & 0.827 & 0.445 & 0.382 & 0.461 & 0.476 & 0.366 & 0.999 & 1.000 (edge) & None & undefined & None & None & [0.1499, 0.2000] & 0.308 & 0.169 & [0.1447, 0.1961] & 0.219 & 692 & 0.692 & 219 & 473 & 0 & 0 \\
-Qwen2-VL & swapblend & 1 & 445 & 0.827 & 0.357 & 0.470 & 0.461 & 0.476 & 0.366 & 0.999 & 0.875 & 0.875 & 0.4814 & [0.4314, 0.5432] & [0.4335, 0.5453] & [0.4314, 0.5432] & 0.986 & 0.470 & [0.4182, 0.5228] & 0.002 & 14 & 0.014 & 2 & 12 & 0 & 0 \\
-LLaVA-1.5 & gaussian & 1 & 445 & 0.791 & 0.494 & 0.297 & 0.497 & 0.476 & 0.479 & 1.000 & 1.000 (edge) & None & undefined & None & None & [0.2428, 0.3243] & 0.079 & 0.260 & [0.2269, 0.3009] & 0.399 & 921 & 0.921 & 399 & 522 & 0 & 0 \\
-LLaVA-1.5 & swapblend & 1 & 445 & 0.791 & 0.472 & 0.319 & 0.497 & 0.476 & 0.479 & 1.000 & 0.875 & None & 0.5740 & [0.5194, 0.6597] & [0.5118, 0.6527] & [0.5194, 0.6597] & 0.551 & 0.563 & [0.5058, 0.6422] & 0.232 & 449 & 0.449 & 232 & 217 & 0 & 0 \\
+SmolVLM   & Gaussian & 0.746 & 0.393 & 0.32 (0.28, 0.37) & $-$0.029 & edge & --- \\
+SmolVLM   & Swapped  & 0.746 & 0.393 & 0.55 (0.49, 0.62) & $-$0.038 & 0.875 & 0.544 \\
+Qwen2-VL  & Gaussian & 0.827 & 0.461 & 0.17 (0.14, 0.20) & $-$0.016 & edge & --- \\
+Qwen2-VL  & Swapped  & 0.827 & 0.461 & 0.47 (0.42, 0.52) & $-$0.103 & 0.875 & 0.481 \\
+LLaVA-1.5 & Gaussian & 0.791 & 0.497 & 0.26 (0.23, 0.30) & $-$0.002 & edge & --- \\
+LLaVA-1.5 & Swapped  & 0.791 & 0.497 & 0.56 (0.50, 0.64) & $-$0.025 & 0.875 & 0.574 \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular}}
 \end{table}

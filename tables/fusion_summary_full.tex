@@ -1,28 +1,32 @@
 \begin{table}[t]
 \centering
-\caption{Modality-dropout impact on task accuracy and utility in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
+\caption{Modality-dropout impact on task accuracy and utility in the
+  two-view proxy ($N=5000$ test images, five seeds, learned null
+  baseline, $B=1000$). Intervals are 95\% hierarchical bootstrap CIs.}
 \label{tab:fusion-full-acc}
-\fittable{%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{ccccc}
 \toprule
-$p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ \\
+$p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ (lo, hi) \\
 \midrule
-0.000 & 0.888 & 0.562 & 0.276 & -0.286 (-0.354, -0.208) \\
-0.100 & 0.888 & 0.840 & 0.448 & -0.392 (-0.442, -0.340) \\
-0.250 & 0.884 & 0.848 & 0.555 & -0.293 (-0.338, -0.245) \\
-0.500 & 0.882 & 0.858 & 0.726 & -0.133 (-0.160, -0.108) \\
+0.000 & 0.888 & 0.562 & 0.276 & $-$0.286 ($-$0.354, $-$0.208) \\
+0.100 & 0.888 & 0.840 & 0.448 & $-$0.392 ($-$0.442, $-$0.340) \\
+0.250 & 0.884 & 0.848 & 0.555 & $-$0.293 ($-$0.338, $-$0.245) \\
+0.500 & 0.882 & 0.858 & 0.726 & $-$0.133 ($-$0.160, $-$0.108) \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
 \begin{table}[t]
 \centering
-\caption{Modality-dropout impact on reliance and Misalignment Index in the two-view proxy ($N=5000$ test images, five seeds, learned null baseline, $B=1000$).}
+\caption{Modality-dropout impact on reliance and Misalignment Index in
+  the two-view proxy ($N=5000$ test images, five seeds, learned null
+  baseline, $B=1000$). Intervals are 95\% hierarchical bootstrap CIs.}
 \label{tab:fusion-full-reliance}
-\fittable{%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{cccccc}
 \toprule
-$p$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $S^*$ & MI \\
+$p$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $S^*$ & MI (lo, hi) \\
 \midrule
 0.000 & 0.331 & 0.611 & 1.846 & 0.500 & 1.657 (1.442, 2.082) \\
 0.100 & 0.056 & 0.452 & 8.105 & 0.250 & 4.586 (4.207, 4.922) \\
