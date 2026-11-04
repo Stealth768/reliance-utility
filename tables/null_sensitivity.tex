@@ -1,23 +1,32 @@
 \begin{table}[t]
 \centering
-\caption{Null-baseline sensitivity of $\hat{R}(1)$ and $U(1)$ for
-  swapped and Gaussian corruptions, main sample ($N=500$, $B=1000$,
-  seed 42). ``Removed'' omits visual tokens; ``Black'' inserts an
-  all-zero image. Intervals are 95\% bootstrap CIs.}
+\caption{Null-baseline sensitivity of normalized reliance $\hat{R}(1)$
+  and terminal utility $U(1)$ across corruptions, main sample ($N=500$,
+  $B=1000$, seed 42). ``Removed'' omits visual tokens; ``Black'' inserts
+  an all-zero image. Intervals are 95\% bootstrap CIs.}
 \label{tab:nullsens}
 {\footnotesize\setlength{\tabcolsep}{3pt}%
-\begin{tabular}{llcccc}
+\begin{tabular}{llcc}
 \toprule
- & & \multicolumn{2}{c}{$\hat{R}(1)$ (lo, hi)} & \multicolumn{2}{c}{$U(1)$ (lo, hi)} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}
-\textbf{Model} & \textbf{Corruption} & Removed & Black & Removed & Black \\
+\textbf{Model} & \textbf{Corruption} & \textbf{Removed null} & \textbf{Black null} \\
 \midrule
-Qwen2-VL  & Swapped  & 0.49 (0.44, 0.54) & 0.47 (0.42, 0.52) & $-$0.06 ($-$0.11, $-$0.02) & $-$0.05 ($-$0.10, $-$0.00) \\
-          & Gaussian & 0.17 (0.15, 0.19) & 0.15 (0.13, 0.17) & $-$0.03 ($-$0.07, $+$0.01) & $-$0.01 ($-$0.05, $+$0.02) \\
-SmolVLM   & Swapped  & 0.49 (0.45, 0.55) & 0.51 (0.46, 0.57) & $-$0.02 ($-$0.06, $+$0.03) & $-$0.00 ($-$0.05, $+$0.04) \\
-          & Gaussian & 0.38 (0.34, 0.42) & 0.26 (0.23, 0.30) & $-$0.02 ($-$0.07, $+$0.02) & $-$0.01 ($-$0.05, $+$0.03) \\
-LLaVA-1.5 & Swapped  & 0.58 (0.51, 0.65) & 0.50 (0.44, 0.56) & $-$0.05 ($-$0.09, $-$0.00) & $-$0.04 ($-$0.08, $+$0.00) \\
-           & Gaussian & 0.30 (0.26, 0.34) & 0.11 (0.09, 0.14) & $-$0.02 ($-$0.06, $+$0.01) & $-$0.01 ($-$0.04, $+$0.01) \\
+\multicolumn{4}{l}{\textit{Panel (a): Terminal normalized reliance $\hat{R}(1)$}} \\
+\midrule
+Qwen2-VL  & Swapped  & 0.49 (0.44, 0.54) & 0.47 (0.42, 0.52) \\
+          & Gaussian & 0.17 (0.15, 0.19) & 0.15 (0.13, 0.17) \\
+SmolVLM   & Swapped  & 0.49 (0.45, 0.55) & 0.51 (0.46, 0.57) \\
+          & Gaussian & 0.38 (0.34, 0.42) & 0.26 (0.23, 0.30) \\
+LLaVA-1.5 & Swapped  & 0.58 (0.51, 0.65) & 0.50 (0.44, 0.56) \\
+           & Gaussian & 0.30 (0.26, 0.34) & 0.11 (0.09, 0.14) \\
+\midrule
+\multicolumn{4}{l}{\textit{Panel (b): Terminal utility $U(1)$}} \\
+\midrule
+Qwen2-VL  & Swapped  & $-$0.064 ($-$0.114, $-$0.018) & $-$0.048 ($-$0.096, $-$0.002) \\
+          & Gaussian & $-$0.030 ($-$0.068, $+$0.006) & $-$0.014 ($-$0.052, $+$0.024) \\
+SmolVLM   & Swapped  & $-$0.016 ($-$0.062, $+$0.030) & $-$0.002 ($-$0.046, $+$0.042) \\
+          & Gaussian & $-$0.022 ($-$0.068, $+$0.022) & $-$0.008 ($-$0.048, $+$0.030) \\
+LLaVA-1.5 & Swapped  & $-$0.048 ($-$0.092, $-$0.004) & $-$0.040 ($-$0.082, $+$0.002) \\
+           & Gaussian & $-$0.022 ($-$0.058, $+$0.014) & $-$0.014 ($-$0.042, $+$0.014) \\
 \bottomrule
 \end{tabular}}
 \end{table}

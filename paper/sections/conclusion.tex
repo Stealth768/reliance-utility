@@ -1,17 +1,14 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We presented a black-box diagnostic that separates multimodal utility from
-distributional reliance along calibrated severity paths and locates the
-crossing point where the input stops helping. Controlled synthetic
-experiments with an oracle benchmark confirm that the measures rank
-architectures correctly. On three open VLMs, semantically structured
-corruptions (swapped images) sustain higher terminal reliance than
-unstructured noise, with significant gaps for all three models. The
-pre-declared criterion is met in only
-\checknum{2}{criterion:status:count_met} of 42 combinations, and
-conclusions for individual models shift with the choice of no-input
-baseline. A small modality-dropout study shows that dropout lowers raw
-reliance while exposing a weakness of $R(0)$-normalized measures. The
-framework and reproducible code are released to support multi-baseline
-evaluation in future multimodal robustness studies.
+We proposed a severity-indexed diagnostic that separates information loss
+from lingering reliance by pairing utility and distributional reliance along
+a degradation path. Controlled synthetic experiments show that the measures
+order the architectures as intended, although the first success criterion
+(Gated MI below 0.2) was not met. On three open VLMs, swapped-image
+corruptions leave normalized reliance at 0.49--0.58 of its clean level and
+produce a utility inversion for one model; both conclusions depend on the
+choice of no-input baseline, and a strict pre-declared over-reliance
+criterion is met in only \checknum{2}{criterion:status:count_met} of 42
+evaluated combinations. The diagnostic is black-box, applicable to any
+multimodal system, and its reproducibility pipeline is openly available.

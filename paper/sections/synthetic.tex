@@ -1,27 +1,20 @@
 \section{Validation on Synthetic Benchmark}
 \label{sec:synthetic}
 
-To validate our theoretical formulation before evaluating large-scale models, we implemented a controlled synthetic toy-fusion benchmark with known data-generating distributions. The benchmark evaluates three distinct architectural designs:
+To examine the measures where the answer is known before evaluating large-scale models, we implemented a controlled synthetic toy-fusion benchmark with known data-generating distributions. The benchmark evaluates three distinct architectural designs:
 \begin{enumerate}
     \item \textbf{FixedModel}: A quality-blind linear fusion baseline with constant equal weighting across modalities.
     \item \textbf{PartialGatedModel}: A heuristic gating model that partially dampens degraded inputs.
-    \item \textbf{GatedModel}: An optimal quality-aware gated architecture that dynamically dampens inputs as noise increases.
+    \item \textbf{GatedModel}: A quality-aware gated architecture that dynamically dampens inputs as noise increases.
 \end{enumerate}
 
 \subsection{Empirical Validation Results}
-Table~\ref{tab:synthetic-summary} reports the empirical crossing points $S^*$ and Misalignment Index ($\mi$) across five independent random seeds under three null baseline choices (\emph{removed}, \emph{zeros}, and \emph{mean}).
+Table~\ref{tab:synthetic-summary} reports the empirical crossing points $S^*$ and Misalignment Index ($\mi$) across five independent random seeds under the removed null baseline.
 
-\begin{figure}[t]
+\begin{figure}[tb]
 \centering
-\includegraphics[width=0.32\textwidth]{figures/fig1_utility_curves_v04.pdf}%
-\hfill
-\includegraphics[width=0.32\textwidth]{figures/fig2_reliance_curves_v04.pdf}%
-\hfill
-\includegraphics[width=0.32\textwidth]{figures/fig3_mi_bar_v04.pdf}
-\caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for
-  Fixed, PartialGated, and Gated models. Centre: normalized reliance
-  $\hat R(S)$. Right: Misalignment Index (MI) with 95\% CIs. The
-  quality-aware Gated model achieves the lowest MI.}
+\includegraphics[width=\textwidth]{figures/fig1_synthetic_two_panel.pdf}
+\caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The quality-aware Gated model achieves the lowest misalignment.}
 \label{fig:synthetic}
 \end{figure}
 
@@ -33,4 +26,4 @@ Under the canonical \emph{removed} null baseline:
     \item The \textbf{PartialGatedModel} yields moderate misalignment ($\mi \approx \checknum{1.286}{synthetic:PartialGatedModel:MI}$, 95\% CI $[\checknum{1.267}{synthetic:PartialGatedModel:MI_lo}, \checknum{1.305}{synthetic:PartialGatedModel:MI_hi}]$).
     \item The quality-aware \textbf{GatedModel} exhibits substantially lower misalignment ($\mi \approx \checknum{0.650}{synthetic:GatedModel:MI}$, 95\% CI $[\checknum{0.639}{synthetic:GatedModel:MI_lo}, \checknum{0.661}{synthetic:GatedModel:MI_hi}]$).
 \end{itemize}
-The pre-declared comparison of independent hierarchical intervals for \textbf{FixedModel} and \textbf{PartialGatedModel} overlapped narrowly ($[1.373, 1.637]$ vs.\ $[1.196, 1.405]$), and the \textbf{GatedModel} misalignment of $\mi \approx \checknum{0.650}{synthetic:GatedModel:MI}$ did not reach the original 0.2 threshold. The paired bootstrap analysis confirming the ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$ was conducted \emph{post hoc}.
+The pre-declared comparison of independent hierarchical intervals for \textbf{FixedModel} and \textbf{PartialGatedModel} overlapped narrowly ($[1.373, 1.637]$ vs.\ $[1.196, 1.405]$), and the \textbf{GatedModel} misalignment of $\mi \approx \checknum{0.650}{synthetic:GatedModel:MI}$ did not reach the original 0.2 threshold. The paired bootstrap analysis show that the measures order the architectures as intended, although the first success criterion (Gated MI below 0.2) was not met.

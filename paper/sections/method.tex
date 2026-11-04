@@ -14,6 +14,9 @@ B_{\text{null}} = f(\text{null}_m, X_{\text{rest}})
 \end{equation}
 where $\text{null}_m$ represents the complete absence or neutralization of modality $m$. In our primary benchmarks, the canonical null is the \emph{removed} condition, where visual tokens are completely omitted from the model sequence. Additional control nulls include \emph{black} (all-zero image), \emph{mean} (dataset-mean gray), and \emph{noise} (uncorrelated Gaussian noise).
 
+\paragraph{Corruptions.}
+Three corruption operators are studied: (i)~\emph{Swapblend}: at severity $S$, the input image is blended as $(1-S)\cdot\text{img} + S\cdot\text{img}_{\text{other}}$, where $\text{img}_{\text{other}}$ is the image of another question selected by a fixed derangement (resized bilinearly to match), with complete image substitution at $S=1$; (ii)~\emph{Gaussian blend}: $(1-S)\cdot\text{img} + S\cdot\text{noise}$, where noise is drawn from $\mathcal{N}(128, \sigma_{\text{img}})$ and clipped to $[0, 255]$; (iii)~\emph{Patch mask}: a fraction $S$ of non-overlapping $28\times 28$ patches are replaced with dataset-mean gray (128), with patch indices chosen randomly without replacement.
+
 \subsection{Multimodal Utility $U(S)$}
 Multimodal utility measures the task performance benefit gained by providing the degraded modality $X_m$ at severity $S$ relative to the unimodal null baseline:
 \begin{equation}
