@@ -75,6 +75,7 @@ def generate_fig1_synthetic():
     ax_u.set_ylabel("Utility $U(S)$")
     ax_u.set_xlim(0, 1)
     ax_u.grid(True, linestyle=":", alpha=0.6)
+    ax_u.legend(loc="lower left", framealpha=0.85, handlelength=1.8, borderpad=0.3, labelspacing=0.2)
 
     # Styling panel 2 (Reliance)
     ax_r.axhline(1.0, color="gray", linestyle=":", linewidth=0.8, alpha=0.7)
@@ -83,7 +84,6 @@ def generate_fig1_synthetic():
     ax_r.set_xlim(0, 1)
     ax_r.set_ylim(-0.05, 1.85)
     ax_r.grid(True, linestyle=":", alpha=0.6)
-    ax_r.legend(loc="upper right", framealpha=0.85, handlelength=1.8, borderpad=0.3, labelspacing=0.2)
 
     plt.subplots_adjust(left=0.12, right=0.98, top=0.95, bottom=0.19, wspace=0.32)
     out_pdf = FIG_DIR / "fig1_synthetic_two_panel.pdf"

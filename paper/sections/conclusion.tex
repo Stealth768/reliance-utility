@@ -1,14 +1,16 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We proposed a severity-indexed diagnostic that separates information loss
-from lingering reliance by pairing utility and distributional reliance along
-a degradation path. Controlled synthetic experiments show that the measures
-order the architectures as intended, although the first success criterion
-(Gated MI below 0.2) was not met. On three open VLMs, swapped-image
-corruptions leave normalized reliance at 0.49--0.58 of its clean level and
-produce a utility inversion for one model; both conclusions depend on the
-choice of no-input baseline, and a strict pre-declared over-reliance
-criterion is met in only \checknum{2}{criterion:status:count_met} of 42
-evaluated combinations. The diagnostic is black-box, applicable to any
-multimodal system, and its reproducibility pipeline is openly available.
+We proposed a severity-indexed diagnostic that pairs utility and
+distributional reliance along a degradation path, to separate information
+loss from lingering reliance on an input. On synthetic models the measures
+order the architectures as intended, although our first success criterion
+(Gated MI below 0.2) was not met. On three open VLMs, a swapped-image
+corruption leaves normalized reliance at 0.49 to 0.58 of its clean level,
+well above Gaussian noise, and produces a significant utility inversion for
+one model under both baselines. A criterion declared in advance is met in
+only \checknum{2}{criterion:status:count_met} of 42 combinations, and
+conclusions for individual models, notably LLaVA-1.5, depend on how the
+no-input baseline is defined. The evidence is limited to one dataset, one
+answer format and three models. We describe the result as retained
+reliance, not over-trust.

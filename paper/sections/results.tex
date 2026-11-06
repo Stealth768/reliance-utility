@@ -5,7 +5,7 @@
 We evaluate three open VLMs (Qwen2-VL-2B-Instruct, LLaVA-1.5-7B in 4-bit,
 and SmolVLM-Instruct) on A-OKVQA multiple-choice questions, reading the
 next-token distribution over the four option letters. The main sample
-contains the 500 questions of the main sample; a replication uses disjoint
+contains 500 validation questions; a replication uses disjoint
 held-out questions, a new random image-pairing seed, and only the swapped
 and Gaussian corruptions. All intervals are 95\% bootstrap intervals over
 questions (1000 resamples, fixed seed). The no-input baseline is the
@@ -27,7 +27,7 @@ Across models under the swapped condition, $\hat R(1)$ ranges from
 \checknum{0.487}{Qwen:swapblend:R_hat_s1} for Qwen2-VL to
 \checknum{0.578}{llava:swapblend:R_hat_s1} for LLaVA-1.5, with SmolVLM at
 \checknum{0.493}{SmolVLM:swapblend:R_hat_s1}.
-Under Gaussian blending and patch masking, reliance at maximum severity is
+Under Gaussian blending, reliance at maximum severity is
 lower for every model, and the paired difference between swapped and
 Gaussian conditions is reported in Table~\ref{tab:paired}; the interval
 excludes zero for all three models.
@@ -38,9 +38,10 @@ excludes zero for all three models.
 Terminal utility is significantly below zero under the swapped condition
 for Qwen2-VL in both samples, and for LLaVA-1.5 in the main and pooled
 samples under the removed-image baseline only; it is not significantly below
-zero for SmolVLM. Gaussian and patch corruptions do not produce a significant
-inversion for any model. Table~\ref{tab:nullsens} shows how these
-statements depend on the baseline.
+zero for SmolVLM. Gaussian corruption does not produce a significant
+inversion for any model. Patch masking was also run on the main sample and
+produced no significant utility inversion; we omit it for space.
+Table~\ref{tab:nullsens} shows how these statements depend on the baseline.
 
 \paragraph{Replication.}
 The replication sample in Table~\ref{tab:headline} is consistent with the main result.
@@ -62,13 +63,12 @@ be assessed under sampling uncertainty. We therefore operationalized it
 \emph{post hoc} as: the upper bound of the interval for $U(1)$ is below
 zero and the lower bound of the interval for $\hat R(1)$ is above $0.5$.
 Only \checknum{2}{criterion:status:count_met} of the 42
-evaluated combinations satisfy both requirements: LLaVA-1.5 under the
-swapped corruption with the removed-image baseline in the main ($N=500$)
-and pooled ($N=945$) samples; none satisfies it in the replication alone
-or under the black-image baseline.
+evaluated combinations satisfy both requirements.
+The pre-declared criterion is met only for LLaVA-1.5 under the swapped
+corruption with the removed baseline, in the main and pooled samples;
+none satisfies it in the replication alone or under the black-image baseline.
 We treat the pre-declared criterion as largely unsupported and describe
 the persistent reliance as a descriptive finding.
-The full criterion table is in Appendix~\ref{sec:appendix}.
 
 \paragraph{Sensitivity to the no-input baseline.}
 \label{sec:nullsens}
@@ -90,10 +90,11 @@ inserted image tokens.
 \input{tables/null_sensitivity.tex}
 
 \paragraph{Comparison with answer-level measures.}
-Table~\ref{tab:baseline} in Appendix~\ref{sec:appendix} reports a visual
-reliance score, blank-image drop, answer-change rate, and benefit and harm
-rates for the swapped image. We report orderings only; with three models no
-inferential claim about their relation to $\hat R(1)$ is supported.
+The swapped image lowers accuracy relative to the clean image for all three
+models, and the answer changes for roughly half or more of the questions,
+with answer sensitivity ranging from
+\checknum{0.518}{baseline:llava:sensitivity} for LLaVA-1.5 to
+\checknum{0.620}{baseline:smolvlm:sensitivity} for SmolVLM.
 
 \paragraph{Misalignment Index.}
 The severity at which utility first reaches zero lies at the last grid

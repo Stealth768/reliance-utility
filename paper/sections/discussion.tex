@@ -10,7 +10,7 @@ path exposes behaviour that accuracy alone does not: two models can lose the
 same accuracy under corruption yet differ in whether that loss comes from
 information destruction or persistent reliance on an unhelpful input.
 The swapped-image condition consistently produces higher terminal reliance
-than Gaussian noise, with statistically significant gaps for all three
+than Gaussian noise, with gaps whose intervals exclude zero for all three
 models, meaning the model's output distribution remains further from its
 no-image behaviour when given a wrong image than when given noise.
 
@@ -24,19 +24,5 @@ additive), this divergence equals about
 \checknum{42}{floor:llava-1.5-7b-hf:floor_pct}\% of swapped-image terminal
 reliance for the three models. Part of the reliance of SmolVLM and
 LLaVA-1.5 may reflect the presence of image tokens and not their content.
-We recommend that future evaluations report results under at least two
+Our results suggest that future evaluations report results under at least two
 baselines and state how the no-input condition is constructed.
-
-\paragraph{Implications for evaluation.}
-The pre-declared criterion was met in only two of 42 combinations.
-This does not mean over-reliance is absent; it means that a strict,
-pre-specified criterion is hard to satisfy when both reliance and utility
-carry sampling uncertainty and when conclusions shift with the baseline.
-
-\paragraph{Dropout and normalized reliance.}
-In the fusion proxy, dropout lowers raw terminal reliance and raises
-accuracy with view A removed or degraded, but terminal utility remains
-negative for every $p$. The normalized measures $\hat R$ and MI move in the
-opposite direction because the denominator $R(0)$ shrinks faster;
-ratio-based measures should be read with caution when clean-input reliance
-differs across conditions.

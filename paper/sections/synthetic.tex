@@ -1,29 +1,24 @@
 \section{Validation on Synthetic Benchmark}
 \label{sec:synthetic}
 
-To examine the measures where the answer is known before evaluating large-scale models, we implemented a controlled synthetic toy-fusion benchmark with known data-generating distributions. The benchmark evaluates three distinct architectural designs:
+To examine the measures where the answer is known before evaluating large-scale models, we implemented a controlled synthetic toy-fusion benchmark with known data-generating distributions. The benchmark evaluates three architectures and one control:
 \begin{enumerate}
     \item \textbf{FixedModel}: A quality-blind linear fusion baseline with constant equal weighting across modalities.
     \item \textbf{PartialGatedModel}: A heuristic gating model that partially dampens degraded inputs.
     \item \textbf{GatedModel}: A quality-aware gated architecture that dynamically dampens inputs as noise increases.
+    \item \textbf{OracleGatedModel}: A positive control that receives the severity and switches the degraded input off beyond a fixed severity; it is not a realistic model.
 \end{enumerate}
 
 \subsection{Empirical Validation Results}
-Table~\ref{tab:synthetic-summary} reports the empirical crossing points $S^*$ and Misalignment Index ($\mi$) across five independent random seeds under the removed null baseline.
+\label{sec:synthetic-results}
 
 \begin{figure}[tb]
 \centering
 \includegraphics[width=\textwidth]{figures/fig1_synthetic_two_panel.pdf}
-\caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The quality-aware Gated model achieves the lowest misalignment.}
+\caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The Oracle receives the severity and serves as a positive control; among the other models, Gated has the lowest MI.}
 \label{fig:synthetic}
 \end{figure}
 
 \input{tables/synthetic_summary.tex}
 
-Under the canonical \emph{removed} null baseline:
-\begin{itemize}
-    \item The quality-blind \textbf{FixedModel} crosses zero utility at $S^* \approx 0.65$ but maintains heavy predictive reliance, resulting in high misalignment ($\mi \approx \checknum{1.491}{synthetic:FixedModel:MI}$, 95\% CI $[\checknum{1.454}{synthetic:FixedModel:MI_lo}, \checknum{1.507}{synthetic:FixedModel:MI_hi}]$).
-    \item The \textbf{PartialGatedModel} yields moderate misalignment ($\mi \approx \checknum{1.286}{synthetic:PartialGatedModel:MI}$, 95\% CI $[\checknum{1.267}{synthetic:PartialGatedModel:MI_lo}, \checknum{1.305}{synthetic:PartialGatedModel:MI_hi}]$).
-    \item The quality-aware \textbf{GatedModel} exhibits substantially lower misalignment ($\mi \approx \checknum{0.650}{synthetic:GatedModel:MI}$, 95\% CI $[\checknum{0.639}{synthetic:GatedModel:MI_lo}, \checknum{0.661}{synthetic:GatedModel:MI_hi}]$).
-\end{itemize}
-The pre-declared comparison of independent hierarchical intervals for \textbf{FixedModel} and \textbf{PartialGatedModel} overlapped narrowly ($[1.373, 1.637]$ vs.\ $[1.196, 1.405]$), and the \textbf{GatedModel} misalignment of $\mi \approx \checknum{0.650}{synthetic:GatedModel:MI}$ did not reach the original 0.2 threshold. The paired bootstrap analysis show that the measures order the architectures as intended, although the first success criterion (Gated MI below 0.2) was not met.
+Table~\ref{tab:synthetic-summary} reports $S^*$ and MI under the removed baseline. The quality-blind Fixed model has the highest MI (\checknum{1.491}{synthetic:FixedModel:MI}), the Partial model \checknum{1.286}{synthetic:PartialGatedModel:MI}, and the Gated model \checknum{0.650}{synthetic:GatedModel:MI}; the Oracle, which receives the severity, reads 0.00. Our first success criterion, a Gated MI below 0.2, was not met: the smooth gate sheds reliance gradually and keeps substantial reliance past the crossing. The pre-declared comparison of independent hierarchical intervals for Fixed and Partial overlapped narrowly ([1.373, 1.637] vs [1.196, 1.405]); a paired bootstrap over seeds and items, added post hoc, supports the ordering $\text{MI}(\text{Gated}) < \text{MI}(\text{Partial}) < \text{MI}(\text{Fixed})$.

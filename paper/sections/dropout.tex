@@ -40,21 +40,4 @@ to \checknum{-0.133}{fusion:0.5:U_1} at $p=0.5$) and not monotone in $p$
 (reported post hoc).
 \input{tables/fusion_summary.tex}
 \paragraph{Why the normalized measures behave this way (post hoc).}
-Reliance at clean input, $R(0)$, falls by more than an order of
-magnitude as $p$ grows, because a model trained with dropout already
-makes similar predictions with and without view A. Since $\hat R$ and the
-Misalignment Index divide by $R(0)$, they are inflated when $R(0)$ is
-small, and their comparison across $p$ is not informative. Raw terminal
-reliance $R(1)$ decreases with $p$ (falling monotonically from
-\checknum{0.611}{fusion:0.0:R_1_raw} at $p=0$ to
-\checknum{0.452}{fusion:0.1:R_1_raw} at $p=0.1$,
-\checknum{0.330}{fusion:0.25:R_1_raw} at $p=0.25$, and
-\checknum{0.148}{fusion:0.5:R_1_raw} at $p=0.5$). We
-report this as a post hoc observation and not as support for H1.
-
-\paragraph{Scope.}
-This is a small proxy with one dataset and simple encoders. It shows that
-dropout preserves clean accuracy and improves accuracy on degraded input
-while lowering raw reliance on it, and it exposes a weakness of
-$R(0)$-normalized measures. It does not show a general property of large
-multimodal models.
+Reliance at clean input, $R(0)$, falls by more than an order of magnitude as $p$ grows because the model already makes similar predictions with and without view A. Because $\hat{R}$ and MI divide by $R(0)$, they are inflated when $R(0)$ is small, whereas raw reliance $R(1)$ decreases monotonically from \checknum{0.611}{fusion:0.0:R_1_raw} to \checknum{0.148}{fusion:0.5:R_1_raw}.

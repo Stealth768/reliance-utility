@@ -13,7 +13,6 @@ sections = [
     ("8. Limitations", "paper/sections/limitations.tex", 0.5),
     ("9. Conclusion", "paper/sections/conclusion.tex", 0.3),
     ("References", "paper/refs.bib", 0.8), # 11 entries
-    ("Appendix (Tables 6, 7)", "paper/sections/appendix.tex", 1.0), # Criterion (0.35p) + Baseline (0.35p)
 ]
 
 print(f"{'Section / Element':<28} | {'Words':<6} | {'Estimated Page Budget':<20}")
@@ -25,8 +24,10 @@ for name, rel_path, est_budget in sections:
     words = 0
     if p.exists():
         words = len(p.read_text(encoding="utf-8").split())
+    else:
+        est_budget = 0.0
     total_est += est_budget
     print(f"{name:<28} | {words:<6} | ~{est_budget:.2f} pages")
 
 print("-" * 60)
-print(f"Total Estimated Document Length: ~{total_est:.1f} pages (Target: 12 pages total including references and appendix).")
+print(f"Total Estimated Document Length: ~{total_est:.1f} pages (Target: at most 12 pages total including references, no appendix).")

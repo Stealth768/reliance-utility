@@ -1,23 +1,23 @@
 \abstract{%
-Multimodal models are usually evaluated by whether task performance
-drops when one input is degraded. This conflates two different things:
-information that is genuinely lost, and a model that keeps relying on an
-input after it has stopped helping. We propose a black-box diagnostic that
-separates them. Along a severity path we pair \emph{utility} (task
-performance relative to removing the input) with \emph{reliance}
-(divergence between predictions with the degraded and with the removed
-input) and locate where utility falls below the no-input level. We
-validate the measures on synthetic fusion models with controlled reliance,
-including an oracle control. On three open VLMs and a multiple-choice
-VQA task, a swapped-image corruption leaves normalized reliance at
-\checknum{0.487}{Qwen:swapblend:R_hat_s1} to
+In this paper we evaluate multimodal models. Multimodal models are usually
+evaluated by assigning them a task and then investigating whether
+performance drops when one input is degraded. This mixes up two different
+things: information that is lost due to degradation, and a model that still
+keeps relying on an input after it has stopped helping. We propose a
+black-box diagnostic that separates the two. Along a severity path we pair
+utility with reliance and locate where utility falls below the no-input
+level. We evaluate our measures on synthetic fusion models implemented with
+controlled reliance, including an oracle control. On three open VLMs and a
+multiple-choice VQA task, a swapped-image corruption leaves normalized
+reliance at \checknum{0.487}{Qwen:swapblend:R_hat_s1} to
 \checknum{0.578}{llava:swapblend:R_hat_s1} of its clean level,
 \checknum{0.112}{paired:SmolVLM:delta_rhat} to
 \checknum{0.319}{paired:Qwen:delta_rhat} above Gaussian noise,
-and produces a significant utility inversion for one model. The pre-declared
-criterion is met in only \checknum{2}{criterion:status:count_met} of 42
-combinations, and conclusions for individual models depend on how the
-no-input baseline is defined. A small modality-dropout study preserves clean
-accuracy and lowers raw reliance, while exposing a weakness of
-$R(0)$-normalized measures.}
+and produces a significant utility inversion for one model under both
+baselines. The pre-declared criterion was met in only
+\checknum{2}{criterion:status:count_met} of the 42 combinations, and
+conclusions for individual models depend on how the no-input baseline was
+defined. A small modality-dropout study preserves clean accuracy but shows a
+clear drop in raw reliance, while exposing a weakness of R(0)-normalized
+measures.}
 \keywords{Multimodal Learning, Vision-Language Models, Robustness Evaluation, Intelligent Systems}

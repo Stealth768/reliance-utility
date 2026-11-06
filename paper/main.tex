@@ -31,9 +31,22 @@
 
 \title*{Reliance-Utility Misalignment in Multimodal AI:\\Formal Framework and Multi-Model Evaluation}
 \titlerunning{Reliance-Utility Misalignment in Multimodal AI}
-\author{Anonymous Authors}
-\authorrunning{Anonymous Authors}
-\institute{Anonymous Institution \at Anonymous Address, \email{anonymous@example.com}}
+
+\newif\ifanon
+\anontrue
+\ifanon
+  \author{Anonymous Authors}
+  \authorrunning{Anonymous Authors}
+  \institute{Anonymous Authors \at Anonymous Institution, Anonymous Address,
+  \email{anonymous@example.com}}
+\else
+  \author{Mohammed Farhan Siddiqui and Uma Rani$^{*}$}
+  \authorrunning{M. F. Siddiqui and U. Rani}
+  \institute{Mohammed Farhan Siddiqui \at Department of Computer Science,
+  ADGIPS, New Delhi, India, \email{MohammedFarhan678@outlook.com}
+  \and Uma Rani$^{*}$ \at Department of Computer Science, ADGIPS,
+  New Delhi, India, \email{dr.uma@adgips.ac.in}}
+\fi
 
 \maketitle
 
@@ -53,13 +66,6 @@
   \bibliography{paper/refs}%
 }{%
   \bibliography{refs}%
-}
-
-\appendix
-\IfFileExists{paper/sections/appendix.tex}{%
-  \input{paper/sections/appendix.tex}%
-}{%
-  \input{paper/sections/appendix.tex}%
 }
 
 \end{document}

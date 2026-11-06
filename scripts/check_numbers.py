@@ -118,6 +118,9 @@ def check_numbers(
     synth_csv = REPO_ROOT / "results" / "derived" / "synthetic_summary_v04.csv"
     df_synth = pd.read_csv(synth_csv) if synth_csv.exists() else None
 
+    baseline_csv = REPO_ROOT / "results" / "derived" / "baseline_metrics_summary.csv"
+    df_baseline = pd.read_csv(baseline_csv) if baseline_csv.exists() else None
+
     mismatches = 0
     total_checks = len(all_checks)
 
@@ -334,6 +337,38 @@ def check_numbers(
                     mismatches += 1
                     continue
 
+            if not verify_num(actual_val):
+                mismatches += 1
+            continue
+
+        # Baseline metrics check: baseline:model:metric
+        if len(parts) == 3 and parts[0] == "baseline":
+            _, model_key, metric_key = parts
+            if df_baseline is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - {baseline_csv} not found.")
+                mismatches += 1
+                continue
+            sub = df_baseline[df_baseline["split"] == "main"]
+            matched_row = None
+            for _, r in sub.iterrows():
+                m = str(r["model_name"])
+                if model_key in m or m.lower().startswith(model_key.lower()) or model_key.lower() in m.lower():
+                    matched_row = r
+                    break
+            if matched_row is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Model '{model_key}' not found in baseline table.")
+                mismatches += 1
+                continue
+            col_target = None
+            for c in matched_row.index:
+                if c.lower() == metric_key.lower() or c.lower() == f"image_{metric_key.lower()}":
+                    col_target = c
+                    break
+            if col_target is None:
+                print(f"  [FAIL] {fpath.name}:{line_num} - Column '{metric_key}' not found in baseline table.")
+                mismatches += 1
+                continue
+            actual_val = matched_row[col_target]
             if not verify_num(actual_val):
                 mismatches += 1
             continue
