@@ -26,7 +26,7 @@ where $\text{acc}(\cdot)$ denotes classification accuracy on the target evaluati
 When $U(S) > 0$, the degraded modality provides net positive value. When $U(S) \le 0$, the modality has become useless or actively harmful compared to ignoring it altogether.
 
 \subsection{Information-Theoretic Reliance $R(S)$ and Normalized Reliance $\hat{R}(S)$}
-Behavioral reliance quantifies the extent to which the model's output distribution shifts when conditioned on the corrupted modality versus the null baseline. We operationalize reliance via the Jensen-Shannon Divergence ($\jsd$) in base-2 logarithm:
+Behavioral reliance quantifies the extent to which the model's output distribution shifts when conditioned on the corrupted modality versus the null baseline. We operationalize reliance via the Jensen-Shannon Divergence ($\jsd$)~\cite{lin1991divergence} in base-2 logarithm:
 \begin{equation}
 R(S) = \mathbb{E}_x \left[ \jsd(B_m(S) \parallel B_{\text{null}}) \right]
 \end{equation}

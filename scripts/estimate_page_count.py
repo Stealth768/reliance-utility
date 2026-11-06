@@ -12,7 +12,7 @@ sections = [
     ("7. Discussion", "paper/sections/discussion.tex", 0.7),
     ("8. Limitations", "paper/sections/limitations.tex", 0.5),
     ("9. Conclusion", "paper/sections/conclusion.tex", 0.3),
-    ("References", "paper/refs.bib", 0.8), # 11 entries
+    ("References", "paper/refs.bib", 1.0), # 17 entries
 ]
 
 print(f"{'Section / Element':<28} | {'Words':<6} | {'Estimated Page Budget':<20}")
