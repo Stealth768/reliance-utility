@@ -16,7 +16,7 @@ image removed from the prompt unless stated otherwise.
 \includegraphics[width=\textwidth]{figures/fig2_vlm_two_panel.pdf}
 \caption{Utility (left) and normalized reliance (right) as a function of
   corruption severity for three VLMs under swapped (solid) and Gaussian (dashed)
-  corruptions ($N=500$ main sample, removed-image null baseline, bootstrap $B=1000$, seed 42). Shaded bands are 95\% bootstrap intervals.}
+  corruptions ($N=500$ main sample, removed-image null baseline, bootstrap $B=1000$, seed 42). Shaded bands are 95\% bootstrap intervals}
 \label{fig:vlm_curves}
 \end{figure}
 
@@ -27,12 +27,12 @@ Across models under the swapped condition, $\hat R(1)$ ranges from
 \checknum{0.487}{Qwen:swapblend:R_hat_s1} for Qwen2-VL to
 \checknum{0.578}{llava:swapblend:R_hat_s1} for LLaVA-1.5, with SmolVLM at
 \checknum{0.493}{SmolVLM:swapblend:R_hat_s1}.
-Reliance at maximum severity is lower under Gaussian blending than under
-swapping, and the paired difference between swapped and Gaussian conditions
-is reported in Table~\ref{tab:paired}; the interval excludes zero for all
-three models.
+The paired difference in $\hat{R}(1)$ between swapped and Gaussian conditions is
+\checknum{+0.32}{paired:Qwen:delta_rhat} (\checknum{0.28}{paired:Qwen:ci_lo}, \checknum{0.37}{paired:Qwen:ci_hi}) for Qwen2-VL,
+\checknum{+0.11}{paired:SmolVLM:delta_rhat} (\checknum{0.06}{paired:SmolVLM:ci_lo}, \checknum{0.17}{paired:SmolVLM:ci_hi}) for SmolVLM and
+\checknum{+0.28}{paired:llava:delta_rhat} (\checknum{0.23}{paired:llava:ci_lo}, \checknum{0.35}{paired:llava:ci_hi}) for LLaVA-1.5;
+every interval excludes zero.
 \input{tables/headline.tex}
-\input{tables/paired_swap_vs_gauss.tex}
 
 \paragraph{Utility inversion.}
 Terminal utility is significantly below zero under the swapped condition
@@ -88,16 +88,3 @@ swapblend $R(1)$ for Qwen2-VL, compared to
 hypothesize, without testing it, that this reflects how each model handles
 inserted image tokens.
 \input{tables/null_sensitivity.tex}
-
-\paragraph{Comparison with answer-level measures.}
-The swapped image lowers accuracy relative to the clean image for all three
-models, and the answer changes for roughly half or more of the questions,
-with answer sensitivity ranging from
-\checknum{0.518}{baseline:llava:sensitivity} for LLaVA-1.5 to
-\checknum{0.620}{baseline:smolvlm:sensitivity} for SmolVLM.
-
-\paragraph{Misalignment Index.}
-The severity at which utility first reaches zero lies at the last grid
-point or is absent in most real conditions, so the Misalignment Index is
-undefined there and we do not rely on it for the VLM results. It is
-validated on the synthetic models of Section~\ref{sec:synthetic}.

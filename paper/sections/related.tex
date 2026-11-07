@@ -3,13 +3,10 @@
 
 \paragraph{Modality interference.}
 Cai et al.~\cite{cai2025interference} study how signals from a
-non-essential modality distort multimodal LLM decisions. They perturb the
-irrelevant modality (misleading text, unrelated or blank images) and
-measure whether the predicted answer changes, using an indicator of
-argmax change as the effect measure. Their perturbations are discrete and
-target the modality that is \emph{not} needed for the task. We instead
-degrade the modality that \emph{is} informative, along a continuous
-severity path, and relate the resulting behaviour change to task utility.
+non-essential modality distort multimodal LLM decisions by applying discrete
+perturbations to an irrelevant input and measuring argmax answer changes.
+We instead degrade the informative modality along a continuous severity path
+and relate the resulting distributional behaviour change to task utility.
 
 \paragraph{Counterfactual grounding probes.}
 Substituting blank or mismatched images to test visual dependence is
@@ -36,21 +33,18 @@ we restrict ourselves to one visual modality and a multiple-choice
 format.
 
 \paragraph{Quality-aware fusion.}
-Moon et al.~\cite{moon2026quality} ask whether reliability scores used by
-fusion models actually influence decisions, by shuffling them across
-test examples after training; they also separate modality outage from
-degradation and use positive controls to show that the diagnostic can
-detect dependence when it exists. We borrow the positive-control idea in
-our synthetic validation, where an oracle model that discards the
-degraded input provides a reading near zero. Our target differs: we
-measure reliance on the degraded data itself, not on a quality estimate.
+Moon et al.~\cite{moon2026quality} use positive controls to test whether
+quality scores in fusion models influence decisions, separating outage from
+degradation. We borrow the positive-control strategy in our synthetic
+validation, but evaluate reliance directly on the degraded input rather than on
+an auxiliary quality score.
 
 \paragraph{Missing modalities and modality dropout.}
 Robustness to absent modalities has been studied extensively
 \cite{ma2022missing}; modality dropout as a training
 technique~\cite{neverova2016moddrop} forces networks to learn robust
 cross-modal features.
-Our fusion study in Section~\ref{sec:fusion} trains small two-view models
+Our fusion study in Sect.~\ref{sec:fusion} trains small two-view models
 with different modality-dropout rates and reports clean accuracy,
 no-input accuracy and reliance; it is a proxy study and not a claim about
 large multimodal systems.

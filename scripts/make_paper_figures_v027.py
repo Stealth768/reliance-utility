@@ -25,15 +25,16 @@ FIG_DIR.mkdir(parents=True, exist_ok=True)
 WIDTH_INCHES = 117.0 / 25.4  # ~4.606 inches
 HEIGHT_INCHES = 2.25
 
-# Global publication style ensuring minimum font >= 7 pt
+# Global publication style ensuring minimum font >= 8 pt sans-serif
 plt.rcParams.update({
-    "font.family": "serif",
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
     "font.size": 8.0,
-    "axes.labelsize": 8.0,
-    "axes.titlesize": 8.0,
-    "xtick.labelsize": 7.0,
-    "ytick.labelsize": 7.0,
-    "legend.fontsize": 7.0,
+    "axes.labelsize": 8.5,
+    "axes.titlesize": 8.5,
+    "xtick.labelsize": 8.0,
+    "ytick.labelsize": 8.0,
+    "legend.fontsize": 8.0,
     "lines.linewidth": 1.4,
     "lines.markersize": 3.5,
     "figure.autolayout": False,
@@ -94,9 +95,9 @@ def generate_fig1_synthetic():
 
 def generate_fig2_vlm():
     model_dirs = {
-        "Qwen2-VL": ("vlm_main", "#0072B2"),   # Blue
-        "SmolVLM": ("vlm_smol", "#D55E00"),    # Vermilion
-        "LLaVA-1.5": ("vlm_llava", "#009E73"), # Bluish green
+        "Qwen2-VL": ("vlm_main", "#0072B2", "o"),   # Blue, circle
+        "SmolVLM": ("vlm_smol", "#D55E00", "s"),    # Vermilion, square
+        "LLaVA-1.5": ("vlm_llava", "#009E73", "^"), # Bluish green, triangle
     }
     corruptions = [
         ("swapblend", "Swapped", "-"),
@@ -107,7 +108,7 @@ def generate_fig2_vlm():
     rng = np.random.default_rng(42)
     n_boot = 500
 
-    for model_name, (dir_name, color) in model_dirs.items():
+    for model_name, (dir_name, color, marker) in model_dirs.items():
         raw_dir = REPO_ROOT / "results" / "raw" / dir_name
         for corr_key, corr_label, ls in corruptions:
             files = sorted([f for f in raw_dir.glob(f"*{corr_key}*.json") if "manifest" not in f.name])
@@ -160,11 +161,11 @@ def generate_fig2_vlm():
 
             # Plot U
             lbl = f"{model_name}" if corr_key == "swapblend" else None
-            ax_u.plot(s_grid, U_point, color=color, linestyle=ls, label=lbl)
+            ax_u.plot(s_grid, U_point, color=color, linestyle=ls, marker=marker, markevery=2, label=lbl)
             ax_u.fill_between(s_grid, u_lo, u_hi, color=color, alpha=0.15)
 
             # Plot R_hat
-            ax_r.plot(s_grid, R_hat_point, color=color, linestyle=ls)
+            ax_r.plot(s_grid, R_hat_point, color=color, linestyle=ls, marker=marker, markevery=2)
             ax_r.fill_between(s_grid, r_lo, r_hi, color=color, alpha=0.15)
 
     # Style panel 1 (Utility)

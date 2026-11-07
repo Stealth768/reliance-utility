@@ -140,11 +140,14 @@ def check_numbers(
                         return False
                     print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
                     return True
-                act_rnd = round(act_f, 3)
-                exp_rnd = round(exp_f, 3)
+                val_clean = val_str.lstrip("+-").strip()
+                dec_places = len(val_clean.split(".")[1]) if "." in val_clean else 3
+                dec_places = max(dec_places, 1)
+                act_rnd = round(act_f, dec_places)
+                exp_rnd = round(exp_f, dec_places)
                 diff = abs(exp_rnd - act_rnd)
                 if diff > 1e-4:
-                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str} (rounded: {exp_rnd:.3f}), table has {act_f:.4f} (rounded 3 dec: {act_rnd:.3f}, diff={diff:.5f} > 1e-4)")
+                    print(f"  [FAIL] {fpath.name}:{line_num} - {label}: TeX has {val_str} (rounded: {exp_rnd:.{dec_places}f}), table has {act_f:.4f} (rounded {dec_places} dec: {act_rnd:.{dec_places}f}, diff={diff:.5f} > 1e-4)")
                     return False
                 print(f"  [PASS] {fpath.name}:{line_num} - {label} = {val_str}")
                 return True

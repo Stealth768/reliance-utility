@@ -4,17 +4,16 @@
 \begin{itemize}
 \item \textbf{Null-baseline dependence.} Both utility and reliance are
   defined relative to a no-input baseline; conclusions for individual
-  models depend on this choice (see Section~\ref{sec:discussion}).
+  models depend on this choice (see Sect.~\ref{sec:discussion}).
 
-\item \textbf{Multiple comparisons.} The pre-declared criterion is evaluated
-  across 42 model--corruption--sample--baseline combinations without
-  correction; the two satisfying combinations overlap (same model, same
-  corruption, different sample sizes).
-
-\item \textbf{Operationalization after the fact.} The interval-based
-  operationalization of the pre-declared criterion was fixed after seeing
-  data. Dropout hypotheses H1--H2 were committed in the same commit as the
-  training code; the log is not an external registry.
+\item \textbf{Multiple comparisons and operationalization after the fact.} The
+  pre-declared criterion is evaluated across 42
+  model--corruption--sample--baseline combinations without correction; the
+  two satisfying combinations overlap (same model, same corruption, different
+  sample sizes). The interval-based operationalization of the pre-declared
+  criterion was fixed after seeing data; dropout hypotheses H1--H2 were
+  committed in the same commit as the training code; the log is not an external
+  registry.
 
 \item \textbf{Scope.} One VQA dataset (A-OKVQA, $N=500$ main,
   $N=445$ replication), one multiple-choice format, three models (one in
