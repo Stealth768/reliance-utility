@@ -1,46 +1,47 @@
 # Kaggle Notebook Instructions: Reliance-Utility Extension Phase
 
-Instructions and executable cells for executing Extension Phase experiments (AI2D Second MC Dataset, Extra Swapped Pairings, Open-Ended Free Generation) across Kaggle GPU sessions.
+This document contains the execution scripts for all Extension Phase GPU runs across **2 Kaggle accounts** organized into **Wave 1** and **Wave 2**.
+
+> [!IMPORTANT]
+> **Execution Mode**: Run every notebook using **"Save & Run All" (Commit mode)**.
+> - Do not rely on interactive session mode (internet hiccups or tab closes will not abort background commit runs).
+> - Kaggle automatically persists all files written to `/kaggle/working/` in the notebook **Output** tab upon completion.
+> - Ensure accelerator is set to **GPU T4 x2** (or GPU P100) and **Internet ON**.
 
 ---
 
-## 2-Account Unified Job Allocation
+## Overview of Allocation
 
-To complete all Extension runs in parallel using 2 Kaggle accounts (with 12-hour session limits and GPU T4 x2 accelerators):
-
-| Account | Tasks Included | Models | Dataset | Shards / Samples | Est. Runtime | Output Artifact |
-|---|---|---|---|---|---|---|
-| **Account 1** | Open-Ended Generation + Extra Swapped Pairings | Qwen2-VL-2B, SmolVLM, LLaVA-1.5 | A-OKVQA | Open N=500 (seed 0); Pairings seeds 11, 12, 13 | ~5.5 hours | `account1_open_and_pairings.zip` |
-| **Account 2** | AI2D Full Multiple-Choice Suite | Qwen2-VL-2B, SmolVLM, LLaVA-1.5 | AI2D | Main N=500 (seed 0) + Rep N=400 (seed 1) | ~7.5 hours | `account2_ai2d_all.zip` |
-
----
-
-## Kaggle Environment Note: PyTorch & TorchAudio CUDA Mismatch Fix
-
-Kaggle GPU environments have PyTorch compiled against CUDA 13.2, whereas pre-installed `torchaudio` is built against CUDA 12.8. When HuggingFace `transformers` attempts to import audio utilities, `torchaudio` raises a `RuntimeError` which breaks `AutoProcessor`. 
-Running `pip uninstall -y torchaudio` resolves this cleanly without impacting vision or text models.
+| Wave | Session | Target Models & Tasks | Est. Time | Output Archive |
+|---|---|---|---|---|
+| **Wave 1** | **Account 1** | Open-Ended Qwen2-VL (3 corruptions) + Extra Swapped Pairings (seeds 11, 12, 13 for Qwen, Smol, LLaVA) | ~7.0h | `account1_wave1.zip` |
+| **Wave 1** | **Account 2** | AI2D MC: Qwen Main (N=500) + Qwen Rep (N=400) + SmolVLM Main (N=500) + LLaVA Main (N=500) | ~7.7h | `account2_wave1_ai2d.zip` |
+| **Wave 2** | **Account 1** | Open-Ended SmolVLM (2 corruptions: `gaussian,swapblend`, N=500) | ~9.6h | `account1_wave2_smolvlm_open.zip` |
+| **Wave 2** | **Account 2** | Open-Ended LLaVA-1.5-7B (2 corruptions: `gaussian,swapblend`, N=500) | ~9.6h | `account2_wave2_llava_open.zip` |
 
 ---
 
-## Account 1: Single Self-Contained Cell
+# WAVE 1
 
-Copy and run this entire Python cell in Account 1:
+Start both Account 1 and Account 2 simultaneously.
+
+---
+
+### Wave 1 — Account 1: Open-Ended Qwen + Extra Pairings
+
+Paste this code block into a single Python cell in Account 1 and click **"Save & Run All"**:
 
 ```python
 import os
 import sys
 import time
-import base64
 import subprocess
-from IPython.display import HTML, Javascript, display
 
 print("=" * 60)
-print("ACCOUNT 1: OPEN-ENDED GENERATION + EXTRA PAIRINGS")
+print("WAVE 1 - ACCOUNT 1: QWEN2-VL OPEN-ENDED + EXTRA PAIRINGS")
 print("=" * 60)
 
-# -------------------------------------------------------------
-# STEP 1: FIX KAGGLE CUDA CONFLICT & INSTALL DEPENDENCIES
-# -------------------------------------------------------------
+# STEP 1: FIX CUDA CONFLICT & INSTALL DEPENDENCIES
 print("\n>>> Step 1/5: Fixing CUDA conflict and installing dependencies...")
 subprocess.run("pip uninstall -y torchaudio", shell=True)
 subprocess.run(
@@ -48,9 +49,7 @@ subprocess.run(
     shell=True, check=True
 )
 
-# -------------------------------------------------------------
 # STEP 2: CLONE OR UPDATE REPOSITORY (EXTENSION BRANCH)
-# -------------------------------------------------------------
 print("\n>>> Step 2/5: Synchronizing GitHub repository (extension branch)...")
 repo_dir = "/kaggle/working/reliance-utility"
 if not os.path.exists(repo_dir):
@@ -60,166 +59,107 @@ if not os.path.exists(repo_dir):
     )
 else:
     print("Repository exists on disk. Resetting and pulling latest...")
-    subprocess.run(
-        f"cd {repo_dir} && git reset --hard HEAD",
-        shell=True, check=True
-    )
+    subprocess.run(f"cd {repo_dir} && git reset --hard HEAD", shell=True, check=True)
 
 subprocess.run(
     f"cd {repo_dir} && git fetch --all --tags && git checkout extension && git pull origin extension",
     shell=True, check=True
 )
 
-# Verify GPU and AutoProcessor import
+# Verify GPU
 import torch
 from transformers import AutoProcessor
-assert torch.cuda.is_available(), "GPU accelerator not detected! Please enable GPU T4 x2 or P100 in Kaggle settings."
+assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
-print("AutoProcessor cleanly verified with zero CUDA version conflicts!")
 
-# -------------------------------------------------------------
-# STEP 3: PRE-FLIGHT VERIFICATION CHECKS
-# -------------------------------------------------------------
-print("\n>>> Step 3/5: Running pre-flight validation checks...")
-check_commands = [
-    f"cd {repo_dir} && python scripts/run_vlm_open.py --model Qwen/Qwen2-VL-2B-Instruct --check",
-    f"cd {repo_dir} && python scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check"
-]
-for cmd in check_commands:
-    print(f"Executing check: {cmd}")
-    subprocess.run(cmd, shell=True, check=True)
+# STEP 3: PRE-FLIGHT CHECK
+print("\n>>> Step 3/5: Running pre-flight check...")
+check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model Qwen/Qwen2-VL-2B-Instruct --check"
+subprocess.run(check_cmd, shell=True, check=True)
 
-# -------------------------------------------------------------
 # STEP 4: PRODUCTION RUNS
-# -------------------------------------------------------------
 print("\n>>> Step 4/5: Running production tasks...")
-os.makedirs("/kaggle/working/results/raw/vlm_open", exist_ok=True)
-os.makedirs("/kaggle/working/results/raw/vlm_pairings", exist_ok=True)
+out_open = "/kaggle/working/results/raw/vlm_open"
+out_pair = "/kaggle/working/results/raw/vlm_pairings"
+os.makedirs(out_open, exist_ok=True)
+os.makedirs(out_pair, exist_ok=True)
 
 prod_tasks = [
-    # 1. Qwen2-VL-2B Open-Ended (N=500, seed 0)
+    # 1. Qwen2-VL Open-Ended (N=500, 3 corruptions)
     (
-        "Open-Ended: Qwen2-VL-2B-Instruct (N=500)",
-        f"cd {repo_dir} && python scripts/run_vlm_open.py "
+        "Open-Ended: Qwen2-VL-2B-Instruct (N=500, 3 corruptions)",
+        f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
         f"--model Qwen/Qwen2-VL-2B-Instruct "
         f"--data_ids results/derived/main_ids.json "
         f"--n 500 --seed 0 --shard_size 25 "
-        f"--out /kaggle/working/results/raw/vlm_open"
-    ),
-    # 2. SmolVLM Open-Ended (N=500, seed 0)
-    (
-        "Open-Ended: SmolVLM-Instruct (N=500)",
-        f"cd {repo_dir} && python scripts/run_vlm_open.py "
-        f"--model HuggingFaceTB/SmolVLM-Instruct "
-        f"--assistant_prefix answer_colon "
-        f"--data_ids results/derived/main_ids.json "
-        f"--n 500 --seed 0 --shard_size 25 "
-        f"--out /kaggle/working/results/raw/vlm_open"
+        f"--out {out_open}"
     ),
 ]
 
-# 3. Extra swapped pairings (seeds 11, 12, 13) for Qwen2-VL, SmolVLM, LLaVA-1.5
+# 2. Extra swapped pairings (seeds 11, 12, 13) for all 3 models
 for pair_seed in [11, 12, 13]:
     prod_tasks.append((
         f"Pairing Seed {pair_seed}: Qwen2-VL-2B",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model Qwen/Qwen2-VL-2B-Instruct --dataset aokvqa "
         f"--corruptions swapblend --pairing_seed {pair_seed} --seed 0 "
-        f"--out /kaggle/working/results/raw/vlm_pairings"
+        f"--out {out_pair}"
     ))
     prod_tasks.append((
         f"Pairing Seed {pair_seed}: SmolVLM",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model HuggingFaceTB/SmolVLM-Instruct --dataset aokvqa "
         f"--assistant_prefix answer_colon "
         f"--corruptions swapblend --pairing_seed {pair_seed} --seed 0 "
-        f"--out /kaggle/working/results/raw/vlm_pairings"
+        f"--out {out_pair}"
     ))
     prod_tasks.append((
         f"Pairing Seed {pair_seed}: LLaVA-1.5-7B",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model llava-hf/llava-1.5-7b-hf --dataset aokvqa "
         f"--assistant_prefix answer_colon "
         f"--corruptions swapblend --pairing_seed {pair_seed} --seed 0 "
-        f"--out /kaggle/working/results/raw/vlm_pairings"
+        f"--out {out_pair}"
     ))
 
 total_tasks = len(prod_tasks)
 t_start = time.time()
 for idx, (title, cmd) in enumerate(prod_tasks, 1):
-    print(f"\n[{idx}/{total_tasks}] Starting {title}...")
+    print(f"\n[{idx}/{total_tasks}] Starting {title}...", flush=True)
     t_task = time.time()
     subprocess.run(cmd, shell=True, check=True)
-    print(f"[{idx}/{total_tasks}] Completed {title} in {(time.time() - t_task)/60:.1f} min")
+    print(f"[{idx}/{total_tasks}] Completed {title} in {(time.time() - t_task)/60:.1f} min", flush=True)
 
 print(f"\nAll tasks finished in {(time.time() - t_start)/60:.1f} min!")
 
-# -------------------------------------------------------------
-# STEP 5: ZIP SHARDS & TRIGGER AUTOMATIC DOWNLOAD
-# -------------------------------------------------------------
-print("\n>>> Step 5/5: Packaging shards and triggering browser download...")
-zip_name = "account1_open_and_pairings.zip"
-zip_path = f"/kaggle/working/{zip_name}"
-
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
+zip_name = "account1_wave1.zip"
 subprocess.run(
     f"cd /kaggle/working && zip -r -q {zip_name} results/raw/vlm_open results/raw/vlm_pairings",
     shell=True, check=True
 )
-
-file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-print(f"Archive created: {zip_name} ({file_size_mb:.2f} MB)")
-
-with open(zip_path, "rb") as f:
-    b64_data = base64.b64encode(f.read()).decode("utf-8")
-
-# JavaScript automatic browser download
-js_code = f"""
-(function() {{
-    var a = document.createElement('a');
-    a.href = 'data:application/zip;base64,{b64_data}';
-    a.download = '{zip_name}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}})();
-"""
-display(Javascript(js_code))
-
-# Fallback HTML download button
-html_code = f"""
-<div style="background-color: #e6ffed; border: 2px solid #52c41a; padding: 15px; border-radius: 8px; margin-top: 10px;">
-    <h3 style="color: #274916; margin: 0 0 8px 0;"> Download Triggered Automatically!</h3>
-    <p style="margin: 0 0 10px 0;">If your browser popup blocker prevented the automatic download, click below:</p>
-    <a href="data:application/zip;base64,{b64_data}" download="{zip_name}" 
-       style="display: inline-block; background: #1890ff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-       Click to Download {zip_name} ({file_size_mb:.2f} MB)
-    </a>
-</div>
-"""
-display(HTML(html_code))
+file_size_mb = os.path.getsize(f"/kaggle/working/{zip_name}") / (1024 * 1024)
+print(f"SUCCESS! Archive created at /kaggle/working/{zip_name} ({file_size_mb:.2f} MB)")
 ```
 
 ---
 
-## Account 2: Single Self-Contained Cell
+### Wave 1 — Account 2: AI2D Multiple-Choice Suite
 
-Copy and run this entire Python cell in Account 2:
+Paste this code block into a single Python cell in Account 2 and click **"Save & Run All"**:
 
 ```python
 import os
 import sys
 import time
-import base64
 import subprocess
-from IPython.display import HTML, Javascript, display
 
 print("=" * 60)
-print("ACCOUNT 2: AI2D MULTIPLE-CHOICE BENCHMARK (ALL MODELS)")
+print("WAVE 1 - ACCOUNT 2: AI2D MULTIPLE-CHOICE (ALL MODELS)")
 print("=" * 60)
 
-# -------------------------------------------------------------
-# STEP 1: FIX KAGGLE CUDA CONFLICT & INSTALL DEPENDENCIES
-# -------------------------------------------------------------
+# STEP 1: FIX CUDA CONFLICT & INSTALL DEPENDENCIES
 print("\n>>> Step 1/5: Fixing CUDA conflict and installing dependencies...")
 subprocess.run("pip uninstall -y torchaudio", shell=True)
 subprocess.run(
@@ -227,9 +167,7 @@ subprocess.run(
     shell=True, check=True
 )
 
-# -------------------------------------------------------------
 # STEP 2: CLONE OR UPDATE REPOSITORY (EXTENSION BRANCH)
-# -------------------------------------------------------------
 print("\n>>> Step 2/5: Synchronizing GitHub repository (extension branch)...")
 repo_dir = "/kaggle/working/reliance-utility"
 if not os.path.exists(repo_dir):
@@ -239,138 +177,269 @@ if not os.path.exists(repo_dir):
     )
 else:
     print("Repository exists on disk. Resetting and pulling latest...")
-    subprocess.run(
-        f"cd {repo_dir} && git reset --hard HEAD",
-        shell=True, check=True
-    )
+    subprocess.run(f"cd {repo_dir} && git reset --hard HEAD", shell=True, check=True)
 
 subprocess.run(
     f"cd {repo_dir} && git fetch --all --tags && git checkout extension && git pull origin extension",
     shell=True, check=True
 )
 
-# Verify GPU and AutoProcessor import
+# Verify GPU
 import torch
 from transformers import AutoProcessor
-assert torch.cuda.is_available(), "GPU accelerator not detected! Please enable GPU T4 x2 or P100 in Kaggle settings."
+assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
-print("AutoProcessor cleanly verified with zero CUDA version conflicts!")
 
-# -------------------------------------------------------------
-# STEP 3: PRE-FLIGHT VERIFICATION CHECKS
-# -------------------------------------------------------------
-print("\n>>> Step 3/5: Running pre-flight validation checks on AI2D...")
+# STEP 3: PRE-FLIGHT CHECKS
+print("\n>>> Step 3/5: Running pre-flight checks on AI2D...")
 check_commands = [
-    f"cd {repo_dir} && python scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --check",
-    f"cd {repo_dir} && python scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --check",
-    f"cd {repo_dir} && python scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check"
+    f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --check",
+    f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --check",
+    f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check"
 ]
 for cmd in check_commands:
-    print(f"Executing check: {cmd}")
+    print(f"Executing check: {cmd}", flush=True)
     subprocess.run(cmd, shell=True, check=True)
 
-# -------------------------------------------------------------
 # STEP 4: PRODUCTION RUNS
-# -------------------------------------------------------------
 print("\n>>> Step 4/5: Running production AI2D tasks...")
-os.makedirs("/kaggle/working/results/raw/vlm_ai2d", exist_ok=True)
+out_ai2d = "/kaggle/working/results/raw/vlm_ai2d"
+os.makedirs(out_ai2d, exist_ok=True)
 
 prod_tasks = [
-    # 1. Qwen2-VL-2B AI2D Main (N=500, seed 0)
+    # 1. Qwen2-VL AI2D Main (N=500, seed 0)
     (
         "AI2D Main: Qwen2-VL-2B-Instruct (N=500)",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model Qwen/Qwen2-VL-2B-Instruct "
         f"--dataset ai2d "
         f"--data_ids results/derived/ai2d_main_ids.json "
         f"--n 500 --seed 0 --shard_size 25 "
-        f"--out /kaggle/working/results/raw/vlm_ai2d"
+        f"--out {out_ai2d}"
     ),
-    # 2. Qwen2-VL-2B AI2D Replication (N=400, seed 1)
+    # 2. Qwen2-VL AI2D Replication (N=400, seed 1)
     (
         "AI2D Replication: Qwen2-VL-2B-Instruct (N=400)",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model Qwen/Qwen2-VL-2B-Instruct "
         f"--dataset ai2d "
         f"--data_ids results/derived/ai2d_rep_ids.json "
         f"--n 400 --seed 1 --shard_size 25 "
-        f"--out /kaggle/working/results/raw/vlm_ai2d"
+        f"--out {out_ai2d}"
     ),
     # 3. SmolVLM AI2D Main (N=500, seed 0)
     (
         "AI2D Main: SmolVLM-Instruct (N=500)",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model HuggingFaceTB/SmolVLM-Instruct "
         f"--dataset ai2d "
         f"--assistant_prefix answer_colon "
         f"--data_ids results/derived/ai2d_main_ids.json "
         f"--n 500 --seed 0 --shard_size 25 "
-        f"--out /kaggle/working/results/raw/vlm_ai2d"
+        f"--out {out_ai2d}"
     ),
     # 4. LLaVA-1.5-7B AI2D Main (N=500, seed 0)
     (
         "AI2D Main: LLaVA-1.5-7B-hf (N=500)",
-        f"cd {repo_dir} && python scripts/run_vlm_pilot.py "
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
         f"--model llava-hf/llava-1.5-7b-hf "
         f"--dataset ai2d "
         f"--assistant_prefix answer_colon "
         f"--data_ids results/derived/ai2d_main_ids.json "
         f"--n 500 --seed 0 --shard_size 25 "
-        f"--out /kaggle/working/results/raw/vlm_ai2d"
+        f"--out {out_ai2d}"
     ),
 ]
 
 total_tasks = len(prod_tasks)
 t_start = time.time()
 for idx, (title, cmd) in enumerate(prod_tasks, 1):
-    print(f"\n[{idx}/{total_tasks}] Starting {title}...")
+    print(f"\n[{idx}/{total_tasks}] Starting {title}...", flush=True)
     t_task = time.time()
     subprocess.run(cmd, shell=True, check=True)
-    print(f"[{idx}/{total_tasks}] Completed {title} in {(time.time() - t_task)/60:.1f} min")
+    print(f"[{idx}/{total_tasks}] Completed {title} in {(time.time() - t_task)/60:.1f} min", flush=True)
 
 print(f"\nAll AI2D tasks finished in {(time.time() - t_start)/60:.1f} min!")
 
-# -------------------------------------------------------------
-# STEP 5: ZIP SHARDS & TRIGGER AUTOMATIC DOWNLOAD
-# -------------------------------------------------------------
-print("\n>>> Step 5/5: Packaging shards and triggering browser download...")
-zip_name = "account2_ai2d_all.zip"
-zip_path = f"/kaggle/working/{zip_name}"
-
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
+zip_name = "account2_wave1_ai2d.zip"
 subprocess.run(
     f"cd /kaggle/working && zip -r -q {zip_name} results/raw/vlm_ai2d",
     shell=True, check=True
 )
+file_size_mb = os.path.getsize(f"/kaggle/working/{zip_name}") / (1024 * 1024)
+print(f"SUCCESS! Archive created at /kaggle/working/{zip_name} ({file_size_mb:.2f} MB)")
+```
 
-file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-print(f"Archive created: {zip_name} ({file_size_mb:.2f} MB)")
+---
 
-with open(zip_path, "rb") as f:
-    b64_data = base64.b64encode(f.read()).decode("utf-8")
+# WAVE 2
 
-# JavaScript automatic browser download
-js_code = f"""
-(function() {{
-    var a = document.createElement('a');
-    a.href = 'data:application/zip;base64,{b64_data}';
-    a.download = '{zip_name}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}})();
-"""
-display(Javascript(js_code))
+Run after downloading and verifying Wave 1 outputs.
 
-# Fallback HTML download button
-html_code = f"""
-<div style="background-color: #e6ffed; border: 2px solid #52c41a; padding: 15px; border-radius: 8px; margin-top: 10px;">
-    <h3 style="color: #274916; margin: 0 0 8px 0;"> Download Triggered Automatically!</h3>
-    <p style="margin: 0 0 10px 0;">If your browser popup blocker prevented the automatic download, click below:</p>
-    <a href="data:application/zip;base64,{b64_data}" download="{zip_name}" 
-       style="display: inline-block; background: #1890ff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-       Click to Download {zip_name} ({file_size_mb:.2f} MB)
-    </a>
-</div>
-"""
-display(HTML(html_code))
+---
+
+### Wave 2 — Account 1: SmolVLM Open-Ended
+
+Paste this code block into Account 1 and click **"Save & Run All"**:
+
+```python
+import os
+import sys
+import time
+import subprocess
+
+print("=" * 60)
+print("WAVE 2 - ACCOUNT 1: SMOLVLM OPEN-ENDED (GAUSSIAN + SWAPBLEND)")
+print("=" * 60)
+
+# STEP 1: FIX CUDA CONFLICT & INSTALL DEPENDENCIES
+print("\n>>> Step 1/5: Fixing CUDA conflict and installing dependencies...")
+subprocess.run("pip uninstall -y torchaudio", shell=True)
+subprocess.run(
+    "pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes",
+    shell=True, check=True
+)
+
+# STEP 2: CLONE OR UPDATE REPOSITORY (EXTENSION BRANCH)
+print("\n>>> Step 2/5: Synchronizing GitHub repository (extension branch)...")
+repo_dir = "/kaggle/working/reliance-utility"
+if not os.path.exists(repo_dir):
+    subprocess.run(
+        f"git clone https://github.com/Stealth768/reliance-utility.git {repo_dir}",
+        shell=True, check=True
+    )
+else:
+    print("Repository exists on disk. Resetting and pulling latest...")
+    subprocess.run(f"cd {repo_dir} && git reset --hard HEAD", shell=True, check=True)
+
+subprocess.run(
+    f"cd {repo_dir} && git fetch --all --tags && git checkout extension && git pull origin extension",
+    shell=True, check=True
+)
+
+# Verify GPU
+import torch
+from transformers import AutoProcessor
+assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
+print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
+
+# STEP 3: PRE-FLIGHT CHECK
+print("\n>>> Step 3/5: Running pre-flight check...")
+check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check"
+subprocess.run(check_cmd, shell=True, check=True)
+
+# STEP 4: PRODUCTION RUN
+print("\n>>> Step 4/5: Running production open-ended SmolVLM...")
+out_open = "/kaggle/working/results/raw/vlm_open"
+os.makedirs(out_open, exist_ok=True)
+
+# 2 corruptions (gaussian,swapblend) to fit within 12h session ceiling (~9.6h runtime)
+prod_cmd = (
+    f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
+    f"--model HuggingFaceTB/SmolVLM-Instruct "
+    f"--assistant_prefix answer_colon "
+    f"--corruptions gaussian,swapblend "
+    f"--data_ids results/derived/main_ids.json "
+    f"--n 500 --seed 0 --shard_size 25 "
+    f"--out {out_open}"
+)
+
+t_start = time.time()
+subprocess.run(prod_cmd, shell=True, check=True)
+print(f"\nSmolVLM Open-Ended finished in {(time.time() - t_start)/60:.1f} min!")
+
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
+zip_name = "account1_wave2_smolvlm_open.zip"
+subprocess.run(
+    f"cd /kaggle/working && zip -r -q {zip_name} results/raw/vlm_open",
+    shell=True, check=True
+)
+file_size_mb = os.path.getsize(f"/kaggle/working/{zip_name}") / (1024 * 1024)
+print(f"SUCCESS! Archive created at /kaggle/working/{zip_name} ({file_size_mb:.2f} MB)")
+```
+
+---
+
+### Wave 2 — Account 2: LLaVA-1.5-7B Open-Ended
+
+Paste this code block into Account 2 and click **"Save & Run All"**:
+
+```python
+import os
+import sys
+import time
+import subprocess
+
+print("=" * 60)
+print("WAVE 2 - ACCOUNT 2: LLAVA-1.5-7B OPEN-ENDED (GAUSSIAN + SWAPBLEND)")
+print("=" * 60)
+
+# STEP 1: FIX CUDA CONFLICT & INSTALL DEPENDENCIES
+print("\n>>> Step 1/5: Fixing CUDA conflict and installing dependencies...")
+subprocess.run("pip uninstall -y torchaudio", shell=True)
+subprocess.run(
+    "pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes",
+    shell=True, check=True
+)
+
+# STEP 2: CLONE OR UPDATE REPOSITORY (EXTENSION BRANCH)
+print("\n>>> Step 2/5: Synchronizing GitHub repository (extension branch)...")
+repo_dir = "/kaggle/working/reliance-utility"
+if not os.path.exists(repo_dir):
+    subprocess.run(
+        f"git clone https://github.com/Stealth768/reliance-utility.git {repo_dir}",
+        shell=True, check=True
+    )
+else:
+    print("Repository exists on disk. Resetting and pulling latest...")
+    subprocess.run(f"cd {repo_dir} && git reset --hard HEAD", shell=True, check=True)
+
+subprocess.run(
+    f"cd {repo_dir} && git fetch --all --tags && git checkout extension && git pull origin extension",
+    shell=True, check=True
+)
+
+# Verify GPU
+import torch
+from transformers import AutoProcessor
+assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
+print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
+
+# STEP 3: PRE-FLIGHT CHECK
+print("\n>>> Step 3/5: Running pre-flight check...")
+check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model llava-hf/llava-1.5-7b-hf --assistant_prefix answer_colon --check"
+subprocess.run(check_cmd, shell=True, check=True)
+
+# STEP 4: PRODUCTION RUN
+print("\n>>> Step 4/5: Running production open-ended LLaVA-1.5-7B...")
+out_open = "/kaggle/working/results/raw/vlm_open"
+os.makedirs(out_open, exist_ok=True)
+
+# 2 corruptions (gaussian,swapblend) to fit within 12h session ceiling (~9.6h runtime)
+prod_cmd = (
+    f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
+    f"--model llava-hf/llava-1.5-7b-hf "
+    f"--assistant_prefix answer_colon "
+    f"--corruptions gaussian,swapblend "
+    f"--data_ids results/derived/main_ids.json "
+    f"--n 500 --seed 0 --shard_size 25 "
+    f"--out {out_open}"
+)
+
+t_start = time.time()
+subprocess.run(prod_cmd, shell=True, check=True)
+print(f"\nLLaVA-1.5-7B Open-Ended finished in {(time.time() - t_start)/60:.1f} min!")
+
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
+zip_name = "account2_wave2_llava_open.zip"
+subprocess.run(
+    f"cd /kaggle/working && zip -r -q {zip_name} results/raw/vlm_open",
+    shell=True, check=True
+)
+file_size_mb = os.path.getsize(f"/kaggle/working/{zip_name}") / (1024 * 1024)
+print(f"SUCCESS! Archive created at /kaggle/working/{zip_name} ({file_size_mb:.2f} MB)")
 ```
