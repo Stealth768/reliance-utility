@@ -44,12 +44,25 @@ from src.vlm.data import load_aokvqa_validation, sample_main_disjoint_ids
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run VLM reliance-utility benchmark on A-OKVQA")
+    parser = argparse.ArgumentParser(description="Run VLM reliance-utility benchmark on A-OKVQA or AI2D")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="aokvqa",
+        choices=["aokvqa", "ai2d"],
+        help="Benchmark dataset to evaluate: 'aokvqa' (default) or 'ai2d'",
+    )
+    parser.add_argument(
+        "--pairing_seed",
+        type=int,
+        default=0,
+        help="Random seed for swapped donor derangement (default: 0 -> seed+100; use 11, 12, 13 for extra pairing runs)",
+    )
     parser.add_argument(
         "--model",
         type=str,
         default="Qwen/Qwen2-VL-2B-Instruct",
-        help="HuggingFace model identifier (e.g. Qwen/Qwen2-VL-2B-Instruct, HuggingFaceTB/SmolVLM-Instruct, llava-hf/llava-1.5-7b-hf)",
+        help="HuggingFace model identifier (e.g. Qwen/Qwen2-VL-2B-Instruct, HuggingFaceTB/SmolVLM-Instruct, llava-hf/llava-1.5-7b-hf, Qwen/Qwen2-VL-7B-Instruct)",
     )
     parser.add_argument(
         "--data_ids",
@@ -194,16 +207,16 @@ def get_gpu_name() -> str:
     return "n/a"
 
 
-def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
+def run_check_mode(adapter: Any, examples: List[Dict[str, Any]], dataset_name: str = "aokvqa"):
     """Run 10 questions clean and text-only, verify mean letter mass >= 0.9.
 
-    For adapters that have a ``_build_prompt_text`` method (SmolVLM, LLaVA),
-    also prints the top-5 next-token probabilities for the clean forward pass on
-    the first item, to diagnose letter mass failures.
+    For AI2D, also validates the diagnostic gate: clean acc >> 25%,
+    text-only acc > 25% and >= 10 points below clean acc.
     """
+    # VERIFY-ON-GPU
     check_items = examples[:10]
     print(f"\n==================================================")
-    print(f"RUNNING MODEL CHECK ON {len(check_items)} ITEMS: {adapter.model_id}")
+    print(f"RUNNING MODEL CHECK ON {len(check_items)} ITEMS: {adapter.model_id} [{dataset_name.upper()}]")
     if hasattr(adapter, "_prefix_str") and adapter._prefix_str:
         print(f"  Assistant prefix: '{adapter._prefix_str}'")
 
@@ -285,6 +298,7 @@ def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
     text_acc = text_correct / len(check_items)
 
     print("-" * 50)
+    print(f"Dataset                      : {dataset_name.upper()}")
     print(f"Mean Letter Probability Mass : {mean_mass:.4f}")
     print(f"Clean Multimodal Accuracy    : {clean_acc:.2%}")
     print(f"Text-Only Accuracy          : {text_acc:.2%}")
@@ -294,6 +308,22 @@ def run_check_mode(adapter: Any, examples: List[Dict[str, Any]]):
         print(f"\n[FAIL] Mean letter probability mass ({mean_mass:.4f}) is below 0.90 threshold!")
         print("Refusing to continue. The model does not conform to the multiple choice format.")
         sys.exit(1)
+
+    if clean_acc <= 0.25:
+        print(f"\n[FAIL] Clean accuracy ({clean_acc:.2%}) is at or below chance level (25%)!")
+        sys.exit(1)
+
+    if dataset_name.lower() == "ai2d":
+        # Strict gate for AI2D: text-only acc > 25% and >= 10 points below clean acc
+        if text_acc <= 0.25:
+            print(f"\n[FAIL] AI2D gate failed: text-only accuracy ({text_acc:.2%}) <= chance (25%).")
+            sys.exit(1)
+        if (clean_acc - text_acc) < 0.10:
+            print(
+                f"\n[FAIL] AI2D gate failed: (clean_acc - text_acc) = {clean_acc - text_acc:.2%} < 10 percentage points."
+            )
+            sys.exit(1)
+        print(f"\n[PASS] AI2D diagnostic gate passed! (clean >> 25%, text > 25%, clean - text >= 10 points).")
     else:
         print(f"\n[PASS] Model check successful! Mean letter mass >= 0.90.")
 
@@ -308,19 +338,32 @@ def run_benchmark():
     lib_versions = get_lib_versions()
     gpu_name = get_gpu_name()
 
-    # 1. Load questions
-    data_ids_path = Path(args.data_ids)
-    if not data_ids_path.exists():
-        if "main_ids" in str(data_ids_path):
-            sample_main_disjoint_ids(main_ids_path=str(data_ids_path), n_sample=args.n, seed=args.seed + 1)
+    # 1. Load questions based on chosen dataset
+    if args.dataset == "ai2d":
+        from src.vlm.data_ai2d import load_ai2d_dataset, sample_ai2d_main_ids
+        if args.data_ids == "results/derived/main_ids.json":
+            data_ids_path = Path("results/derived/ai2d_main_ids.json")
         else:
-            raise FileNotFoundError(f"Requested dataset IDs file not found: {data_ids_path}")
+            data_ids_path = Path(args.data_ids)
 
-    all_examples = load_aokvqa_validation(
-        pilot_ids_path=str(data_ids_path),
-        n_sample=args.n,
-        seed=args.seed,
-    )
+        if not data_ids_path.exists():
+            sample_ai2d_main_ids(dest_path=str(data_ids_path), n_sample=args.n, seed=args.seed)
+
+        all_examples = load_ai2d_dataset(ids_path=str(data_ids_path), load_images=True)
+    else:
+        data_ids_path = Path(args.data_ids)
+        if not data_ids_path.exists():
+            if "main_ids" in str(data_ids_path):
+                sample_main_disjoint_ids(main_ids_path=str(data_ids_path), n_sample=args.n, seed=args.seed + 1)
+            else:
+                raise FileNotFoundError(f"Requested dataset IDs file not found: {data_ids_path}")
+
+        all_examples = load_aokvqa_validation(
+            pilot_ids_path=str(data_ids_path),
+            n_sample=args.n,
+            seed=args.seed,
+        )
+
     if len(all_examples) > args.n:
         all_examples = all_examples[: args.n]
 
@@ -339,14 +382,16 @@ def run_benchmark():
     adapter = get_adapter(args.model, assistant_prefix=args.assistant_prefix)
     model_slug = args.model.split("/")[-1]
 
-    # Pre-compute derangement permutation for swapblend corruption
-    swap_permutation = get_derangement(n_total, seed=args.seed + 100)
+    # Pre-compute derangement permutation for swapblend / swapped corruption
+    swap_seed = args.pairing_seed if (args.pairing_seed is not None and args.pairing_seed != 0) else (args.seed + 100)
+    swap_permutation = get_derangement(n_total, seed=swap_seed)
 
     # 3. Check mode execution
     if args.check:
         try:
+            # VERIFY-ON-GPU
             adapter.load(device="cuda", dtype="float16")
-            run_check_mode(adapter, all_examples)
+            run_check_mode(adapter, all_examples, dataset_name=args.dataset)
             return
         except SystemExit as se:
             # Re-raise explicit exit codes (e.g. sys.exit(1) on mass < 0.90)
@@ -357,12 +402,19 @@ def run_benchmark():
             traceback.print_exc()
             sys.exit(1)
 
-    # 4. Filter needed shard tasks (NEW: seed included in filename)
+    # 4. Filter needed shard tasks (shard names include dataset and pairing seed)
     n_shards = (n_total + args.shard_size - 1) // args.shard_size
+    pair_str = f"_pair{args.pairing_seed}" if (args.pairing_seed is not None and args.pairing_seed != 0) else ""
     needed_tasks = []
     for corruption in corruptions_list:
         for shard_idx in range(n_shards):
-            shard_file = out_dir / f"{model_slug}_{corruption}_seed{args.seed}_shard{shard_idx}.json"
+            shard_name = f"{args.dataset}_{model_slug}_{corruption}{pair_str}_seed{args.seed}_shard{shard_idx}.json"
+            shard_file = out_dir / shard_name
+            # Fallback for existing aokvqa shards without dataset prefix
+            if not shard_file.exists() and args.dataset == "aokvqa" and not pair_str:
+                legacy_file = out_dir / f"{model_slug}_{corruption}_seed{args.seed}_shard{shard_idx}.json"
+                if legacy_file.exists():
+                    shard_file = legacy_file
             if not shard_file.exists():
                 needed_tasks.append((corruption, shard_idx, shard_file))
 
@@ -491,10 +543,12 @@ def run_benchmark():
                 )
 
         shard_data: Dict[str, Any] = {
+            "dataset": args.dataset,
             "model_name": args.model,
             "corruption": corruption,
             "shard_idx": shard_idx,
             "seed": args.seed,
+            "pairing_seed": args.pairing_seed,
             "start_idx": start_idx,
             "end_idx": end_idx,
             "n_questions": len(items_records),
@@ -509,14 +563,16 @@ def run_benchmark():
 
         # Write run manifest (enriched with provenance fields)
         config_dict = {
+            "dataset": args.dataset,
             "model": args.model,
             "corruption": corruption,
             "shard_idx": shard_idx,
             "seed": args.seed,
+            "pairing_seed": args.pairing_seed,
             "n_items": len(items_records),
             "grid_points": len(S_grid),
         }
-        manifest_dir = out_dir / f"manifest_{model_slug}_{corruption}_seed{args.seed}_shard{shard_idx}"
+        manifest_dir = out_dir / f"manifest_{args.dataset}_{model_slug}_{corruption}{pair_str}_seed{args.seed}_shard{shard_idx}"
         write_manifest(
             manifest_dir,
             config_dict,

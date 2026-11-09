@@ -122,6 +122,53 @@ class Qwen2VLAdapter(BaseVLMAdapter):
         return letter_probs(self.model, self.processor, image_or_None, question, choices)
 
 
+class Qwen2VL4BitAdapter(BaseVLMAdapter):
+    """Adapter for Qwen2-VL family with 4-bit NF4 quantisation (e.g. Qwen/Qwen2-VL-7B-Instruct).
+
+    Fits a 7B parameter vision-language model within ~6 GB of GPU memory on a T4 GPU.
+    """
+
+    def load(self, device: str = "cuda", dtype: str = "float16"):
+        # VERIFY-ON-GPU
+        import torch
+        from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2VLForConditionalGeneration
+
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=False,
+        )
+        print(f"Loading Qwen2-VL 4-bit model: {self.model_id} on {device}...")
+        self.model = Qwen2VLForConditionalGeneration.from_pretrained(
+            self.model_id,
+            quantization_config=bnb_config,
+            device_map={"": 0} if device == "cuda" else None,
+        )
+        self.model.eval()
+
+        min_pixels = 256 * 28 * 28
+        max_pixels = 1024 * 28 * 28
+        try:
+            self.processor = AutoProcessor.from_pretrained(
+                self.model_id, min_pixels=min_pixels, max_pixels=max_pixels
+            )
+        except TypeError:
+            size_dict = {"shortest_edge": min_pixels, "longest_edge": max_pixels}
+            self.processor = AutoProcessor.from_pretrained(self.model_id, size=size_dict)
+        self.tokenizer = self.processor.tokenizer
+
+    def letter_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        choices: List[str],
+    ) -> Tuple[np.ndarray, float]:
+        # VERIFY-ON-GPU
+        from src.vlm.scoring import letter_probs
+        return letter_probs(self.model, self.processor, image_or_None, question, choices)
+
+
 class SmolVLMAdapter(BaseVLMAdapter):
     """Adapter for SmolVLM family (e.g. HuggingFaceTB/SmolVLM-Instruct or 500M/2B).
 
@@ -507,9 +554,14 @@ class LlavaAdapter(BaseVLMAdapter):
 
 # Registry of supported models
 MODEL_REGISTRY = {
-    # Qwen2-VL
+    # Qwen2-VL (2B)
     "Qwen/Qwen2-VL-2B-Instruct": Qwen2VLAdapter,
     "qwen2-vl-2b": Qwen2VLAdapter,
+    # Qwen2-VL 4-bit (7B)
+    "Qwen/Qwen2-VL-7B-Instruct": Qwen2VL4BitAdapter,
+    "qwen2-vl-7b-instruct": Qwen2VL4BitAdapter,
+    "qwen2-vl-7b-4bit": Qwen2VL4BitAdapter,
+    "qwen2-vl-7b": Qwen2VL4BitAdapter,
     # SmolVLM
     "HuggingFaceTB/SmolVLM-Instruct": SmolVLMAdapter,
     "HuggingFaceTB/SmolVLM-500M-Instruct": SmolVLMAdapter,
@@ -558,7 +610,9 @@ def get_adapter(model_name_or_id: str, assistant_prefix: Optional[str] = None) -
         return cls(normalized)
 
     # Substring matching fallback
-    if "qwen2" in lower or "qwen" in lower:
+    if "7b" in lower and ("qwen2" in lower or "qwen" in lower):
+        return Qwen2VL4BitAdapter(normalized)
+    elif "qwen2" in lower or "qwen" in lower:
         return Qwen2VLAdapter(normalized)
     elif "smol" in lower:
         return _smol(normalized)

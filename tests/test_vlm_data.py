@@ -123,3 +123,29 @@ def test_three_id_sets_are_disjoint():
         f"Union of all three ID sets = {len(total_union)}, expected 1145"
     )
 
+
+def test_ai2d_id_sets_disjoint():
+    """results/derived/ai2d_main_ids.json (N=500) and ai2d_rep_ids.json (N=400) are disjoint."""
+    main_path = Path("results/derived/ai2d_main_ids.json")
+    rep_path = Path("results/derived/ai2d_rep_ids.json")
+
+    assert main_path.exists(), "ai2d_main_ids.json missing"
+    assert rep_path.exists(), "ai2d_rep_ids.json missing"
+
+    with open(main_path, "r", encoding="utf-8") as f:
+        main_data = json.load(f)
+    with open(rep_path, "r", encoding="utf-8") as f:
+        rep_data = json.load(f)
+
+    main_ids = set(main_data["question_ids"])
+    rep_ids = set(rep_data["question_ids"])
+
+    assert len(main_ids) == 500, f"Expected 500 AI2D main IDs, got {len(main_ids)}"
+    assert len(rep_ids) == 400, f"Expected 400 AI2D rep IDs, got {len(rep_ids)}"
+    assert len(main_data["question_ids"]) == 500
+    assert len(rep_data["question_ids"]) == 400
+
+    intersection = main_ids & rep_ids
+    assert len(intersection) == 0, f"AI2D main ∩ rep has {len(intersection)} overlapping IDs!"
+
+

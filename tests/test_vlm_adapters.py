@@ -8,6 +8,7 @@ from src.vlm.adapters import (
     InternVL2Adapter,
     LlavaAdapter,
     Qwen2VLAdapter,
+    Qwen2VL4BitAdapter,
     SmolVLMAdapter,
     get_adapter,
 )
@@ -25,6 +26,13 @@ def test_get_adapter_dispatch():
 
     intern = get_adapter("OpenGVLab/InternVL2-2B")
     assert isinstance(intern, InternVL2Adapter)
+
+    qwen7b = get_adapter("Qwen/Qwen2-VL-7B-Instruct")
+    assert isinstance(qwen7b, Qwen2VL4BitAdapter)
+    assert qwen7b.model_id == "Qwen/Qwen2-VL-7B-Instruct"
+
+    assert isinstance(get_adapter("qwen2-vl-7b-4bit"), Qwen2VL4BitAdapter)
+    assert isinstance(get_adapter("qwen-7b-vlm"), Qwen2VL4BitAdapter)
 
     # Substring fallbacks
     assert isinstance(get_adapter("qwen2_model"), Qwen2VLAdapter)
