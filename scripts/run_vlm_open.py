@@ -376,7 +376,8 @@ def run_open_benchmark():
 
         print(
             f"\n>>> Shard {shard_idx + 1}/{n_shards} "
-            f"[{corruption}] (Questions {start_idx}..{end_idx - 1}) <<<"
+            f"[{corruption}] (Questions {start_idx}..{end_idx - 1}) <<<",
+            flush=True,
         )
 
         items_records = []
@@ -505,7 +506,8 @@ def run_open_benchmark():
                     f"Done {q_local_idx + 1}/{len(shard_examples)} | "
                     f"Overall: {completed_items}/{total_items_to_process} | "
                     f"Rate: {rate:.2f} items/s | "
-                    f"ETA: {format_eta(remaining_sec)}"
+                    f"ETA: {format_eta(remaining_sec)}",
+                    flush=True,
                 )
 
         shard_data: Dict[str, Any] = {
@@ -524,7 +526,7 @@ def run_open_benchmark():
 
         if not shard_file.exists():
             write_raw(shard_file, shard_data)
-            print(f"  -> Successfully saved shard: {shard_file.name}")
+            print(f"  -> Successfully saved shard: {shard_file.name}", flush=True)
 
         config_dict = {
             "mode": "open_ended",

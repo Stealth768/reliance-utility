@@ -356,67 +356,6 @@ class SmolVLMAdapter(BaseVLMAdapter):
 
         return renorm, float(total_mass)
 
-    def _build_open_prompt_text(self, image_or_None: Any, question: str, prompt_suffix: str) -> str:
-        body = f"{question}\n{prompt_suffix}"
-        if image_or_None is not None:
-            return f"USER: <image>\n{body} ASSISTANT:"
-        return f"USER: {body} ASSISTANT:"
-
-    def generate_open_answer(
-        self,
-        image_or_None: Any,
-        question: str,
-        prompt_suffix: str = "Answer the question with a short phrase.",
-        max_new_tokens: int = 8,
-    ) -> str:
-        # VERIFY-ON-GPU
-        import torch
-        prompt_text = self._build_open_prompt_text(image_or_None, question, prompt_suffix)
-        if image_or_None is not None:
-            inputs = self.processor(text=prompt_text, images=image_or_None, return_tensors="pt")
-        else:
-            inputs = self.processor(text=prompt_text, return_tensors="pt")
-        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-        with torch.no_grad():
-            output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
-        input_len = inputs["input_ids"].shape[1]
-        new_ids = output_ids[0, input_len:]
-        return self.tokenizer.decode(new_ids, skip_special_tokens=True).strip()
-
-    def teacher_forced_answer_probs(
-        self,
-        image_or_None: Any,
-        question: str,
-        answer_text: str,
-        prompt_suffix: str = "Answer the question with a short phrase.",
-    ) -> np.ndarray:
-        # VERIFY-ON-GPU
-        import torch
-        prompt_text = self._build_open_prompt_text(image_or_None, question, prompt_suffix)
-        clean_ans = answer_text.strip()
-        if not clean_ans:
-            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
-
-        full_text = prompt_text + " " + clean_ans
-        if image_or_None is not None:
-            full_inputs = self.processor(text=full_text, images=image_or_None, return_tensors="pt")
-            prompt_inputs = self.processor(text=prompt_text, images=image_or_None, return_tensors="pt")
-        else:
-            full_inputs = self.processor(text=full_text, return_tensors="pt")
-            prompt_inputs = self.processor(text=prompt_text, return_tensors="pt")
-
-        full_inputs = {k: v.to(self.model.device) for k, v in full_inputs.items()}
-        p_len = prompt_inputs["input_ids"].shape[1]
-        f_len = full_inputs["input_ids"].shape[1]
-        if f_len <= p_len:
-            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
-
-        with torch.no_grad():
-            outputs = self.model(**full_inputs)
-            target_logits = outputs.logits[0, (p_len - 1):(f_len - 1), :]
-            probs = torch.softmax(target_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
-        return probs
-
     def _build_open_prompt(self, image_or_None: Any, question: str, prompt_suffix: str) -> str:
         content = []
         if image_or_None is not None:
