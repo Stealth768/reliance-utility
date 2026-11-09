@@ -252,3 +252,38 @@ python scripts/make_all.py
 # 4. Verify all numbers in paper/*.tex agree with generated tables
 python scripts/check_numbers.py
 ```
+
+---
+
+## Extension Phase Orchestration Matrix (AI2D, Pairings, Open-Ended, 7B)
+
+Operational matrix for the research paper extension:
+
+| Job ID | Target Model | Dataset / Modality | Partition / Seeds | Corruptions | Shard Size | Est. Time | Output Archive |
+|---|---|---|---|---|---|---|---|
+| **EXT-1** | Qwen2-VL-2B-Instruct | AI2D (MC) | Main N=500 (seed 0) + Rep N=400 (seed 1) | gaussian,patch,swapblend | 25 | ~4.5 hours | `ai2d_qwen2vl.zip` |
+| **EXT-2** | SmolVLM + LLaVA-1.5 | AI2D (MC) | Main N=500 (seed 0) | gaussian,patch,swapblend | 25 | ~5.5 hours | `ai2d_smol_llava.zip` |
+| **EXT-3** | Qwen, Smol, LLaVA | A-OKVQA (MC) | Main N=500, pairing seeds 11, 12, 13 | swapblend only | 25 | ~4.0 hours | `aokvqa_extra_pairings.zip` |
+| **EXT-4** | Qwen2-VL-2B + SmolVLM | A-OKVQA (Open) | Main N=500 (seed 0) | gaussian,patch,swapblend | 25 | ~6.0 hours | `vlm_open_ended.zip` |
+| **EXT-5** | Qwen2-VL-7B-Instruct (4-bit) | AI2D / A-OKVQA | Check + Main N=500 (seed 0) | gaussian,patch,swapblend | 25 | ~5.0 hours | `qwen7b_4bit.zip` |
+
+### Extension Pre-Flight Check Commands
+
+Run `--check` before launching production shards:
+
+```bash
+# 1. AI2D Multiple-Choice Check
+python scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --check
+python scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --check
+python scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check
+
+# 2. Open-Ended Generation Check
+python scripts/run_vlm_open.py --model Qwen/Qwen2-VL-2B-Instruct --check
+python scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check
+
+# 3. 7B 4-bit Model Check
+python scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-7B-Instruct --dataset ai2d --check
+```
+
+See [notebooks/kaggle_extension.md](file:///c:/Users/steal/Desktop/Multimodal%20Research%20paper/Code/reliance-utility/notebooks/kaggle_extension.md) for self-contained, one-code-block-per-cell Kaggle execution cells with base64 in-notebook downloads.
+
