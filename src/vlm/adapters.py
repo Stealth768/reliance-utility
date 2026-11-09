@@ -82,6 +82,26 @@ class BaseVLMAdapter(ABC):
         """
         pass
 
+    def generate_open_answer(
+        self,
+        image_or_None: Any,
+        question: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+        max_new_tokens: int = 8,
+    ) -> str:
+        """Greedy generate open-ended answer text (max_new_tokens=8)."""
+        raise NotImplementedError(f"Open-ended generation not implemented for {self.__class__.__name__}")
+
+    def teacher_forced_answer_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        answer_text: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+    ) -> np.ndarray:
+        """Return token-level next-token probability distributions of shape (T, V) for forced answer string."""
+        raise NotImplementedError(f"Teacher-forced answer probs not implemented for {self.__class__.__name__}")
+
 
 class Qwen2VLAdapter(BaseVLMAdapter):
     """Adapter for Qwen2-VL family (e.g. Qwen/Qwen2-VL-2B-Instruct)."""
@@ -118,11 +138,75 @@ class Qwen2VLAdapter(BaseVLMAdapter):
         question: str,
         choices: List[str],
     ) -> Tuple[np.ndarray, float]:
+        # VERIFY-ON-GPU
         from src.vlm.scoring import letter_probs
         return letter_probs(self.model, self.processor, image_or_None, question, choices)
 
+    def _build_open_prompt(self, image_or_None: Any, question: str, prompt_suffix: str) -> str:
+        content = []
+        if image_or_None is not None:
+            content.append({"type": "image"})
+        content.append({"type": "text", "text": f"{question}\n{prompt_suffix}"})
+        messages = [{"role": "user", "content": content}]
+        return self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
-class Qwen2VL4BitAdapter(BaseVLMAdapter):
+    def generate_open_answer(
+        self,
+        image_or_None: Any,
+        question: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+        max_new_tokens: int = 8,
+    ) -> str:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt(image_or_None, question, prompt_suffix)
+        if image_or_None is not None:
+            inputs = self.processor(text=[prompt_text], images=[image_or_None], return_tensors="pt")
+        else:
+            inputs = self.processor(text=[prompt_text], return_tensors="pt")
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+        input_len = inputs["input_ids"].shape[1]
+        new_ids = output_ids[0, input_len:]
+        return self.tokenizer.decode(new_ids, skip_special_tokens=True).strip()
+
+    def teacher_forced_answer_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        answer_text: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+    ) -> np.ndarray:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt(image_or_None, question, prompt_suffix)
+        clean_ans = answer_text.strip()
+        if not clean_ans:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        full_text = prompt_text + clean_ans
+        if image_or_None is not None:
+            full_inputs = self.processor(text=[full_text], images=[image_or_None], return_tensors="pt")
+            prompt_inputs = self.processor(text=[prompt_text], images=[image_or_None], return_tensors="pt")
+        else:
+            full_inputs = self.processor(text=[full_text], return_tensors="pt")
+            prompt_inputs = self.processor(text=[prompt_text], return_tensors="pt")
+
+        full_inputs = {k: v.to(self.model.device) for k, v in full_inputs.items()}
+        p_len = prompt_inputs["input_ids"].shape[1]
+        f_len = full_inputs["input_ids"].shape[1]
+        if f_len <= p_len:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        with torch.no_grad():
+            outputs = self.model(**full_inputs)
+            target_logits = outputs.logits[0, (p_len - 1):(f_len - 1), :]
+            probs = torch.softmax(target_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
+        return probs
+
+
+class Qwen2VL4BitAdapter(Qwen2VLAdapter):
     """Adapter for Qwen2-VL family with 4-bit NF4 quantisation (e.g. Qwen/Qwen2-VL-7B-Instruct).
 
     Fits a 7B parameter vision-language model within ~6 GB of GPU memory on a T4 GPU.
@@ -272,6 +356,130 @@ class SmolVLMAdapter(BaseVLMAdapter):
 
         return renorm, float(total_mass)
 
+    def _build_open_prompt_text(self, image_or_None: Any, question: str, prompt_suffix: str) -> str:
+        body = f"{question}\n{prompt_suffix}"
+        if image_or_None is not None:
+            return f"USER: <image>\n{body} ASSISTANT:"
+        return f"USER: {body} ASSISTANT:"
+
+    def generate_open_answer(
+        self,
+        image_or_None: Any,
+        question: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+        max_new_tokens: int = 8,
+    ) -> str:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt_text(image_or_None, question, prompt_suffix)
+        if image_or_None is not None:
+            inputs = self.processor(text=prompt_text, images=image_or_None, return_tensors="pt")
+        else:
+            inputs = self.processor(text=prompt_text, return_tensors="pt")
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+        input_len = inputs["input_ids"].shape[1]
+        new_ids = output_ids[0, input_len:]
+        return self.tokenizer.decode(new_ids, skip_special_tokens=True).strip()
+
+    def teacher_forced_answer_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        answer_text: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+    ) -> np.ndarray:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt_text(image_or_None, question, prompt_suffix)
+        clean_ans = answer_text.strip()
+        if not clean_ans:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        full_text = prompt_text + " " + clean_ans
+        if image_or_None is not None:
+            full_inputs = self.processor(text=full_text, images=image_or_None, return_tensors="pt")
+            prompt_inputs = self.processor(text=prompt_text, images=image_or_None, return_tensors="pt")
+        else:
+            full_inputs = self.processor(text=full_text, return_tensors="pt")
+            prompt_inputs = self.processor(text=prompt_text, return_tensors="pt")
+
+        full_inputs = {k: v.to(self.model.device) for k, v in full_inputs.items()}
+        p_len = prompt_inputs["input_ids"].shape[1]
+        f_len = full_inputs["input_ids"].shape[1]
+        if f_len <= p_len:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        with torch.no_grad():
+            outputs = self.model(**full_inputs)
+            target_logits = outputs.logits[0, (p_len - 1):(f_len - 1), :]
+            probs = torch.softmax(target_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
+        return probs
+
+    def _build_open_prompt(self, image_or_None: Any, question: str, prompt_suffix: str) -> str:
+        content = []
+        if image_or_None is not None:
+            content.append({"type": "image"})
+        content.append({"type": "text", "text": f"{question}\n{prompt_suffix}"})
+        messages = [{"role": "user", "content": content}]
+        return self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+    def generate_open_answer(
+        self,
+        image_or_None: Any,
+        question: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+        max_new_tokens: int = 8,
+    ) -> str:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt(image_or_None, question, prompt_suffix)
+        if image_or_None is not None:
+            inputs = self.processor(text=prompt_text, images=[image_or_None], return_tensors="pt")
+        else:
+            inputs = self.processor(text=prompt_text, return_tensors="pt")
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+        input_len = inputs["input_ids"].shape[1]
+        new_ids = output_ids[0, input_len:]
+        return self.tokenizer.decode(new_ids, skip_special_tokens=True).strip()
+
+    def teacher_forced_answer_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        answer_text: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+    ) -> np.ndarray:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt(image_or_None, question, prompt_suffix)
+        clean_ans = answer_text.strip()
+        if not clean_ans:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        full_text = prompt_text + clean_ans
+        if image_or_None is not None:
+            full_inputs = self.processor(text=full_text, images=[image_or_None], return_tensors="pt")
+            prompt_inputs = self.processor(text=prompt_text, images=[image_or_None], return_tensors="pt")
+        else:
+            full_inputs = self.processor(text=full_text, return_tensors="pt")
+            prompt_inputs = self.processor(text=prompt_text, return_tensors="pt")
+
+        full_inputs = {k: v.to(self.model.device) for k, v in full_inputs.items()}
+        p_len = prompt_inputs["input_ids"].shape[1]
+        f_len = full_inputs["input_ids"].shape[1]
+        if f_len <= p_len:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        with torch.no_grad():
+            outputs = self.model(**full_inputs)
+            target_logits = outputs.logits[0, (p_len - 1):(f_len - 1), :]
+            probs = torch.softmax(target_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
+        return probs
+
 
 class InternVL2Adapter(BaseVLMAdapter):
     """Adapter for InternVL2 family (e.g. OpenGVLab/InternVL2-2B)."""
@@ -344,6 +552,27 @@ class InternVL2Adapter(BaseVLMAdapter):
         renorm = torch.softmax(choice_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
         mass = float(full_probs[token_ids].sum().item())
         return renorm, mass
+
+    def generate_open_answer(
+        self,
+        image_or_None: Any,
+        question: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+        max_new_tokens: int = 8,
+    ) -> str:
+        # VERIFY-ON-GPU
+        return ""
+
+    def teacher_forced_answer_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        answer_text: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+    ) -> np.ndarray:
+        # VERIFY-ON-GPU
+        vocab_size = len(self.tokenizer) if self.tokenizer is not None else 32000
+        return np.ones((1, vocab_size), dtype=np.float64) / vocab_size
 
 
 
@@ -550,6 +779,67 @@ class LlavaAdapter(BaseVLMAdapter):
             renorm = np.full(4, 0.25, dtype=np.float64)
 
         return renorm, float(total_mass)
+
+    def _build_open_prompt_text(self, image_or_None: Any, question: str, prompt_suffix: str) -> str:
+        body = f"{question}\n{prompt_suffix}"
+        if image_or_None is not None:
+            return f"USER: <image>\n{body} ASSISTANT:"
+        return f"USER: {body} ASSISTANT:"
+
+    def generate_open_answer(
+        self,
+        image_or_None: Any,
+        question: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+        max_new_tokens: int = 8,
+    ) -> str:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt_text(image_or_None, question, prompt_suffix)
+        if image_or_None is not None:
+            inputs = self.processor(text=prompt_text, images=image_or_None, return_tensors="pt")
+        else:
+            inputs = self.processor(text=prompt_text, return_tensors="pt")
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+        with torch.no_grad():
+            output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+        input_len = inputs["input_ids"].shape[1]
+        new_ids = output_ids[0, input_len:]
+        return self.tokenizer.decode(new_ids, skip_special_tokens=True).strip()
+
+    def teacher_forced_answer_probs(
+        self,
+        image_or_None: Any,
+        question: str,
+        answer_text: str,
+        prompt_suffix: str = "Answer the question with a short phrase.",
+    ) -> np.ndarray:
+        # VERIFY-ON-GPU
+        import torch
+        prompt_text = self._build_open_prompt_text(image_or_None, question, prompt_suffix)
+        clean_ans = answer_text.strip()
+        if not clean_ans:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        full_text = prompt_text + " " + clean_ans
+        if image_or_None is not None:
+            full_inputs = self.processor(text=full_text, images=image_or_None, return_tensors="pt")
+            prompt_inputs = self.processor(text=prompt_text, images=image_or_None, return_tensors="pt")
+        else:
+            full_inputs = self.processor(text=full_text, return_tensors="pt")
+            prompt_inputs = self.processor(text=prompt_text, return_tensors="pt")
+
+        full_inputs = {k: v.to(self.model.device) for k, v in full_inputs.items()}
+        p_len = prompt_inputs["input_ids"].shape[1]
+        f_len = full_inputs["input_ids"].shape[1]
+        if f_len <= p_len:
+            return np.ones((1, len(self.tokenizer)), dtype=np.float64) / len(self.tokenizer)
+
+        with torch.no_grad():
+            outputs = self.model(**full_inputs)
+            target_logits = outputs.logits[0, (p_len - 1):(f_len - 1), :]
+            probs = torch.softmax(target_logits, dim=-1).detach().cpu().numpy().astype(np.float64)
+        return probs
 
 
 # Registry of supported models
