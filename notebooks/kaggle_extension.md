@@ -24,6 +24,7 @@ git clone https://github.com/Stealth768/reliance-utility.git /kaggle/working/rel
 cd /kaggle/working/reliance-utility
 git fetch --all --tags
 git checkout extension
+pip uninstall -y torchaudio
 pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes
 ```
 
