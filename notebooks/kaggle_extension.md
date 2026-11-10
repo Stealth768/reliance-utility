@@ -1,43 +1,241 @@
 # Kaggle Notebook Instructions: Reliance-Utility Extension Phase
 
-This document contains the execution scripts for all Extension Phase GPU runs across **2 Kaggle accounts** organized into **Wave 1** and **Wave 2**, with automatic browser downloads and clickable fallback download buttons included.
+This document contains executable notebook scripts for the Extension Phase of the reliance-utility research paper across Kaggle GPU environments (GPU T4 x2 or P100 with Internet enabled).
 
-> [!IMPORTANT]
-> **Execution Mode**:
-> - If running via **"Save & Run All" (Commit mode)**: Kaggle runs headlessly and saves all outputs to `/kaggle/working/` in the Output tab. When you open the committed notebook version or view outputs, the file is ready to download.
-> - If viewing the cell outputs in the notebook: The JavaScript and HTML payload triggers automatic browser download + shows a 1-click fallback button!
-> - Ensure accelerator is set to **GPU T4 x2** (or GPU P100) and **Internet ON**.
+All documentation and terminology strictly adhere to **retained visual reliance** under multimodal degradation (without assuming subjective over-reliance).
 
 ---
 
-## Overview of Allocation
+## Experimental Protocol & Job Allocation
 
-| Wave | Session | Target Models & Tasks | Est. Time | Output Archive |
-|---|---|---|---|---|
-| **Wave 1** | **Account 1** | Open-Ended Qwen2-VL (3 corruptions) + Extra Swapped Pairings (seeds 11, 12, 13 for Qwen, Smol, LLaVA) | ~7.0h | `account1_wave1.zip` |
-| **Wave 1** | **Account 2** | AI2D MC: Qwen Main (N=500) + Qwen Rep (N=400) + SmolVLM Main (N=500) + LLaVA Main (N=500) | ~7.7h | `account2_wave1_ai2d.zip` |
-| **Wave 2** | **Account 1** | Open-Ended SmolVLM (2 corruptions: `gaussian,swapblend`, N=500) | ~9.6h | `account1_wave2_smolvlm_open.zip` |
-| **Wave 2** | **Account 2** | Open-Ended LLaVA-1.5-7B (2 corruptions: `gaussian,swapblend`, N=500) | ~9.6h | `account2_wave2_llava_open.zip` |
+1. **Wave 0 (Pre-Flight Interactive Session)**:
+   - A single interactive session on one GPU account to validate model weights, tokenization, assistant prefixes, and pre-flight gates across all model $\times$ dataset configurations.
+   - Evaluates mean letter probability mass, clean multimodal accuracy, text-only unimodal accuracy, empty-generation fraction, and per-question inference latency.
+   - Outputs a verified benchmark and runtime projection table before launching long-running production sessions.
+
+2. **Wave 1 (Production Batches — 2 Parallel Accounts)**:
+   - **Account 1** (`account1_wave1.zip`, ~7.0h): Qwen2-VL Open-Ended (N=500, 3 corruptions) + Extra Swapped Pairings for Qwen, SmolVLM, LLaVA across derangement seeds $\{11, 12, 13\}$ (swapblend only). Total: 240 shards.
+   - **Account 2** (`account2_wave1_ai2d.zip`, ~7.7h): AI2D Multiple-Choice full suite: Qwen Main (N=500), Qwen Rep (N=400), SmolVLM Main (N=500), LLaVA Main (N=500). Total: 228 shards.
+
+3. **Wave 2 (Production Batches — 2 Parallel Accounts)**:
+   - **Account 1** (`account1_wave2_smolvlm_open.zip`, ~9.6h): SmolVLM Open-Ended on A-OKVQA (N=500, 2 corruptions: `gaussian,swapblend`). Total: 40 shards.
+   - **Account 2** (`account2_wave2_llava_open.zip`, ~9.6h): LLaVA-1.5-7B Open-Ended on A-OKVQA (N=500, 2 corruptions: `gaussian,swapblend`). Total: 40 shards.
+
+4. **Pairing Stability Protocol**:
+   - Evaluates the range and 95% bootstrap confidence interval of retained terminal reliance $\hat{R}(1)$ across derangement seeds $\{0, 11, 12, 13\}$. No variance test is performed.
+
+5. **Execution & Download Rule**:
+   - Waves 1 and 2 **must run with "Save & Run All" (Commit mode)**.
+   - Every individual job executes its pre-flight `--check` first and stops immediately if `--check` exits non-zero.
+   - Output archives are written directly into `/kaggle/working/` and downloaded from the committed version's **Output** tab.
 
 ---
 
-# WAVE 1
+## Dataset Provenance & Licenses
 
-Start both Account 1 and Account 2 simultaneously.
+- **AI2D (AI2 Diagrams)**:
+  - **Source**: `lmms-lab-encoder/ai2d` via Hugging Face (`default/test/0.parquet`, `default/test/1.parquet`).
+  - **Original Reference**: Kembhavi et al., *A Diagram is Worth A Dozen Images*, ECCV 2016. Allen Institute for Artificial Intelligence.
+  - **License**: CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0 International).
+  - **Split Specification**: 4-choice multiple-choice diagrams; N=500 main validation split (seed 0, `results/derived/ai2d_main_ids.json`), N=400 disjoint replication split (seed 1, `results/derived/ai2d_rep_ids.json`).
+
+- **A-OKVQA (Augmented OK-VQA)**:
+  - **Source**: `HuggingFaceM4/A-OKVQA` (revision: `d1b0efa3a436e9101dfbde3752db7607da696c35`).
+  - **Original Reference**: Schwenk et al., *A-OKVQA: A Benchmark for Visual Question Answering using World Knowledge*, ECCV 2022.
+  - **License**: CC BY 4.0 (Creative Commons Attribution 4.0 International).
+  - **Split Specification**: Validation split; N=500 main validation IDs (`results/derived/main_ids.json`), N=445 disjoint replication IDs (`results/derived/rep_ids.json`).
 
 ---
 
-### Wave 1 — Account 1: Open-Ended Qwen + Extra Pairings
+# WAVE 0: Interactive Pre-Flight Diagnostics & Runtime Calibration
 
-Paste this code block into a single Python cell in Account 1:
+Run this cell interactively in a single GPU notebook before starting Wave 1. It executes `--check` on all 6 combinations, gathers exact latency numbers, and prints the runtime projection table.
 
 ```python
 import os
 import sys
 import time
-import base64
 import subprocess
-from IPython.display import HTML, Javascript, display
+import re
+
+print("=" * 70)
+print("WAVE 0: INTERACTIVE PRE-FLIGHT DIAGNOSTICS & RUNTIME CALIBRATION")
+print("=" * 70)
+
+# 1. Environment & Dependencies
+print("\n>>> Setting up environment...")
+subprocess.run("pip uninstall -y torchaudio", shell=True)
+subprocess.run(
+    "pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes",
+    shell=True, check=True
+)
+
+repo_dir = "/kaggle/working/reliance-utility"
+if not os.path.exists(repo_dir):
+    subprocess.run(
+        f"git clone https://github.com/Stealth768/reliance-utility.git {repo_dir}",
+        shell=True, check=True
+    )
+else:
+    subprocess.run(f"cd {repo_dir} && git reset --hard HEAD", shell=True, check=True)
+
+subprocess.run(
+    f"cd {repo_dir} && git fetch --all --tags && git checkout extension && git pull origin extension",
+    shell=True, check=True
+)
+
+import torch
+assert torch.cuda.is_available(), "GPU accelerator required!"
+gpu_name = torch.cuda.get_device_name(0)
+print(f"CUDA Accelerator Verified: {gpu_name}")
+
+# 2. Check Suite Definitions
+checks = [
+    {
+        "model": "Qwen2-VL-2B",
+        "task": "AI2D MC",
+        "cmd": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --check",
+        "type": "mc"
+    },
+    {
+        "model": "SmolVLM",
+        "task": "AI2D MC",
+        "cmd": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --check",
+        "type": "mc"
+    },
+    {
+        "model": "LLaVA-1.5-7B",
+        "task": "AI2D MC",
+        "cmd": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check",
+        "type": "mc"
+    },
+    {
+        "model": "Qwen2-VL-2B",
+        "task": "Open-Ended",
+        "cmd": f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model Qwen/Qwen2-VL-2B-Instruct --check",
+        "type": "open"
+    },
+    {
+        "model": "SmolVLM",
+        "task": "Open-Ended",
+        "cmd": f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check",
+        "type": "open"
+    },
+    {
+        "model": "LLaVA-1.5-7B",
+        "task": "Open-Ended",
+        "cmd": f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model llava-hf/llava-1.5-7b-hf --assistant_prefix answer_colon --check",
+        "type": "open"
+    },
+]
+
+results = []
+print("\n>>> Executing Pre-Flight Checks (10 items per combination)...")
+for c in checks:
+    print(f"\n--- Checking {c['model']} [{c['task']}] ---", flush=True)
+    t0 = time.time()
+    res = subprocess.run(c["cmd"], shell=True, capture_output=True, text=True)
+    elapsed = time.time() - t0
+    stdout = res.stdout
+    print(stdout)
+    if res.returncode != 0:
+        print(f"[FAIL] Check failed for {c['model']} {c['task']} with exit code {res.returncode}")
+        print(res.stderr)
+        sys.exit(res.returncode)
+
+    # Parse metrics
+    mass_match = re.search(r"Mean Letter Probability Mass\s*:\s*([0-9.]+)", stdout)
+    clean_acc_match = re.search(r"Clean Multimodal Accuracy\s*:\s*([0-9.]+)%", stdout)
+    text_acc_match = re.search(r"Text-Only Accuracy\s*:\s*([0-9.]+)%", stdout)
+    empty_match = re.search(r"Empty answers\s*:\s*[0-9]+/10\s*\(([0-9.]+)%\)", stdout)
+    time_q_match = re.search(r"Time per question \(check\)\s*:\s*([0-9.]+)\s*s", stdout)
+
+    time_per_q = float(time_q_match.group(1)) if time_q_match else (elapsed / 10.0)
+    mass = f"{float(mass_match.group(1)):.4f}" if mass_match else "N/A"
+    clean_acc = f"{float(clean_acc_match.group(1)):.1f}%" if clean_acc_match else "N/A"
+    text_acc = f"{float(text_acc_match.group(1)):.1f}%" if text_acc_match else "N/A"
+    empty_frac = f"{float(empty_match.group(1)):.1f}%" if empty_match else "0.0%"
+
+    results.append({
+        "model": c["model"],
+        "task": c["task"],
+        "mass": mass,
+        "clean_acc": clean_acc,
+        "text_acc": text_acc,
+        "empty": empty_frac,
+        "time_q": time_per_q,
+    })
+
+# 3. Print Pre-Flight Diagnostic Summary Table
+print("\n" + "=" * 90)
+print("PRE-FLIGHT DIAGNOSTIC SUMMARY")
+print("=" * 90)
+header = f"{'Model':<15} | {'Task':<12} | {'Letter Mass':<11} | {'Clean Acc':<9} | {'Text Acc':<9} | {'Empty Frac':<10} | {'Time/Q (s)':<10} | {'Status'}"
+print(header)
+print("-" * 90)
+for r in results:
+    row = f"{r['model']:<15} | {r['task']:<12} | {r['mass']:<11} | {r['clean_acc']:<9} | {r['text_acc']:<9} | {r['empty']:<10} | {r['time_q']:<10.2f} | PASS"
+    print(row)
+print("-" * 90)
+
+# 4. Projected Runtime Table for Waves 1 & 2
+# MC job estimation: N questions * (3 corruptions * 9 grid + 2 nulls) / (check_evals * scaling)
+# Empirically on T4: MC questions take ~time_per_q / 2 per forward pass (check did 2 forward passes per item)
+# Open-ended: check does ~3 forward passes per item (clean, black, removed), full run does 29 forward passes per item.
+print("\n" + "=" * 90)
+print("PROJECTED RUNTIMES PER WAVE 1 & WAVE 2 PRODUCTION JOBS")
+print("=" * 90)
+job_header = f"{'Wave':<6} | {'Account':<9} | {'Job Description':<40} | {'Items / Corruptions':<20} | {'Projected Hours'}"
+print(job_header)
+print("-" * 90)
+
+lookup = {(r['model'], r['task']): r['time_q'] for r in results}
+
+# Estimates in hours
+qwen_open_h = (lookup[('Qwen2-VL-2B', 'Open-Ended')] / 3.0 * 29 * 500) / 3600.0
+smol_open_h = (lookup[('SmolVLM', 'Open-Ended')] / 3.0 * 20 * 500) / 3600.0  # 2 corruptions
+llava_open_h = (lookup[('LLaVA-1.5-7B', 'Open-Ended')] / 3.0 * 20 * 500) / 3600.0  # 2 corruptions
+
+qwen_ai2d_main_h = (lookup[('Qwen2-VL-2B', 'AI2D MC')] * 14 * 500) / 3600.0
+qwen_ai2d_rep_h = (lookup[('Qwen2-VL-2B', 'AI2D MC')] * 14 * 400) / 3600.0
+smol_ai2d_main_h = (lookup[('SmolVLM', 'AI2D MC')] * 14 * 500) / 3600.0
+llava_ai2d_main_h = (lookup[('LLaVA-1.5-7B', 'AI2D MC')] * 14 * 500) / 3600.0
+
+# Pairings: 3 seeds * 500 items * 1 corruption (9 grid + 2 nulls) = 11 passes per item
+pairings_h = 3 * ((lookup[('Qwen2-VL-2B', 'AI2D MC')] + lookup[('SmolVLM', 'AI2D MC')] + lookup[('LLaVA-1.5-7B', 'AI2D MC')]) * 5.5 * 500) / 3600.0
+
+print(f"{'Wave 1':<6} | {'Account 1':<9} | {'Qwen2-VL Open-Ended (3 corruptions)':<40} | {'N=500, 3 corr':<20} | {qwen_open_h:.2f} h")
+print(f"{'Wave 1':<6} | {'Account 1':<9} | {'Extra Swapped Pairings (3 models x 3 seeds)':<40} | {'N=500 x 9 jobs':<20} | {pairings_h:.2f} h")
+print(f"{'Wave 1':<6} | {'Account 1':<9} | {'--> Account 1 Wave 1 Total Projected Time':<40} | {'':<20} | {(qwen_open_h + pairings_h):.2f} h")
+print("-" * 90)
+print(f"{'Wave 1':<6} | {'Account 2':<9} | {'Qwen2-VL AI2D Main':<40} | {'N=500, 3 corr':<20} | {qwen_ai2d_main_h:.2f} h")
+print(f"{'Wave 1':<6} | {'Account 2':<9} | {'Qwen2-VL AI2D Replication':<40} | {'N=400, 3 corr':<20} | {qwen_ai2d_rep_h:.2f} h")
+print(f"{'Wave 1':<6} | {'Account 2':<9} | {'SmolVLM AI2D Main':<40} | {'N=500, 3 corr':<20} | {smol_ai2d_main_h:.2f} h")
+print(f"{'Wave 1':<6} | {'Account 2':<9} | {'LLaVA-1.5-7B AI2D Main':<40} | {'N=500, 3 corr':<20} | {llava_ai2d_main_h:.2f} h")
+print(f"{'Wave 1':<6} | {'Account 2':<9} | {'--> Account 2 Wave 1 Total Projected Time':<40} | {'':<20} | {(qwen_ai2d_main_h + qwen_ai2d_rep_h + smol_ai2d_main_h + llava_ai2d_main_h):.2f} h")
+print("-" * 90)
+print(f"{'Wave 2':<6} | {'Account 1':<9} | {'SmolVLM Open-Ended (swapblend+gaussian)':<40} | {'N=500, 2 corr':<20} | {smol_open_h:.2f} h")
+print(f"{'Wave 2':<6} | {'Account 2':<9} | {'LLaVA-1.5-7B Open-Ended (swapblend+gaussian)':<40} | {'N=500, 2 corr':<20} | {llava_open_h:.2f} h")
+print("=" * 90)
+```
+
+---
+
+# WAVE 1
+
+Start both Account 1 and Account 2 in parallel using **"Save & Run All" (Commit mode)**.
+
+---
+
+### Wave 1 — Account 1: Open-Ended Qwen + Extra Swapped Pairings
+
+Paste this cell into Account 1:
+
+```python
+import os
+import sys
+import time
+import subprocess
 
 print("=" * 60)
 print("WAVE 1 - ACCOUNT 1: QWEN2-VL OPEN-ENDED + EXTRA PAIRINGS")
@@ -68,74 +266,82 @@ subprocess.run(
     shell=True, check=True
 )
 
-# Verify GPU
 import torch
-from transformers import AutoProcessor
-assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
+assert torch.cuda.is_available(), "GPU accelerator not detected!"
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
 
-# STEP 3: PRE-FLIGHT CHECK
-print("\n>>> Step 3/5: Running pre-flight check...")
-check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model Qwen/Qwen2-VL-2B-Instruct --check"
-subprocess.run(check_cmd, shell=True, check=True)
-
-# STEP 4: PRODUCTION RUNS
-print("\n>>> Step 4/5: Running production tasks...")
+# STEP 3 & 4: PRODUCTION RUNS WITH MANDATORY PRE-CHECK GUARD
 out_open = "/kaggle/working/results/raw/vlm_open"
 out_pair = "/kaggle/working/results/raw/vlm_pairings"
 os.makedirs(out_open, exist_ok=True)
 os.makedirs(out_pair, exist_ok=True)
 
-prod_tasks = [
-    # 1. Qwen2-VL Open-Ended (N=500, 3 corruptions)
-    (
-        "Open-Ended: Qwen2-VL-2B-Instruct (N=500, 3 corruptions)",
+# Helper function to execute pre-check before running production
+def run_guarded_job(job_name, check_command, prod_command):
+    print(f"\n" + "=" * 60)
+    print(f"STARTING GUARDED JOB: {job_name}")
+    print("=" * 60)
+    print(f">> Executing pre-flight check: {check_command}", flush=True)
+    check_res = subprocess.run(check_command, shell=True)
+    if check_res.returncode != 0:
+        print(f"\n[FATAL ERROR] Pre-flight check failed with code {check_res.returncode}!")
+        print(f"Stopping job '{job_name}' immediately. Refusing to run full production.")
+        sys.exit(check_res.returncode)
+    print(f"[CHECK PASSED] Launching production run: {prod_command}", flush=True)
+    t0 = time.time()
+    subprocess.run(prod_command, shell=True, check=True)
+    print(f"[JOB COMPLETED] Finished {job_name} in {(time.time() - t0)/60:.1f} min", flush=True)
+
+t_start = time.time()
+
+# 1. Qwen Open-Ended Run
+run_guarded_job(
+    job_name="Qwen2-VL Open-Ended (N=500, 3 corruptions)",
+    check_command=f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model Qwen/Qwen2-VL-2B-Instruct --check",
+    prod_command=(
         f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
         f"--model Qwen/Qwen2-VL-2B-Instruct "
         f"--data_ids results/derived/main_ids.json "
         f"--n 500 --seed 0 --shard_size 25 "
         f"--out {out_open}"
-    ),
+    )
+)
+
+# 2. Extra Swapped Pairings for Qwen2-VL, SmolVLM, LLaVA-1.5 across seeds 11, 12, 13
+# Run model MC check once per model before executing pairing seeds
+models_pairing = [
+    {
+        "name": "Qwen2-VL-2B",
+        "check": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset aokvqa --check",
+        "base_cmd": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset aokvqa --corruptions swapblend --seed 0 --out {out_pair}"
+    },
+    {
+        "name": "SmolVLM",
+        "check": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset aokvqa --assistant_prefix answer_colon --check",
+        "base_cmd": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset aokvqa --assistant_prefix answer_colon --corruptions swapblend --seed 0 --out {out_pair}"
+    },
+    {
+        "name": "LLaVA-1.5-7B",
+        "check": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset aokvqa --assistant_prefix answer_colon --check",
+        "base_cmd": f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset aokvqa --assistant_prefix answer_colon --corruptions swapblend --seed 0 --out {out_pair}"
+    },
 ]
 
-# 2. Extra swapped pairings (seeds 11, 12, 13) for all 3 models
-for pair_seed in [11, 12, 13]:
-    prod_tasks.append((
-        f"Pairing Seed {pair_seed}: Qwen2-VL-2B",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model Qwen/Qwen2-VL-2B-Instruct --dataset aokvqa "
-        f"--corruptions swapblend --pairing_seed {pair_seed} --seed 0 "
-        f"--out {out_pair}"
-    ))
-    prod_tasks.append((
-        f"Pairing Seed {pair_seed}: SmolVLM",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model HuggingFaceTB/SmolVLM-Instruct --dataset aokvqa "
-        f"--assistant_prefix answer_colon "
-        f"--corruptions swapblend --pairing_seed {pair_seed} --seed 0 "
-        f"--out {out_pair}"
-    ))
-    prod_tasks.append((
-        f"Pairing Seed {pair_seed}: LLaVA-1.5-7B",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model llava-hf/llava-1.5-7b-hf --dataset aokvqa "
-        f"--assistant_prefix answer_colon "
-        f"--corruptions swapblend --pairing_seed {pair_seed} --seed 0 "
-        f"--out {out_pair}"
-    ))
+for m in models_pairing:
+    print(f"\n>> Pre-flight verification for {m['name']} pairings...")
+    c_res = subprocess.run(m["check"], shell=True)
+    if c_res.returncode != 0:
+        print(f"[FATAL ERROR] Check failed for {m['name']}. Aborting!")
+        sys.exit(c_res.returncode)
+    for pair_seed in [11, 12, 13]:
+        p_cmd = f"{m['base_cmd']} --pairing_seed {pair_seed}"
+        print(f">> Running {m['name']} Swapped Pairing Seed {pair_seed}...", flush=True)
+        subprocess.run(p_cmd, shell=True, check=True)
 
-total_tasks = len(prod_tasks)
-t_start = time.time()
-for idx, (title, cmd) in enumerate(prod_tasks, 1):
-    print(f"\n[{idx}/{total_tasks}] Starting {title}...", flush=True)
-    t_task = time.time()
-    subprocess.run(cmd, shell=True, check=True)
-    print(f"[{idx}/{total_tasks}] Completed {title} in {(time.time() - t_task)/60:.1f} min", flush=True)
+print(f"\nAll Wave 1 Account 1 tasks completed in {(time.time() - t_start)/60:.1f} min!")
 
-print(f"\nAll tasks finished in {(time.time() - t_start)/60:.1f} min!")
-
-# STEP 5: ZIP OUTPUT ARCHIVE & AUTO-DOWNLOAD
-print("\n>>> Step 5/5: Packaging shards into zip and triggering download...")
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
 zip_name = "account1_wave1.zip"
 zip_path = f"/kaggle/working/{zip_name}"
 
@@ -144,51 +350,23 @@ subprocess.run(
     shell=True, check=True
 )
 file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-print(f"SUCCESS! Archive created: {zip_name} ({file_size_mb:.2f} MB)")
-
-with open(zip_path, "rb") as f:
-    b64_data = base64.b64encode(f.read()).decode("utf-8")
-
-# JavaScript automatic browser download
-js_code = f"""
-(function() {{
-    var a = document.createElement('a');
-    a.href = 'data:application/zip;base64,{b64_data}';
-    a.download = '{zip_name}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}})();
-"""
-display(Javascript(js_code))
-
-# Fallback HTML download button
-html_code = f"""
-<div style="background-color: #e6ffed; border: 2px solid #52c41a; padding: 15px; border-radius: 8px; margin-top: 10px;">
-    <h3 style="color: #274916; margin: 0 0 8px 0;">🎉 Download Triggered Automatically!</h3>
-    <p style="margin: 0 0 10px 0;">If your browser popup blocker prevented the automatic download, click below:</p>
-    <a href="data:application/zip;base64,{b64_data}" download="{zip_name}" 
-       style="display: inline-block; background: #1890ff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-       Click to Download {zip_name} ({file_size_mb:.2f} MB)
-    </a>
-</div>
-"""
-display(HTML(html_code))
+print("=" * 70)
+print(f"SUCCESS! Output archive saved to: {zip_path} ({file_size_mb:.2f} MB)")
+print("=" * 70)
+print("NOTE: Download this archive directly from the 'Output' tab of your committed Kaggle notebook version.")
 ```
 
 ---
 
 ### Wave 1 — Account 2: AI2D Multiple-Choice Suite
 
-Paste this code block into a single Python cell in Account 2:
+Paste this cell into Account 2:
 
 ```python
 import os
 import sys
 import time
-import base64
 import subprocess
-from IPython.display import HTML, Javascript, display
 
 print("=" * 60)
 print("WAVE 1 - ACCOUNT 2: AI2D MULTIPLE-CHOICE (ALL MODELS)")
@@ -219,85 +397,64 @@ subprocess.run(
     shell=True, check=True
 )
 
-# Verify GPU
 import torch
-from transformers import AutoProcessor
-assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
+assert torch.cuda.is_available(), "GPU accelerator not detected!"
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
 
-# STEP 3: PRE-FLIGHT CHECKS
-print("\n>>> Step 3/5: Running pre-flight checks on AI2D...")
-check_commands = [
-    f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --check",
-    f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --check",
-    f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check"
-]
-for cmd in check_commands:
-    print(f"Executing check: {cmd}", flush=True)
-    subprocess.run(cmd, shell=True, check=True)
-
-# STEP 4: PRODUCTION RUNS
-print("\n>>> Step 4/5: Running production AI2D tasks...")
+# STEP 3 & 4: PRODUCTION RUNS WITH MANDATORY PRE-CHECK GUARD
 out_ai2d = "/kaggle/working/results/raw/vlm_ai2d"
 os.makedirs(out_ai2d, exist_ok=True)
 
-prod_tasks = [
-    # 1. Qwen2-VL AI2D Main (N=500, seed 0)
-    (
-        "AI2D Main: Qwen2-VL-2B-Instruct (N=500)",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model Qwen/Qwen2-VL-2B-Instruct "
-        f"--dataset ai2d "
-        f"--data_ids results/derived/ai2d_main_ids.json "
-        f"--n 500 --seed 0 --shard_size 25 "
-        f"--out {out_ai2d}"
-    ),
-    # 2. Qwen2-VL AI2D Replication (N=400, seed 1)
-    (
-        "AI2D Replication: Qwen2-VL-2B-Instruct (N=400)",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model Qwen/Qwen2-VL-2B-Instruct "
-        f"--dataset ai2d "
-        f"--data_ids results/derived/ai2d_rep_ids.json "
-        f"--n 400 --seed 1 --shard_size 25 "
-        f"--out {out_ai2d}"
-    ),
-    # 3. SmolVLM AI2D Main (N=500, seed 0)
-    (
-        "AI2D Main: SmolVLM-Instruct (N=500)",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model HuggingFaceTB/SmolVLM-Instruct "
-        f"--dataset ai2d "
-        f"--assistant_prefix answer_colon "
-        f"--data_ids results/derived/ai2d_main_ids.json "
-        f"--n 500 --seed 0 --shard_size 25 "
-        f"--out {out_ai2d}"
-    ),
-    # 4. LLaVA-1.5-7B AI2D Main (N=500, seed 0)
-    (
-        "AI2D Main: LLaVA-1.5-7B-hf (N=500)",
-        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
-        f"--model llava-hf/llava-1.5-7b-hf "
-        f"--dataset ai2d "
-        f"--assistant_prefix answer_colon "
-        f"--data_ids results/derived/ai2d_main_ids.json "
-        f"--n 500 --seed 0 --shard_size 25 "
-        f"--out {out_ai2d}"
-    ),
-]
+def run_guarded_job(job_name, check_command, prod_commands):
+    print(f"\n" + "=" * 60)
+    print(f"STARTING GUARDED JOB: {job_name}")
+    print("=" * 60)
+    print(f">> Executing pre-flight check: {check_command}", flush=True)
+    check_res = subprocess.run(check_command, shell=True)
+    if check_res.returncode != 0:
+        print(f"\n[FATAL ERROR] Pre-flight check failed with code {check_res.returncode}!")
+        print(f"Stopping job '{job_name}' immediately. Refusing to run full production.")
+        sys.exit(check_res.returncode)
+    for cmd in prod_commands:
+        print(f"[CHECK PASSED] Launching production run: {cmd}", flush=True)
+        t0 = time.time()
+        subprocess.run(cmd, shell=True, check=True)
+        print(f"[SUBTASK COMPLETED] in {(time.time() - t0)/60:.1f} min", flush=True)
 
-total_tasks = len(prod_tasks)
 t_start = time.time()
-for idx, (title, cmd) in enumerate(prod_tasks, 1):
-    print(f"\n[{idx}/{total_tasks}] Starting {title}...", flush=True)
-    t_task = time.time()
-    subprocess.run(cmd, shell=True, check=True)
-    print(f"[{idx}/{total_tasks}] Completed {title} in {(time.time() - t_task)/60:.1f} min", flush=True)
 
-print(f"\nAll AI2D tasks finished in {(time.time() - t_start)/60:.1f} min!")
+# 1. Qwen2-VL AI2D Main + Replication
+run_guarded_job(
+    job_name="Qwen2-VL AI2D Suite (Main N=500 + Rep N=400)",
+    check_command=f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --check",
+    prod_commands=[
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --data_ids results/derived/ai2d_main_ids.json --n 500 --seed 0 --shard_size 25 --out {out_ai2d}",
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model Qwen/Qwen2-VL-2B-Instruct --dataset ai2d --data_ids results/derived/ai2d_rep_ids.json --n 400 --seed 1 --shard_size 25 --out {out_ai2d}"
+    ]
+)
 
-# STEP 5: ZIP OUTPUT ARCHIVE & AUTO-DOWNLOAD
-print("\n>>> Step 5/5: Packaging shards into zip and triggering download...")
+# 2. SmolVLM AI2D Main
+run_guarded_job(
+    job_name="SmolVLM AI2D Main (N=500)",
+    check_command=f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --check",
+    prod_commands=[
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset ai2d --assistant_prefix answer_colon --data_ids results/derived/ai2d_main_ids.json --n 500 --seed 0 --shard_size 25 --out {out_ai2d}"
+    ]
+)
+
+# 3. LLaVA-1.5-7B AI2D Main
+run_guarded_job(
+    job_name="LLaVA-1.5-7B AI2D Main (N=500)",
+    check_command=f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check",
+    prod_commands=[
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --data_ids results/derived/ai2d_main_ids.json --n 500 --seed 0 --shard_size 25 --out {out_ai2d}"
+    ]
+)
+
+print(f"\nAll Wave 1 Account 2 tasks completed in {(time.time() - t_start)/60:.1f} min!")
+
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
 zip_name = "account2_wave1_ai2d.zip"
 zip_path = f"/kaggle/working/{zip_name}"
 
@@ -306,55 +463,29 @@ subprocess.run(
     shell=True, check=True
 )
 file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-print(f"SUCCESS! Archive created: {zip_name} ({file_size_mb:.2f} MB)")
-
-with open(zip_path, "rb") as f:
-    b64_data = base64.b64encode(f.read()).decode("utf-8")
-
-# JavaScript automatic browser download
-js_code = f"""
-(function() {{
-    var a = document.createElement('a');
-    a.href = 'data:application/zip;base64,{b64_data}';
-    a.download = '{zip_name}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}})();
-"""
-display(Javascript(js_code))
-
-# Fallback HTML download button
-html_code = f"""
-<div style="background-color: #e6ffed; border: 2px solid #52c41a; padding: 15px; border-radius: 8px; margin-top: 10px;">
-    <h3 style="color: #274916; margin: 0 0 8px 0;">🎉 Download Triggered Automatically!</h3>
-    <p style="margin: 0 0 10px 0;">If your browser popup blocker prevented the automatic download, click below:</p>
-    <a href="data:application/zip;base64,{b64_data}" download="{zip_name}" 
-       style="display: inline-block; background: #1890ff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-       Click to Download {zip_name} ({file_size_mb:.2f} MB)
-    </a>
-</div>
-"""
-display(HTML(html_code))
+print("=" * 70)
+print(f"SUCCESS! Output archive saved to: {zip_path} ({file_size_mb:.2f} MB)")
+print("=" * 70)
+print("NOTE: Download this archive directly from the 'Output' tab of your committed Kaggle notebook version.")
 ```
 
 ---
 
 # WAVE 2
 
-Run after downloading and verifying Wave 1 outputs.
+Run both notebooks in parallel after downloading and verifying Wave 1 outputs.
 
 ---
 
 ### Wave 2 — Account 1: SmolVLM Open-Ended
 
+Paste this cell into Account 1:
+
 ```python
 import os
 import sys
 import time
-import base64
 import subprocess
-from IPython.display import HTML, Javascript, display
 
 print("=" * 60)
 print("WAVE 2 - ACCOUNT 1: SMOLVLM OPEN-ENDED (GAUSSIAN + SWAPBLEND)")
@@ -385,16 +516,18 @@ subprocess.run(
     shell=True, check=True
 )
 
-# Verify GPU
 import torch
-from transformers import AutoProcessor
-assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
+assert torch.cuda.is_available(), "GPU accelerator not detected!"
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
 
-# STEP 3: PRE-FLIGHT CHECK
-print("\n>>> Step 3/5: Running pre-flight check...")
+# STEP 3: PRE-FLIGHT CHECK GUARD
+print("\n>>> Step 3/5: Running mandatory pre-flight check...")
 check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check"
-subprocess.run(check_cmd, shell=True, check=True)
+check_res = subprocess.run(check_cmd, shell=True)
+if check_res.returncode != 0:
+    print(f"\n[FATAL ERROR] SmolVLM open-ended pre-check failed with exit code {check_res.returncode}!")
+    print("Refusing to continue with full production run.")
+    sys.exit(check_res.returncode)
 
 # STEP 4: PRODUCTION RUN
 print("\n>>> Step 4/5: Running production open-ended SmolVLM...")
@@ -416,8 +549,8 @@ t_start = time.time()
 subprocess.run(prod_cmd, shell=True, check=True)
 print(f"\nSmolVLM Open-Ended finished in {(time.time() - t_start)/60:.1f} min!")
 
-# STEP 5: ZIP OUTPUT ARCHIVE & AUTO-DOWNLOAD
-print("\n>>> Step 5/5: Packaging shards into zip and triggering download...")
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
 zip_name = "account1_wave2_smolvlm_open.zip"
 zip_path = f"/kaggle/working/{zip_name}"
 
@@ -426,49 +559,23 @@ subprocess.run(
     shell=True, check=True
 )
 file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-print(f"SUCCESS! Archive created: {zip_name} ({file_size_mb:.2f} MB)")
-
-with open(zip_path, "rb") as f:
-    b64_data = base64.b64encode(f.read()).decode("utf-8")
-
-# JavaScript automatic browser download
-js_code = f"""
-(function() {{
-    var a = document.createElement('a');
-    a.href = 'data:application/zip;base64,{b64_data}';
-    a.download = '{zip_name}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}})();
-"""
-display(Javascript(js_code))
-
-# Fallback HTML download button
-html_code = f"""
-<div style="background-color: #e6ffed; border: 2px solid #52c41a; padding: 15px; border-radius: 8px; margin-top: 10px;">
-    <h3 style="color: #274916; margin: 0 0 8px 0;">🎉 Download Triggered Automatically!</h3>
-    <p style="margin: 0 0 10px 0;">If your browser popup blocker prevented the automatic download, click below:</p>
-    <a href="data:application/zip;base64,{b64_data}" download="{zip_name}" 
-       style="display: inline-block; background: #1890ff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-       Click to Download {zip_name} ({file_size_mb:.2f} MB)
-    </a>
-</div>
-"""
-display(HTML(html_code))
+print("=" * 70)
+print(f"SUCCESS! Output archive saved to: {zip_path} ({file_size_mb:.2f} MB)")
+print("=" * 70)
+print("NOTE: Download this archive directly from the 'Output' tab of your committed Kaggle notebook version.")
 ```
 
 ---
 
 ### Wave 2 — Account 2: LLaVA-1.5-7B Open-Ended
 
+Paste this cell into Account 2:
+
 ```python
 import os
 import sys
 import time
-import base64
 import subprocess
-from IPython.display import HTML, Javascript, display
 
 print("=" * 60)
 print("WAVE 2 - ACCOUNT 2: LLAVA-1.5-7B OPEN-ENDED (GAUSSIAN + SWAPBLEND)")
@@ -499,16 +606,18 @@ subprocess.run(
     shell=True, check=True
 )
 
-# Verify GPU
 import torch
-from transformers import AutoProcessor
-assert torch.cuda.is_available(), "GPU accelerator not detected! Enable GPU in Kaggle settings."
+assert torch.cuda.is_available(), "GPU accelerator not detected!"
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
 
-# STEP 3: PRE-FLIGHT CHECK
-print("\n>>> Step 3/5: Running pre-flight check...")
+# STEP 3: PRE-FLIGHT CHECK GUARD
+print("\n>>> Step 3/5: Running mandatory pre-flight check...")
 check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model llava-hf/llava-1.5-7b-hf --assistant_prefix answer_colon --check"
-subprocess.run(check_cmd, shell=True, check=True)
+check_res = subprocess.run(check_cmd, shell=True)
+if check_res.returncode != 0:
+    print(f"\n[FATAL ERROR] LLaVA-1.5-7B open-ended pre-check failed with exit code {check_res.returncode}!")
+    print("Refusing to continue with full production run.")
+    sys.exit(check_res.returncode)
 
 # STEP 4: PRODUCTION RUN
 print("\n>>> Step 4/5: Running production open-ended LLaVA-1.5-7B...")
@@ -530,8 +639,8 @@ t_start = time.time()
 subprocess.run(prod_cmd, shell=True, check=True)
 print(f"\nLLaVA-1.5-7B Open-Ended finished in {(time.time() - t_start)/60:.1f} min!")
 
-# STEP 5: ZIP OUTPUT ARCHIVE & AUTO-DOWNLOAD
-print("\n>>> Step 5/5: Packaging shards into zip and triggering download...")
+# STEP 5: ZIP OUTPUT ARCHIVE
+print("\n>>> Step 5/5: Packaging shards into zip...")
 zip_name = "account2_wave2_llava_open.zip"
 zip_path = f"/kaggle/working/{zip_name}"
 
@@ -540,34 +649,8 @@ subprocess.run(
     shell=True, check=True
 )
 file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-print(f"SUCCESS! Archive created: {zip_name} ({file_size_mb:.2f} MB)")
-
-with open(zip_path, "rb") as f:
-    b64_data = base64.b64encode(f.read()).decode("utf-8")
-
-# JavaScript automatic browser download
-js_code = f"""
-(function() {{
-    var a = document.createElement('a');
-    a.href = 'data:application/zip;base64,{b64_data}';
-    a.download = '{zip_name}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}})();
-"""
-display(Javascript(js_code))
-
-# Fallback HTML download button
-html_code = f"""
-<div style="background-color: #e6ffed; border: 2px solid #52c41a; padding: 15px; border-radius: 8px; margin-top: 10px;">
-    <h3 style="color: #274916; margin: 0 0 8px 0;">🎉 Download Triggered Automatically!</h3>
-    <p style="margin: 0 0 10px 0;">If your browser popup blocker prevented the automatic download, click below:</p>
-    <a href="data:application/zip;base64,{b64_data}" download="{zip_name}" 
-       style="display: inline-block; background: #1890ff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-       Click to Download {zip_name} ({file_size_mb:.2f} MB)
-    </a>
-</div>
-"""
-display(HTML(html_code))
+print("=" * 70)
+print(f"SUCCESS! Output archive saved to: {zip_path} ({file_size_mb:.2f} MB)")
+print("=" * 70)
+print("NOTE: Download this archive directly from the 'Output' tab of your committed Kaggle notebook version.")
 ```
