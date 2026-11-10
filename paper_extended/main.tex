@@ -252,6 +252,13 @@ We validate the diagnostic on a controlled synthetic fusion benchmark where the 
     \item \textbf{OracleGatedModel}: An idealized positive control receiving true severity $S$, switching off the degraded modality beyond $S^*$.
 \end{enumerate}
 
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig1_synthetic_two_panel.pdf}
+\caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The Oracle receives the severity and serves as a positive control; among the other models, Gated has the lowest MI}
+\label{fig:synthetic}
+\end{figure}
+
 \begin{table}[tb]
 \centering
 \caption{Synthetic toy-fusion validation: utility crossing $S^*$ and Misalignment Index ($\mi$) under removed null ($N=2000$ items per seed, 5 seeds, $B=1000$, seed 42). Intervals are 95\% pooled bootstrap CIs}
@@ -279,6 +286,13 @@ As shown in Table~\ref{tab:synthetic-summary}, the quality-blind FixedModel exhi
 
 \paragraph{Experimental Setup.}
 We evaluate three open-weight VLMs: Qwen2-VL-2B-Instruct~\cite{wang2024qwen2vl}, SmolVLM-Instruct~\cite{marafioti2025smolvlm}, and LLaVA-1.5-7B (4-bit NF4)~\cite{liu2024improved}. Evaluated on A-OKVQA multiple-choice questions~\cite{schwenk2022aokvqa}, next-token probability mass across the four option letters is extracted at the terminal prompt position. The evaluation comprises a main sample ($N=500$, seed 0) and an independent replication sample ($N=445$, seed 1).
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig2_vlm_two_panel.pdf}
+\caption{Utility (left) and normalized reliance (right) as a function of corruption severity for three VLMs under swapped (solid) and Gaussian (dashed) corruptions ($N=500$ main sample, removed-image null baseline, bootstrap $B=1000$, seed 42). Shaded bands are 95\% bootstrap intervals}
+\label{fig:vlm_curves}
+\end{figure}
 
 \begin{table}[tb]
 \centering
