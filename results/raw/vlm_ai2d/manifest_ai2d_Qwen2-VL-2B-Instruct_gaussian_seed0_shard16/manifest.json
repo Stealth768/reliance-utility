@@ -1,0 +1,17 @@
+{
+  "git_commit": "13f8dfb",
+  "git_tag": null,
+  "model_hf_revision": "unknown",
+  "assistant_prefix": null,
+  "data_ids_hash": "60585c706b6589c85ce5655d736b1f2bc907339ceb11456ee0640073fc9091ec",
+  "lib_versions": {
+    "torch": "2.15.0+cu132",
+    "transformers": "5.22.2",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpu_name": "Tesla T4",
+  "config_sha256": "d2b19994b46e3401a549c0f6e8e54e95775a93c728ca66b5145c9d23469e32c0",
+  "seed": 0,
+  "model_name": "Qwen/Qwen2-VL-2B-Instruct",
+  "timestamp_utc": "2026-11-10T00:39:54.802423+00:00"
+}

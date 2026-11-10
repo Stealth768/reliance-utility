@@ -1,0 +1,17 @@
+{
+  "git_commit": "13f8dfb",
+  "git_tag": null,
+  "model_hf_revision": "unknown",
+  "assistant_prefix": "answer_colon",
+  "data_ids_hash": "60585c706b6589c85ce5655d736b1f2bc907339ceb11456ee0640073fc9091ec",
+  "lib_versions": {
+    "torch": "2.15.0+cu132",
+    "transformers": "5.22.2",
+    "bitsandbytes": "0.50.2"
+  },
+  "gpu_name": "Tesla T4",
+  "config_sha256": "f5b02025c4647842be024f00a3016b22fc13023297dfb42fdee386e68e56d3f1",
+  "seed": 0,
+  "model_name": "HuggingFaceTB/SmolVLM-Instruct",
+  "timestamp_utc": "2026-11-10T08:07:36.697577+00:00"
+}
