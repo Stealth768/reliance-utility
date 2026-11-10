@@ -471,28 +471,29 @@ print("NOTE: Download this archive directly from the 'Output' tab of your commit
 
 ---
 
-# WAVE 2
+# WAVE 2 (FINAL LOAD-BALANCED PRODUCTION)
 
-Run both notebooks in parallel after downloading and verifying Wave 1 outputs.
+Run both notebooks in parallel. Both accounts include **checkpoint zips** after every completed job so shards are preserved even in case of an early exit.
 
 ---
 
-### Wave 2 — Account 1: SmolVLM Open-Ended
+### Wave 2 — Account 1: SmolVLM Pairing 13 + SmolVLM Open-Ended (~11.0h)
 
-Paste this cell into Account 1:
+**Upload**: 
+otebooks/wave2_account1_final.ipynb OR paste this cell:
 
-```python
+`python
 import os
 import sys
 import time
 import subprocess
 
-print("=" * 60)
-print("WAVE 2 - ACCOUNT 1: SMOLVLM OPEN-ENDED (GAUSSIAN + SWAPBLEND)")
-print("=" * 60)
+print("=" * 70)
+print("WAVE 2 FINAL - ACCOUNT 1: SMOLVLM PAIRING 13 + SMOLVLM OPEN-ENDED")
+print("=" * 70)
 
 # STEP 1: FIX CUDA CONFLICT & INSTALL DEPENDENCIES
-print("\n>>> Step 1/5: Fixing CUDA conflict and installing dependencies...")
+print("\n>>> Step 1: Fixing CUDA conflict and installing dependencies...")
 subprocess.run("pip uninstall -y torchaudio", shell=True)
 subprocess.run(
     "pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes",
@@ -500,7 +501,7 @@ subprocess.run(
 )
 
 # STEP 2: CLONE OR UPDATE REPOSITORY (EXTENSION BRANCH)
-print("\n>>> Step 2/5: Synchronizing GitHub repository (extension branch)...")
+print("\n>>> Step 2: Synchronizing GitHub repository (extension branch)...")
 repo_dir = "/kaggle/working/reliance-utility"
 if not os.path.exists(repo_dir):
     subprocess.run(
@@ -520,69 +521,111 @@ import torch
 assert torch.cuda.is_available(), "GPU accelerator not detected!"
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
 
-# STEP 3: PRE-FLIGHT CHECK GUARD
-print("\n>>> Step 3/5: Running mandatory pre-flight check...")
-check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check"
-check_res = subprocess.run(check_cmd, shell=True)
-if check_res.returncode != 0:
-    print(f"\n[FATAL ERROR] SmolVLM open-ended pre-check failed with exit code {check_res.returncode}!")
-    print("Refusing to continue with full production run.")
-    sys.exit(check_res.returncode)
-
-# STEP 4: PRODUCTION RUN
-print("\n>>> Step 4/5: Running production open-ended SmolVLM...")
+out_pair = "/kaggle/working/results/raw/vlm_pairings"
 out_open = "/kaggle/working/results/raw/vlm_open"
+os.makedirs(out_pair, exist_ok=True)
 os.makedirs(out_open, exist_ok=True)
 
-# 2 corruptions (gaussian,swapblend) to fit within 12h session ceiling (~9.6h runtime)
-prod_cmd = (
-    f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
-    f"--model HuggingFaceTB/SmolVLM-Instruct "
-    f"--assistant_prefix answer_colon "
-    f"--corruptions gaussian,swapblend "
-    f"--data_ids results/derived/main_ids.json "
-    f"--n 500 --seed 0 --shard_size 25 "
-    f"--out {out_open}"
+# Helper function to execute pre-check before running production
+def run_guarded_job(job_name, check_cmd, prod_cmd):
+    print("\n" + "=" * 70)
+    print(f"STARTING GUARDED JOB: {job_name}")
+    print("=" * 70)
+    print(f">> Executing pre-flight check: {check_cmd}", flush=True)
+    check_res = subprocess.run(check_cmd, shell=True)
+    if check_res.returncode != 0:
+        print(f"\n[FATAL ERROR] Pre-flight check failed with code {check_res.returncode}!")
+        print(f"Stopping job '{job_name}' immediately. Refusing to run full production.")
+        sys.exit(check_res.returncode)
+    print(f"[CHECK PASSED] Launching production run: {prod_cmd}", flush=True)
+    t0 = time.time()
+    subprocess.run(prod_cmd, shell=True, check=True)
+    elapsed_min = (time.time() - t0) / 60
+    print(f"[JOB COMPLETED] Finished {job_name} in {elapsed_min:.1f} min", flush=True)
+
+t_global_start = time.time()
+
+# ----------------------------------------------------------------------
+# JOB 1: SmolVLM A-OKVQA Pairing Seed 13 (~1.5 hours)
+# ----------------------------------------------------------------------
+run_guarded_job(
+    job_name="SmolVLM A-OKVQA Pairing Seed 13",
+    check_cmd=f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model HuggingFaceTB/SmolVLM-Instruct --dataset aokvqa --assistant_prefix answer_colon --check",
+    prod_cmd=(
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
+        f"--model HuggingFaceTB/SmolVLM-Instruct "
+        f"--dataset aokvqa "
+        f"--assistant_prefix answer_colon "
+        f"--corruptions swapblend "
+        f"--pairing_seed 13 "
+        f"--seed 0 --shard_size 25 "
+        f"--out {out_pair}"
+    )
 )
 
-t_start = time.time()
-subprocess.run(prod_cmd, shell=True, check=True)
-print(f"\nSmolVLM Open-Ended finished in {(time.time() - t_start)/60:.1f} min!")
+# Intermediate packaging for Job 1
+print("\n>>> Creating intermediate checkpoint zip for pairings...")
+subprocess.run(f"cd /kaggle/working && zip -r -q checkpoint_acc1_pair13.zip results/raw/vlm_pairings", shell=True)
+print("Checkpoint zip created: checkpoint_acc1_pair13.zip")
 
-# STEP 5: ZIP OUTPUT ARCHIVE
-print("\n>>> Step 5/5: Packaging shards into zip...")
-zip_name = "account1_wave2_smolvlm_open.zip"
-zip_path = f"/kaggle/working/{zip_name}"
+# ----------------------------------------------------------------------
+# JOB 2: SmolVLM Open-Ended (gaussian, swapblend) (~9.5 hours)
+# ----------------------------------------------------------------------
+run_guarded_job(
+    job_name="SmolVLM Open-Ended (gaussian + swapblend)",
+    check_cmd=f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model HuggingFaceTB/SmolVLM-Instruct --assistant_prefix answer_colon --check",
+    prod_cmd=(
+        f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
+        f"--model HuggingFaceTB/SmolVLM-Instruct "
+        f"--assistant_prefix answer_colon "
+        f"--corruptions gaussian,swapblend "
+        f"--data_ids results/derived/main_ids.json "
+        f"--n 500 --seed 0 --shard_size 25 "
+        f"--out {out_open}"
+    )
+)
 
+# ----------------------------------------------------------------------
+# FINAL PACKAGING
+# ----------------------------------------------------------------------
+print("\n>>> Step 5: Packaging all completed shards into final zip...")
+final_zip = "account1_wave2_final.zip"
 subprocess.run(
-    f"cd /kaggle/working && zip -r -q {zip_name} results/raw/vlm_open",
+    f"cd /kaggle/working && zip -r -q {final_zip} results/raw/vlm_pairings results/raw/vlm_open",
     shell=True, check=True
 )
-file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
+
+zip_path = f"/kaggle/working/{final_zip}"
+size_mb = os.path.getsize(zip_path) / (1024 * 1024)
+total_hours = (time.time() - t_global_start) / 3600
+
 print("=" * 70)
-print(f"SUCCESS! Output archive saved to: {zip_path} ({file_size_mb:.2f} MB)")
+print(f"SUCCESS! Account 1 completed in {total_hours:.2f} hours.")
+print(f"Final archive: {zip_path} ({size_mb:.2f} MB)")
 print("=" * 70)
 print("NOTE: Download this archive directly from the 'Output' tab of your committed Kaggle notebook version.")
-```
+
+`
 
 ---
 
-### Wave 2 — Account 2: LLaVA-1.5-7B Open-Ended
+### Wave 2 — Account 2: LLaVA AI2D + Pairing 13 + Open-Ended (~11.5h)
 
-Paste this cell into Account 2:
+**Upload**: 
+otebooks/wave2_account2_final.ipynb OR paste this cell:
 
-```python
+`python
 import os
 import sys
 import time
 import subprocess
 
-print("=" * 60)
-print("WAVE 2 - ACCOUNT 2: LLAVA-1.5-7B OPEN-ENDED (GAUSSIAN + SWAPBLEND)")
-print("=" * 60)
+print("=" * 70)
+print("WAVE 2 FINAL - ACCOUNT 2: LLAVA AI2D + PAIRING 13 + OPEN-ENDED")
+print("=" * 70)
 
 # STEP 1: FIX CUDA CONFLICT & INSTALL DEPENDENCIES
-print("\n>>> Step 1/5: Fixing CUDA conflict and installing dependencies...")
+print("\n>>> Step 1: Fixing CUDA conflict and installing dependencies...")
 subprocess.run("pip uninstall -y torchaudio", shell=True)
 subprocess.run(
     "pip install -q -U transformers accelerate datasets pillow torchvision bitsandbytes",
@@ -590,7 +633,7 @@ subprocess.run(
 )
 
 # STEP 2: CLONE OR UPDATE REPOSITORY (EXTENSION BRANCH)
-print("\n>>> Step 2/5: Synchronizing GitHub repository (extension branch)...")
+print("\n>>> Step 2: Synchronizing GitHub repository (extension branch)...")
 repo_dir = "/kaggle/working/reliance-utility"
 if not os.path.exists(repo_dir):
     subprocess.run(
@@ -610,47 +653,111 @@ import torch
 assert torch.cuda.is_available(), "GPU accelerator not detected!"
 print(f"CUDA GPU Verified: {torch.cuda.get_device_name(0)}")
 
-# STEP 3: PRE-FLIGHT CHECK GUARD
-print("\n>>> Step 3/5: Running mandatory pre-flight check...")
-check_cmd = f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model llava-hf/llava-1.5-7b-hf --assistant_prefix answer_colon --check"
-check_res = subprocess.run(check_cmd, shell=True)
-if check_res.returncode != 0:
-    print(f"\n[FATAL ERROR] LLaVA-1.5-7B open-ended pre-check failed with exit code {check_res.returncode}!")
-    print("Refusing to continue with full production run.")
-    sys.exit(check_res.returncode)
-
-# STEP 4: PRODUCTION RUN
-print("\n>>> Step 4/5: Running production open-ended LLaVA-1.5-7B...")
+out_ai2d = "/kaggle/working/results/raw/vlm_ai2d"
+out_pair = "/kaggle/working/results/raw/vlm_pairings"
 out_open = "/kaggle/working/results/raw/vlm_open"
+os.makedirs(out_ai2d, exist_ok=True)
+os.makedirs(out_pair, exist_ok=True)
 os.makedirs(out_open, exist_ok=True)
 
-# 2 corruptions (gaussian,swapblend) to fit within 12h session ceiling (~9.6h runtime)
-prod_cmd = (
-    f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
-    f"--model llava-hf/llava-1.5-7b-hf "
-    f"--assistant_prefix answer_colon "
-    f"--corruptions gaussian,swapblend "
-    f"--data_ids results/derived/main_ids.json "
-    f"--n 500 --seed 0 --shard_size 25 "
-    f"--out {out_open}"
+def run_guarded_job(job_name, check_cmd, prod_cmd):
+    print("\n" + "=" * 70)
+    print(f"STARTING GUARDED JOB: {job_name}")
+    print("=" * 70)
+    print(f">> Executing pre-flight check: {check_cmd}", flush=True)
+    check_res = subprocess.run(check_cmd, shell=True)
+    if check_res.returncode != 0:
+        print(f"\n[FATAL ERROR] Pre-flight check failed with code {check_res.returncode}!")
+        print(f"Stopping job '{job_name}' immediately. Refusing to run full production.")
+        sys.exit(check_res.returncode)
+    print(f"[CHECK PASSED] Launching production run: {prod_cmd}", flush=True)
+    t0 = time.time()
+    subprocess.run(prod_cmd, shell=True, check=True)
+    elapsed_min = (time.time() - t0) / 60
+    print(f"[JOB COMPLETED] Finished {job_name} in {elapsed_min:.1f} min", flush=True)
+
+t_global_start = time.time()
+
+# ----------------------------------------------------------------------
+# JOB 1: LLaVA-1.5-7B AI2D Remaining (patch + swapblend) (~1.6 hours)
+# Note: --corruptions patch,swapblend runs only the remaining corruptions
+# ----------------------------------------------------------------------
+run_guarded_job(
+    job_name="LLaVA-1.5-7B AI2D (patch + swapblend)",
+    check_cmd=f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset ai2d --assistant_prefix answer_colon --check",
+    prod_cmd=(
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
+        f"--model llava-hf/llava-1.5-7b-hf "
+        f"--dataset ai2d "
+        f"--assistant_prefix answer_colon "
+        f"--corruptions patch,swapblend "
+        f"--data_ids results/derived/ai2d_main_ids.json "
+        f"--n 500 --seed 0 --shard_size 25 "
+        f"--out {out_ai2d}"
+    )
 )
 
-t_start = time.time()
-subprocess.run(prod_cmd, shell=True, check=True)
-print(f"\nLLaVA-1.5-7B Open-Ended finished in {(time.time() - t_start)/60:.1f} min!")
+print("\n>>> Checkpoint zip: packaging completed AI2D shards...")
+subprocess.run(f"cd /kaggle/working && zip -r -q checkpoint_acc2_ai2d.zip results/raw/vlm_ai2d", shell=True)
+print("Checkpoint zip created: checkpoint_acc2_ai2d.zip")
 
-# STEP 5: ZIP OUTPUT ARCHIVE
-print("\n>>> Step 5/5: Packaging shards into zip...")
-zip_name = "account2_wave2_llava_open.zip"
-zip_path = f"/kaggle/working/{zip_name}"
+# ----------------------------------------------------------------------
+# JOB 2: LLaVA-1.5-7B A-OKVQA Pairing Seed 13 (~1.4 hours)
+# ----------------------------------------------------------------------
+run_guarded_job(
+    job_name="LLaVA-1.5-7B A-OKVQA Pairing Seed 13",
+    check_cmd=f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py --model llava-hf/llava-1.5-7b-hf --dataset aokvqa --assistant_prefix answer_colon --check",
+    prod_cmd=(
+        f"cd {repo_dir} && python -u scripts/run_vlm_pilot.py "
+        f"--model llava-hf/llava-1.5-7b-hf "
+        f"--dataset aokvqa "
+        f"--assistant_prefix answer_colon "
+        f"--corruptions swapblend "
+        f"--pairing_seed 13 "
+        f"--seed 0 --shard_size 25 "
+        f"--out {out_pair}"
+    )
+)
 
+print("\n>>> Checkpoint zip: packaging completed pairing shards...")
+subprocess.run(f"cd /kaggle/working && zip -r -q checkpoint_acc2_pair13.zip results/raw/vlm_pairings", shell=True)
+print("Checkpoint zip created: checkpoint_acc2_pair13.zip")
+
+# ----------------------------------------------------------------------
+# JOB 3: LLaVA-1.5-7B Open-Ended (gaussian, swapblend) (~8.5 hours)
+# ----------------------------------------------------------------------
+run_guarded_job(
+    job_name="LLaVA-1.5-7B Open-Ended (gaussian + swapblend)",
+    check_cmd=f"cd {repo_dir} && python -u scripts/run_vlm_open.py --model llava-hf/llava-1.5-7b-hf --assistant_prefix answer_colon --check",
+    prod_cmd=(
+        f"cd {repo_dir} && python -u scripts/run_vlm_open.py "
+        f"--model llava-hf/llava-1.5-7b-hf "
+        f"--assistant_prefix answer_colon "
+        f"--corruptions gaussian,swapblend "
+        f"--data_ids results/derived/main_ids.json "
+        f"--n 500 --seed 0 --shard_size 25 "
+        f"--out {out_open}"
+    )
+)
+
+# ----------------------------------------------------------------------
+# FINAL PACKAGING
+# ----------------------------------------------------------------------
+print("\n>>> Step 5: Packaging all completed shards into final zip...")
+final_zip = "account2_wave2_final.zip"
 subprocess.run(
-    f"cd /kaggle/working && zip -r -q {zip_name} results/raw/vlm_open",
+    f"cd /kaggle/working && zip -r -q {final_zip} results/raw/vlm_ai2d results/raw/vlm_pairings results/raw/vlm_open",
     shell=True, check=True
 )
-file_size_mb = os.path.getsize(zip_path) / (1024 * 1024)
+
+zip_path = f"/kaggle/working/{final_zip}"
+size_mb = os.path.getsize(zip_path) / (1024 * 1024)
+total_hours = (time.time() - t_global_start) / 3600
+
 print("=" * 70)
-print(f"SUCCESS! Output archive saved to: {zip_path} ({file_size_mb:.2f} MB)")
+print(f"SUCCESS! Account 2 completed in {total_hours:.2f} hours.")
+print(f"Final archive: {zip_path} ({size_mb:.2f} MB)")
 print("=" * 70)
 print("NOTE: Download this archive directly from the 'Output' tab of your committed Kaggle notebook version.")
-```
+
+`
