@@ -1,15 +1,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % paper_extended/main.tex
-% Single-File Manuscript (Standard LaTeX article class)
+% ComSIA 2026 Conference Submission
+% Formatted using Springer SVMult (svmult.cls)
 % Retained Visual Reliance and Multimodal Reliance-Utility Misalignment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[11pt,a4paper]{article}
+\documentclass[graybox]{svmult}
 
-\usepackage[margin=1in]{geometry}
+% Springer fonts and standard layout packages
+\usepackage{mathptmx}        % selects Times Roman as basic font
+\usepackage{helvet}          % selects Helvetica as sans-serif font
+\usepackage{courier}         % selects Courier as typewriter font
+\usepackage{type1cm}         % activate if the above 3 fonts are not available on system
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
-\usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
 \usepackage{xcolor}
@@ -26,29 +36,47 @@
 \newcommand{\jsd}{\text{JSD}}
 \newcommand{\dkl}{D_{\text{KL}}}
 
-\title{\textbf{Retained Visual Reliance and Multimodal Reliance-Utility Misalignment in Vision-Language Models: Formal Framework, Cross-Dataset Validation, and Generative Diagnostic}}
+% Abstract keywords macro (used in svmult \keywords{} call)
+\providecommand{\keywords}[1]{\par\addvspace{0.5\baselineskip}\noindent\textbf{Keywords:} #1}
 
-\author{
-  \textbf{Mohammed Farhan Siddiqui} \quad \textbf{Uma Rani}\thanks{Corresponding author: \texttt{dr.uma@adgips.ac.in}} \\
-  Department of Computer Science, ADGIPS, New Delhi, India \\
-  \texttt{MohammedFarhan678@outlook.com}
-}
+% Compress paragraph heading spacing to run-in style
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {-6\p@ \@plus -2\p@ \@minus -2\p@}%
+  {-0.5em}%
+  {\normalfont\normalsize\bfseries}}
+\makeatother
 
-\date{}
+\makeindex
 
 \begin{document}
+\raggedbottom
+
+\title*{Retained Visual Reliance and Multimodal Reliance-Utility Misalignment in Vision-Language Models}
+\titlerunning{Retained Visual Reliance and Multimodal Misalignment}
+
+% Authorship configured for ComSIA 2026
+\author{Mohammed Farhan Siddiqui and Uma Rani}
+\authorrunning{M. F. Siddiqui and U. Rani}
+\institute{Mohammed Farhan Siddiqui \at Department of Computer Science, ADGIPS, New Delhi, India, \\ \email{MohammedFarhan678@outlook.com}
+\and Uma Rani (corresponding author) \at Department of Computer Science, ADGIPS, New Delhi, India, \\ \email{dr.uma@adgips.ac.in}}
 
 \maketitle
 
-\begin{abstract}
-Multimodal systems are conventionally evaluated by assigning them a task and investigating whether task accuracy degrades when one modality is corrupted. However, task accuracy conflates two distinct phenomena: informational loss caused by input corruption, and the model's tendency to maintain reliance on a degraded input even when that input no longer provides positive utility. We formulate a diagnostic that disentangles information degradation from behavioral reliance along a continuous severity path. For each severity level, we pair task utility with an information-theoretic reliance measure and determine whether utility falls below the unimodal null baseline. We evaluate this diagnostic across controlled synthetic fusion systems with known data-generating distributions, three open-weight Vision-Language Models (Qwen2-VL-2B, SmolVLM-Instruct, and LLaVA-1.5-7B), two multiple-choice benchmarks (A-OKVQA and AI2D diagram reasoning), an open-ended generative format with teacher-forced sequence divergences, and multiple swapped-donor derangement seeds.
+% ======================================================================
+% Abstract & Keywords (Formatted per Springer SVMult Guidelines)
+% ======================================================================
+\abstract*{Multimodal systems are conventionally evaluated by assigning them a task and investigating whether task accuracy degrades when one modality is corrupted. However, task accuracy conflates two distinct phenomena: informational loss caused by input corruption, and the model's tendency to maintain reliance on a degraded input even when that input no longer provides positive utility. We formulate a diagnostic that disentangles information degradation from behavioral reliance along a continuous severity path. For each severity level, we pair task utility with an information-theoretic reliance measure and determine whether utility falls below the unimodal null baseline. We evaluate this diagnostic across controlled synthetic fusion systems with known data-generating distributions, three open-weight Vision-Language Models (Qwen2-VL-2B, SmolVLM-Instruct, and LLaVA-1.5-7B), two multiple-choice benchmarks (A-OKVQA and AI2D diagram reasoning), an open-ended generative format with teacher-forced sequence divergences, and multiple swapped-donor derangement seeds.
+Across models and benchmarks, visual corruptions that destroy task utility leave substantial normalized reliance relative to clean input, markedly higher than uninformative Gaussian noise. In cross-seed stability assessments over donor seeds $\{0, 11, 12, 13\}$, we report the empirical range and bootstrap confidence intervals of retained reliance without relying on parametric variance tests. We document that empirical conclusions are sensitive to unimodal baseline selection, and we control family-wise error rates across pre-declared hypotheses using Holm's procedure. We characterize this phenomenon strictly as retained visual reliance under informational degradation.}
 
-Across models and benchmarks, visual corruptions that destroy task utility leave substantial normalized reliance relative to clean input, markedly higher than uninformative Gaussian noise. In cross-seed stability assessments over donor seeds $\{0, 11, 12, 13\}$, we report the empirical range and bootstrap confidence intervals of retained reliance without relying on parametric variance tests. We document that empirical conclusions are sensitive to unimodal baseline selection, and we control family-wise error rates across pre-declared hypotheses using Holm's procedure. We characterize this phenomenon strictly as retained visual reliance under informational degradation.
-\end{abstract}
+\abstract{Multimodal systems are conventionally evaluated by assigning them a task and investigating whether task accuracy degrades when one modality is corrupted. However, task accuracy conflates two distinct phenomena: informational loss caused by input corruption, and the model's tendency to maintain reliance on a degraded input even when that input no longer provides positive utility. We formulate a diagnostic that disentangles information degradation from behavioral reliance along a continuous severity path. For each severity level, we pair task utility with an information-theoretic reliance measure and determine whether utility falls below the unimodal null baseline. We evaluate this diagnostic across controlled synthetic fusion systems with known data-generating distributions, three open-weight Vision-Language Models (Qwen2-VL-2B, SmolVLM-Instruct, and LLaVA-1.5-7B), two multiple-choice benchmarks (A-OKVQA and AI2D diagram reasoning), an open-ended generative format with teacher-forced sequence divergences, and multiple swapped-donor derangement seeds.
+Across models and benchmarks, visual corruptions that destroy task utility leave substantial normalized reliance relative to clean input, markedly higher than uninformative Gaussian noise. In cross-seed stability assessments over donor seeds $\{0, 11, 12, 13\}$, we report the empirical range and bootstrap confidence intervals of retained reliance without relying on parametric variance tests. We document that empirical conclusions are sensitive to unimodal baseline selection, and we control family-wise error rates across pre-declared hypotheses using Holm's procedure. We characterize this phenomenon strictly as retained visual reliance under informational degradation.}
 
-\vspace{0.5em}
-\noindent\textbf{Keywords:} Multimodal Learning, Vision-Language Models, Retained Visual Reliance, Reliance-Utility Misalignment, Robustness Evaluation, Multiple Hypothesis Testing.
+\keywords{Multimodal Learning, Vision-Language Models, Retained Visual Reliance, Reliance-Utility Misalignment, Robustness Evaluation, ComSIA 2026}
 
+% ======================================================================
+% Section 1: Introduction
+% ======================================================================
 \section{Introduction}
 \label{sec:intro}
 
@@ -59,7 +87,7 @@ When one input to a multimodal artificial intelligence system degrades, standard
 \end{enumerate}
 Task accuracy alone cannot distinguish between a model that appropriately discounts an uninformative input and a model that persistently conditions its predictions upon it.
 
-Substituting or omitting input modalities to probe dependence is established practice in multimodal evaluation (Section~\ref{sec:related}). In this work, we study a severity-graded formulation: tracking how predictive utility and behavioral reliance co-evolve as an input is progressively degraded along a calibrated severity path $S \in [0, 1]$. For every severity step, we quantify \emph{utility} $U(S)$ as task performance relative to an unimodal null baseline, and \emph{reliance} $R(S)$ as the divergence between the model's predictive distribution under corruption and its unimodal null distribution. We identify the crossing point $S^*$ where utility reaches zero, and we quantify the retained reliance in the negative-utility regime.
+Substituting or omitting input modalities to probe dependence is established practice in multimodal evaluation (Sect.~\ref{sec:related}). In this work, we study a severity-graded formulation: tracking how predictive utility and behavioral reliance co-evolve as an input is progressively degraded along a calibrated severity path $S \in [0, 1]$. For every severity step, we quantify \emph{utility} $U(S)$ as task performance relative to an unimodal null baseline, and \emph{reliance} $R(S)$ as the divergence between the model's predictive distribution under corruption and its unimodal null distribution. We identify the crossing point $S^*$ where utility reaches zero, and we quantify the retained reliance in the negative-utility regime.
 
 \paragraph{Contributions.}
 \begin{itemize}
@@ -72,6 +100,9 @@ Substituting or omitting input modalities to probe dependence is established pra
     \item \textbf{Pre-Declared Hypothesis Testing and FWER Control}: We formulate pre-declared hypotheses (H4--H7) with strict failure criteria, applying Holm's step-down procedure to control family-wise error rate at $\alpha = 0.05$.
 \end{itemize}
 
+% ======================================================================
+% Section 2: Related Work
+% ======================================================================
 \section{Related Work}
 \label{sec:related}
 
@@ -87,6 +118,9 @@ Substituting blank or mismatched images to test visual grounding is established 
 \paragraph{Multiple Testing Control in Benchmark Evaluations.}
 Large-scale model evaluation across multiple conditions, models, and datasets introduces substantial multiple-testing risk. When evaluating multiple hypotheses simultaneously, unadjusted comparisons inflate the family-wise error rate (FWER). We apply Holm's sequentially rejective Bonferroni procedure~\cite{holm1979simple}, which controls the FWER at level $\alpha$ under arbitrary dependence structures while offering strictly greater statistical power than the standard single-step Bonferroni correction.
 
+% ======================================================================
+% Section 3: Methodology
+% ======================================================================
 \section{Methodology: Measuring Reliance-Utility Misalignment}
 \label{sec:method}
 
@@ -204,7 +238,10 @@ To evaluate sensitivity to donor image pairing in swapblend corruption, evaluati
 \end{equation}
 alongside 95\% percentile bootstrap confidence intervals per seed. In accordance with pre-declared constraints, no parametric variance equality test is performed.
 
-\section{Synthetic Benchmark Validation}
+% ======================================================================
+% Section 4: Synthetic Benchmark Validation
+% ======================================================================
+\section{Validation on Synthetic Benchmark}
 \label{sec:synthetic}
 
 We validate the diagnostic on a controlled synthetic fusion benchmark where the true data-generating process is known. We implement four architectures:
@@ -217,9 +254,9 @@ We validate the diagnostic on a controlled synthetic fusion benchmark where the 
 
 \begin{table}[tb]
 \centering
-\caption{Synthetic toy-fusion validation: utility crossing $S^*$ and Misalignment Index ($\mi$) under removed null ($N=2000$ items per seed, 5 seeds, $B=1000$, seed 42). Intervals are 95\% pooled bootstrap CIs.}
+\caption{Synthetic toy-fusion validation: utility crossing $S^*$ and Misalignment Index ($\mi$) under removed null ($N=2000$ items per seed, 5 seeds, $B=1000$, seed 42). Intervals are 95\% pooled bootstrap CIs}
 \label{tab:synthetic-summary}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lcc}
 \toprule
 \textbf{Model Architecture} & $S^*$ (95\% CI) & $\mi$ (95\% CI) \\
@@ -229,11 +266,14 @@ PartialGatedModel & 0.65 (0.65, 0.65) & 1.286 (1.270, 1.310) \\
 GatedModel        & 0.70 (0.70, 0.70) & 0.650 (0.640, 0.660) \\
 OracleGatedModel  & 0.70 (0.65, 0.70) & 0.000 (0.000, 0.000) \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 As shown in Table~\ref{tab:synthetic-summary}, the quality-blind FixedModel exhibits the highest misalignment ($\mi = 1.491$), the PartialGatedModel achieves $\mi = 1.286$, the dynamic GatedModel achieves $\mi = 0.650$, and the Oracle positive control achieves $\mi = 0.000$. A paired bootstrap across seeds and items confirms the strict ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$.
 
+% ======================================================================
+% Section 5: A-OKVQA Multiple-Choice Evaluation
+% ======================================================================
 \section{Evaluation on Vision-Language Models: A-OKVQA Multiple-Choice}
 \label{sec:results_aokvqa}
 
@@ -242,9 +282,9 @@ We evaluate three open-weight VLMs: Qwen2-VL-2B-Instruct~\cite{wang2024qwen2vl},
 
 \begin{table}[tb]
 \centering
-\caption{A-OKVQA Multiple-Choice headline results: terminal normalized reliance $\hat{R}(1)$ and terminal utility $U(1)$ across corruptions under the removed-image null baseline ($B=1000$, seed 42). Intervals denote 95\% bootstrap CIs.}
+\caption{A-OKVQA Multiple-Choice headline results: terminal normalized reliance $\hat{R}(1)$ and terminal utility $U(1)$ across corruptions under the removed-image null baseline ($B=1000$, seed 42). Intervals denote 95\% bootstrap CIs}
 \label{tab:headline}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
 \textbf{Model} & \textbf{Corruption} & $\hat{R}(1)$ (95\% CI) & $U(1)$ (95\% CI) \\
@@ -267,7 +307,7 @@ SmolVLM      & Swapped  & 0.553 (0.491, 0.620) & $-$0.038 ($-$0.090, $+$0.013) \
 LLaVA-1.5-7B & Swapped  & 0.563 (0.497, 0.638) & $-$0.025 ($-$0.072, $+$0.022) \\
              & Gaussian & 0.260 (0.226, 0.301) & $-$0.002 ($-$0.043, $+$0.038) \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \paragraph{Retained Reliance Under Incongruent Images.}
@@ -283,9 +323,9 @@ Table~\ref{tab:nullsens} compares reliance and utility when using the removed-im
 
 \begin{table}[tb]
 \centering
-\caption{Sensitivity to unimodal null baseline selection on A-OKVQA ($N=500$, $B=1000$, seed 42). ``Removed'' omits visual tokens; ``Black'' provides an all-zero image.}
+\caption{Sensitivity to unimodal null baseline selection on A-OKVQA ($N=500$, $B=1000$, seed 42). ``Removed'' omits visual tokens; ``Black'' provides an all-zero image}
 \label{tab:nullsens}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
 \textbf{Model} & \textbf{Corruption} & \textbf{Removed Null} & \textbf{Black Null} \\
@@ -308,9 +348,12 @@ SmolVLM      & Swapped  & $-$0.016 ($-$0.062, $+$0.030) & $-$0.002 ($-$0.046, $+
 LLaVA-1.5-7B & Swapped  & $-$0.048 ($-$0.092, $-$0.004) & $-$0.040 ($-$0.082, $+$0.002) \\
              & Gaussian & $-$0.022 ($-$0.058, $+$0.014) & $-$0.014 ($-$0.042, $+$0.014) \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
+% ======================================================================
+% Section 6: Extension Suite
+% ======================================================================
 \section{Extension Suite: Second Benchmark, Open Generation, and Pairing Stability}
 \label{sec:extension}
 
@@ -327,7 +370,7 @@ The AI2D dataset~\cite{kembhavi2016diagram} tests diagrammatic reasoning across 
 \centering
 \caption{AI2D Diagram Reasoning Headline Results: Terminal normalized reliance $\hat{R}(1)$ and utility $U(1)$ under the removed null baseline ($B=1000$, seed 42). Intervals are 95\% bootstrap CIs. \textit{[Results pending GPU shard execution]}}
 \label{tab:ai2d_headline}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
 \textbf{Model} & \textbf{Corruption} & $\hat{R}(1)$ (95\% CI) & $U(1)$ (95\% CI) \\
@@ -350,7 +393,7 @@ Qwen2-VL-2B  & Swapped  & --- & --- \\
              & Gaussian & --- & --- \\
              & Patch    & --- & --- \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \subsection{Open-Ended Free Generation Evaluation}
@@ -366,7 +409,7 @@ Evaluations are conducted on A-OKVQA validation questions ($N=500$, seed 0) in o
 \centering
 \caption{Open-Ended Generation Headline Results: Terminal normalized sequence reliance $\hat{R}_{\text{open}}(1)$ and VQA soft accuracy utility $U_{\text{open}}(1)$ under the removed null baseline ($N=500$, seed 0, $B=1000$, seed 42). \textit{[Results pending GPU shard execution]}}
 \label{tab:open_headline}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
 \textbf{Model} & \textbf{Corruption} & $\hat{R}_{\text{open}}(1)$ (95\% CI) & $U_{\text{open}}(1)$ (95\% CI) \\
@@ -379,7 +422,7 @@ SmolVLM      & Swapped  & --- & --- \\
 LLaVA-1.5-7B & Swapped  & --- & --- \\
              & Gaussian & --- & --- \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \subsection{Donor Derangement Stability Across Seeds}
@@ -395,7 +438,7 @@ Swapped image pairings are evaluated across four independent derangement seeds: 
 \centering
 \caption{Donor Derangement Stability on A-OKVQA ($N=500$ questions): Terminal normalized reliance $\hat{R}(1)$ across derangement seeds $\{0, 11, 12, 13\}$ under swapblend ($S=1$), removed null baseline ($B=1000$, seed 42). \textit{[Results pending GPU shard execution]}}
 \label{tab:pairing_stability}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Model} & Seed 0 & Seed 11 & Seed 12 & Seed 13 & Empirical Range \\
@@ -404,7 +447,7 @@ Qwen2-VL-2B  & 0.487 (0.437, 0.542) & --- & --- & --- & --- \\
 SmolVLM      & 0.493 (0.446, 0.547) & --- & --- & --- & --- \\
 LLaVA-1.5-7B & 0.578 (0.514, 0.653) & --- & --- & --- & --- \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \subsection{Pre-Declared Hypothesis Testing Outcomes}
@@ -416,7 +459,7 @@ Table~\ref{tab:hypothesis_tests} summarizes the evaluation of pre-declared hypot
 \centering
 \caption{Evaluation of Pre-Declared Hypotheses H4--H7 with Holm-Bonferroni FWER Control ($\alpha = 0.05$, $B=1000$, seed 42). \textit{[Results pending GPU shard execution]}}
 \label{tab:hypothesis_tests}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lllcccc}
 \toprule
 \textbf{ID} & \textbf{Benchmark} & \textbf{Target Model} & \textbf{Metric / Test} & \textbf{Raw $p$} & \textbf{Holm $p_{\text{adj}}$} & \textbf{Outcome} \\
@@ -430,9 +473,12 @@ H6b & Open-Ended & SmolVLM      & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gau
 H6c & Open-Ended & LLaVA-1.5-7B & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & --- & --- & Pending \\
 H7  & Open-Ended & At least one & UpperCI$_{95}(U_{\text{open}}(1)) < 0$     & --- & --- & Pending \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
+% ======================================================================
+% Section 7: Modality Dropout Case Study
+% ======================================================================
 \section{Case Study: Modality Dropout in Late Fusion Proxy}
 \label{sec:fusion}
 
@@ -440,9 +486,9 @@ To investigate whether training with missing modalities mitigates retained relia
 
 \begin{table}[tb]
 \centering
-\caption{Modality dropout proxy evaluation on two-view Fashion-MNIST ($N=5000$ test items, 5 seeds, $B=1000$, seed 42). $\hat{R}(1)$ is normalized terminal reliance; $R(1)$ is raw terminal reliance.}
+\caption{Modality dropout proxy evaluation on two-view Fashion-MNIST ($N=5000$ test items, 5 seeds, $B=1000$, seed 42). $\hat{R}(1)$ is normalized terminal reliance; $R(1)$ is raw terminal reliance}
 \label{tab:fusion}
-\vspace{0.5em}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{ccccccccc}
 \toprule
 $p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $\mi$ \\
@@ -452,11 +498,14 @@ $p$ & Clean Acc & Null Acc & Acc ($S=1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1
 0.250 & 0.884 & 0.848 & 0.555 & $-$0.293 & 0.040 & 0.330 & 8.362 & 4.514 \\
 0.500 & 0.882 & 0.858 & 0.726 & $-$0.133 & 0.024 & 0.148 & 6.200 & 3.684 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 As reported in Table~\ref{tab:fusion}, modality dropout raises unimodal null accuracy from 0.562 ($p=0$) to 0.858 ($p=0.5$), while preserving clean accuracy within 0.364 percentage points. However, the pre-declared hypothesis that $\mi$ would decrease monotonically in $p$ failed: because baseline reliance $R(0)$ collapses from 0.331 to 0.024, the denominator in $\hat{R}(S) = R(S)/R(0)$ artificially inflates normalized reliance. In contrast, raw terminal reliance $R(1)$ decreases monotonically from 0.611 to 0.148. This highlights a fundamental limitation of clean-normalized reliance metrics in models with high unimodal capacity.
 
+% ======================================================================
+% Section 8: Discussion and Limitations
+% ======================================================================
 \section{Discussion and Limitations}
 \label{sec:discussion}
 
@@ -473,66 +522,79 @@ Our findings demonstrate that open-weight VLMs exhibit persistent behavioral rel
     \item \textbf{Donor Derangement Sample Size}: Swapped donor stability is evaluated over four derangement seeds ($N=4$ seeds $\times 500$ questions), providing an empirical range rather than asymptotic variance estimation.
 \end{enumerate}
 
+% ======================================================================
+% Section 9: Conclusion
+% ======================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 
 We introduced a formal diagnostic that traces multimodal task utility and information-theoretic reliance along continuous degradation paths. Across synthetic fusion controls, three open Vision-Language Models, multiple-choice benchmarks (A-OKVQA, AI2D), open-ended generative sequences, and across multiple donor pairing seeds, models consistently retain visual reliance under unhelpful or incongruent inputs. By pre-declaring hypotheses in advance, controlling multiple-testing error rates via Holm's procedure, and reporting all findings transparently without post-hoc rescue, this work provides an empirical foundation for measuring reliance-utility dynamics in multimodal artificial intelligence.
 
-\begin{thebibliography}{99}
+% ======================================================================
+% Acknowledgement (Springer SVMult Style)
+% ======================================================================
+\begin{acknowledgement}
+This research was conducted using open-weight vision-language models and publicly available benchmark datasets. The authors thank the open-source community for providing accessible model weights, inference libraries, and evaluation infrastructure.
+\end{acknowledgement}
+
+% ======================================================================
+% References (Springer spmpsci style)
+% ======================================================================
+\begin{thebibliography}{99.}
 
 \bibitem{agrawal2018dont}
-Agrawal, A., Batra, D., Parikh, D., Kembhavi, A.: Don't Just Assume; Look and Answer: Overcoming Priors for Visual Question Answering. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 4971--4980 (2018).
+Agrawal, A., Batra, D., Parikh, D., Kembhavi, A.: Don't Just Assume; Look and Answer: Overcoming Priors for Visual Question Answering. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 4971--4980 (2018)
 
 \bibitem{antol2015vqa}
-Antol, S., Agrawal, A., Lu, J., Mitchell, M., Batra, D., Zitnick, C.L., Parikh, D.: {VQA}: Visual Question Answering. In: Proceedings of the IEEE International Conference on Computer Vision (ICCV), pp. 2425--2433 (2015). arXiv:1505.00468.
+Antol, S., Agrawal, A., Lu, J., Mitchell, M., Batra, D., Zitnick, C.L., Parikh, D.: {VQA}: Visual Question Answering. In: Proceedings of the IEEE International Conference on Computer Vision (ICCV), pp. 2425--2433 (2015). arXiv:1505.00468
 
 \bibitem{cai2025interference}
-Cai, R., Li, B., Wen, X., Chen, M., Zhao, Z.: Diagnosing and Mitigating Modality Interference in Multimodal Large Language Models. arXiv:2505.19616 (2025).
+Cai, R., Li, B., Wen, X., Chen, M., Zhao, Z.: Diagnosing and Mitigating Modality Interference in Multimodal Large Language Models. arXiv:2505.19616 (2025)
 
 \bibitem{goyal2017making}
-Goyal, Y., Khot, T., Summers-Stay, D., Batra, D., Parikh, D.: Making the {V} in {VQA} Matter: Elevating the Role of Image Understanding in Visual Question Answering. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 6904--6913 (2017).
+Goyal, Y., Khot, T., Summers-Stay, D., Batra, D., Parikh, D.: Making the {V} in {VQA} Matter: Elevating the Role of Image Understanding in Visual Question Answering. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 6904--6913 (2017)
 
 \bibitem{gupta2022swapmix}
-Gupta, V., Li, Z., Kortylewski, A., Zhang, C., Li, Y., Yuille, A.: {SwapMix}: Diagnosing and Regularizing the Over-Reliance on Visual Context in Visual Question Answering. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5078--5088 (2022).
+Gupta, V., Li, Z., Kortylewski, A., Zhang, C., Li, Y., Yuille, A.: {SwapMix}: Diagnosing and Regularizing the Over-Reliance on Visual Context in Visual Question Answering. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5078--5088 (2022)
 
 \bibitem{holm1979simple}
-Holm, S.: A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics \textbf{6}(2), 65--70 (1979).
+Holm, S.: A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics \textbf{6}(2), 65--70 (1979)
 
 \bibitem{kembhavi2016diagram}
-Kembhavi, A., Salvato, M., Kolve, E., Seo, M., Hajishirzi, H., Farhadi, A.: A Diagram Is Worth a Dozen Images. In: Computer Vision -- ECCV 2016, Lecture Notes in Computer Science, vol. 9908, pp. 235--251. Springer (2016). arXiv:1603.07396.
+Kembhavi, A., Salvato, M., Kolve, E., Seo, M., Hajishirzi, H., Farhadi, A.: A Diagram Is Worth a Dozen Images. In: Computer Vision -- ECCV 2016, Lecture Notes in Computer Science, vol. 9908, pp. 235--251. Springer (2016). arXiv:1603.07396
 
 \bibitem{lin1991divergence}
-Lin, J.: Divergence measures based on the {Shannon} entropy. IEEE Transactions on Information Theory \textbf{37}(1), 145--151 (1991).
+Lin, J.: Divergence measures based on the {Shannon} entropy. IEEE Transactions on Information Theory \textbf{37}(1), 145--151 (1991)
 
 \bibitem{liu2024improved}
-Liu, H., Li, C., Li, Y., Lee, Y.J.: Improved Baselines with Visual Instruction Tuning. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) (2024).
+Liu, H., Li, C., Li, Y., Lee, Y.J.: Improved Baselines with Visual Instruction Tuning. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) (2024)
 
 \bibitem{ma2022missing}
-Ma, M., Ren, J., Zhao, L., Testuggine, D., Peng, X.: Are Multimodal Transformers Robust to Missing Modality? In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 9758--9767 (2022).
+Ma, M., Ren, J., Zhao, L., Testuggine, D., Peng, X.: Are Multimodal Transformers Robust to Missing Modality? In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 9758--9767 (2022)
 
 \bibitem{marafioti2025smolvlm}
-Marafioti, A., Noyan, M., Bakouch, E., Allal, L.B., Lozhkov, A., Wolf, T., Tunstall, L.: {SmolVLM}: Small Models, Big Vision. arXiv:2504.05299 (2025).
+Marafioti, A., Noyan, M., Bakouch, E., Allal, L.B., Lozhkov, A., Wolf, T., Tunstall, L.: {SmolVLM}: Small Models, Big Vision. arXiv:2504.05299 (2025)
 
 \bibitem{moon2026quality}
-Moon, J., Pillai, A., Campbell, A.: When Does Quality-Aware Multimodal Fusion Matter? A Leakage-Safe Diagnostic for Decision-Level Dependence. arXiv:2606.26473 (2026).
+Moon, J., Pillai, A., Campbell, A.: When Does Quality-Aware Multimodal Fusion Matter? A Leakage-Safe Diagnostic for Decision-Level Dependence. arXiv:2606.26473 (2026)
 
 \bibitem{nazi2026omd}
-Nazi, Z.A., Dipta, S.R., Parvez, M.R.: Omni-Modal Dissonance Benchmark: Systematically Breaking Modality Consensus to Probe Robustness and Calibrated Abstention. arXiv:2603.27187 (2026).
+Nazi, Z.A., Dipta, S.R., Parvez, M.R.: Omni-Modal Dissonance Benchmark: Systematically Breaking Modality Consensus to Probe Robustness and Calibrated Abstention. arXiv:2603.27187 (2026)
 
 \bibitem{neverova2016moddrop}
-Neverova, N., Wolf, C., Taylor, G.W., Nebout, F.: {ModDrop}: Adaptive Multi-Modal Gesture Recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence \textbf{38}(8), 1692--1706 (2016).
+Neverova, N., Wolf, C., Taylor, G.W., Nebout, F.: {ModDrop}: Adaptive Multi-Modal Gesture Recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence \textbf{38}(8), 1692--1706 (2016)
 
 \bibitem{schwenk2022aokvqa}
-Schwenk, D., Khandelwal, A., Clark, C., Marino, K., Mottaghi, R.: {A-OKVQA}: A Benchmark for Visual Question Answering using World Knowledge. In: European Conference on Computer Vision (ECCV) (2022).
+Schwenk, D., Khandelwal, A., Clark, C., Marino, K., Mottaghi, R.: {A-OKVQA}: A Benchmark for Visual Question Answering using World Knowledge. In: European Conference on Computer Vision (ECCV) (2022)
 
 \bibitem{wang2024qwen2vl}
-Wang, P., Bai, S., Tan, S., Wang, S., Fan, Z., Bai, J., Chen, K., Liu, X., Wang, J., Ge, W., et al.: {Qwen2-VL}: To See the World More Clearly. arXiv:2409.12191 (2024).
+Wang, P., Bai, S., Tan, S., Wang, S., Fan, Z., Bai, J., Chen, K., Liu, X., Wang, J., Ge, W., et al.: {Qwen2-VL}: To See the World More Clearly. arXiv:2409.12191 (2024)
 
 \bibitem{xiao2017fashion}
-Xiao, H., Rasul, K., Vollgraf, R.: {Fashion-MNIST}: A Novel Image Dataset for Benchmarking Machine Learning Algorithms. arXiv:1708.07747 (2017).
+Xiao, H., Rasul, K., Vollgraf, R.: {Fashion-MNIST}: A Novel Image Dataset for Benchmarking Machine Learning Algorithms. arXiv:1708.07747 (2017)
 
 \bibitem{zafar2026grounding}
-Zafar, A., Murali, L.K., Vashist, A.: Beyond Accuracy: Evaluating Visual Grounding In Multimodal Medical Reasoning. arXiv:2603.03437 (2026).
+Zafar, A., Murali, L.K., Vashist, A.: Beyond Accuracy: Evaluating Visual Grounding In Multimodal Medical Reasoning. arXiv:2603.03437 (2026)
 
 \end{thebibliography}
 
