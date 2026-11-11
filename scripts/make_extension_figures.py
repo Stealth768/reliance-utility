@@ -244,7 +244,7 @@ def generate_fig4_open_and_stability():
     ax_o.tick_params(axis="both", labelsize=6.5, pad=1)
     ax_o.grid(True, linestyle=":", alpha=0.4)
     ax_o.set_xlim(-0.02, 1.02)
-    ax_o.set_ylim(-0.05, 1.15)
+    ax_o.set_ylim(-0.05, 1.45)  # raised: Qwen Gaussian R_hat peaks at ~1.34 around S=0.125
     ax_o.legend(fontsize=5.5, loc="lower left", frameon=True, framealpha=0.85, borderpad=0.2)
 
     # Panel (b): Pairing Stability across seeds {0, 11, 12, 13}
