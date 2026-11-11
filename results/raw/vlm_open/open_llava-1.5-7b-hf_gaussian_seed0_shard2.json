@@ -106,14 +106,14 @@
     {
       "question_id": "82bLyanbdDeEq6mkVa3YGM",
       "clean_answer": "England",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "Usa",
         "black": "Usa"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 0.3333333333333333,
+        "black": 0.3333333333333333
       },
       "R0": {
         "removed": 0.47373742272783226,
@@ -131,15 +131,15 @@
         "Usa"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
       "answer_changed_per_S": [
         false,
@@ -195,7 +195,7 @@
         "black": "Trunk"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -272,7 +272,7 @@
     {
       "question_id": "8KqQoveNzvvZSgxxPeepUY",
       "clean_answer": "Bus",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Car",
         "black": "Car"
@@ -297,11 +297,11 @@
         "Car"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -381,12 +381,12 @@
       ],
       "utility_per_S": [
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        1.0,
         0.0,
         0.0
       ],
@@ -438,13 +438,13 @@
     {
       "question_id": "8MMdCgrej5iBZ7PitRYrt3",
       "clean_answer": "Suitcase",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Backpack",
         "black": "Purse"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.3333333333333333,
         "black": 0.0
       },
       "R0": {
@@ -463,13 +463,13 @@
         "Purse"
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
         0.0,
         0.0
       ],
@@ -521,14 +521,14 @@
     {
       "question_id": "8Q69Bei8UReA69MSuQAcLT",
       "clean_answer": "Picture",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Nothing",
         "black": "Picture"
       },
       "null_utility": {
         "removed": 0.0,
-        "black": 0.0
+        "black": 1.0
       },
       "R0": {
         "removed": 0.6833596917011521,
@@ -546,15 +546,15 @@
         "Picture"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -604,7 +604,7 @@
     {
       "question_id": "8R6BwQYURjKQu4FPYr8TpL",
       "clean_answer": "Seattle",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "None",
         "black": "None"
@@ -629,10 +629,10 @@
         "None"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -687,13 +687,13 @@
     {
       "question_id": "8RDETmscMEEsHh6Sbekaa6",
       "clean_answer": "Smile",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "Smile",
         "black": "None"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.6666666666666666,
         "black": 0.0
       },
       "R0": {
@@ -712,13 +712,13 @@
         "None"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
         0.0,
         0.0
       ],
@@ -770,14 +770,14 @@
     {
       "question_id": "8dWqzZJR3MvHHSGAAzAEJy",
       "clean_answer": "Investments",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Investments",
         "black": "Investment"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 0.3333333333333333
       },
       "R0": {
         "removed": 0.029194404956424145,
@@ -795,15 +795,15 @@
         "Investment"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
       "answer_changed_per_S": [
         false,
@@ -853,7 +853,7 @@
     {
       "question_id": "8enBCTrMj57db8JVq9wyPq",
       "clean_answer": "Orange",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Apple",
         "black": "Apple"
@@ -878,13 +878,13 @@
         "Apple"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -1019,13 +1019,13 @@
     {
       "question_id": "8qqTsLQFXdEDT9oeVgZekp",
       "clean_answer": "Water",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Water",
         "black": "Shadow"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -1044,12 +1044,12 @@
         "Zebra"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -1185,14 +1185,14 @@
     {
       "question_id": "8uQHFZsgJwvQPuvYs7reMA",
       "clean_answer": "Driving",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "Driving",
         "black": "Driving"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 0.6666666666666666,
+        "black": 0.6666666666666666
       },
       "R0": {
         "removed": 0.03497908735365323,
@@ -1210,15 +1210,15 @@
         "Driving"
       ],
       "utility_per_S": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
       ],
       "answer_changed_per_S": [
         false,
@@ -1274,7 +1274,7 @@
         "black": "No"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -1299,7 +1299,7 @@
         0.0,
         0.0,
         0.0,
-        0.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -1351,14 +1351,14 @@
     {
       "question_id": "8vzpRWS6dDNrFCouzebMm9",
       "clean_answer": "Wii",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Wii",
         "black": "Wii"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.09018014605995438,
@@ -1376,15 +1376,15 @@
         "Wii"
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1434,14 +1434,14 @@
     {
       "question_id": "9J5n2f4j4R4B9t3c6MPSi3",
       "clean_answer": "Chicken",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Chicken",
         "black": "Chicken"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.18111642928054447,
@@ -1459,15 +1459,15 @@
         "Chicken"
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1517,7 +1517,7 @@
     {
       "question_id": "9PGPr3vxBAb9jyWDiR9ous",
       "clean_answer": "Hp",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Dell",
         "black": "Dell"
@@ -1542,7 +1542,7 @@
         "Dell"
       ],
       "utility_per_S": [
-        0.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1683,7 +1683,7 @@
     {
       "question_id": "9TJtRYnGa8xr8CF67M5Mof",
       "clean_answer": "Cat",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Snake",
         "black": "Snake"
@@ -1708,13 +1708,13 @@
         "Snake"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -1797,7 +1797,7 @@
         0.0,
         0.0,
         0.0,
-        0.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -1849,7 +1849,7 @@
     {
       "question_id": "9Vcrsyxf2zbSBauWavQbju",
       "clean_answer": "Man",
-      "clean_utility": 0.0,
+      "clean_utility": 0.3333333333333333,
       "null_answers": {
         "removed": "Man in black",
         "black": "None"
@@ -1874,13 +1874,13 @@
         "None"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
         0.0,
         0.0
       ],
@@ -2015,7 +2015,7 @@
     {
       "question_id": "9d7StqUZPtRBbHjSDFwwqa",
       "clean_answer": "School",
-      "clean_utility": 0.0,
+      "clean_utility": 0.3333333333333333,
       "null_answers": {
         "removed": "They don't",
         "black": "They don't"
@@ -2040,12 +2040,12 @@
         "They don't"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0

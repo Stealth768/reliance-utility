@@ -23,7 +23,7 @@
     {
       "question_id": "VEYdFufFnzaDwFg4HBBcYY",
       "clean_answer": "standing",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Driver",
         "black": "Driver"
@@ -48,12 +48,12 @@
         "Passenger"
       ],
       "utility_per_S": [
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -106,7 +106,7 @@
     {
       "question_id": "VJ43YwLMKZXTSbGAg9waNa",
       "clean_answer": "wine",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Coffee",
         "black": "Beer"
@@ -131,15 +131,15 @@
         "water"
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -272,14 +272,14 @@
     {
       "question_id": "VSvCeQz6PNuzX6hYisMLe4",
       "clean_answer": "sitting",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Sleeping",
         "black": "Sleeping"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 0.3333333333333333,
+        "black": 0.3333333333333333
       },
       "R0": {
         "removed": 0.41197658553468347,
@@ -297,11 +297,11 @@
         "eating"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -355,7 +355,7 @@
     {
       "question_id": "VWfKcAKJSwowZ7bGBCTpc6",
       "clean_answer": "old man",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "Rider 1",
         "black": "Rider 1"
@@ -380,11 +380,11 @@
         "Jim Butcher"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.6666666666666666,
+        1.0,
+        0.6666666666666666,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -438,14 +438,14 @@
     {
       "question_id": "VXA5FfMXfSByVYECxCwcR2",
       "clean_answer": "grilled",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Grilled",
         "black": "Grilled"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.39283868754442436,
@@ -463,15 +463,15 @@
         "baked"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
       "answer_changed_per_S": [
         false,
@@ -604,14 +604,14 @@
     {
       "question_id": "VdepsSMSGD3FJyBybbLsFD",
       "clean_answer": "food",
-      "clean_utility": 0.0,
+      "clean_utility": 0.3333333333333333,
       "null_answers": {
         "removed": "Food",
         "black": "Food"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 0.3333333333333333,
+        "black": 0.3333333333333333
       },
       "R0": {
         "removed": 0.20923252849801705,
@@ -629,12 +629,12 @@
         "nothing"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0
@@ -687,7 +687,7 @@
     {
       "question_id": "VeQ4KEc2qHLZTXoPaHX4sy",
       "clean_answer": "Skiing",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Talking",
         "black": "Talking"
@@ -712,11 +712,11 @@
         "Talking"
       ],
       "utility_per_S": [
+        1.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -798,9 +798,9 @@
         0.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -859,7 +859,7 @@
         "black": "Read"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -1185,13 +1185,13 @@
     {
       "question_id": "WCss8XpjKYENCSuFCSKUz8",
       "clean_answer": "orange",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Red",
         "black": "White"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -1210,13 +1210,13 @@
         "Green"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -1268,7 +1268,7 @@
     {
       "question_id": "WRniXpa5KWfR7D85cwFASi",
       "clean_answer": "wii",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Nintendo Switch",
         "black": "Nintendo Switch"
@@ -1293,12 +1293,12 @@
         "none"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -1351,7 +1351,7 @@
     {
       "question_id": "WT3fLQWr4Wnj9LaQJ68rri",
       "clean_answer": "bench",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "On chairs",
         "black": "in chairs"
@@ -1376,10 +1376,10 @@
         "bathroom"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1517,7 +1517,7 @@
     {
       "question_id": "WdswpNeyj4t9nbTqRVKKT9",
       "clean_answer": "stir fry",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Baking",
         "black": "Baking"
@@ -1542,11 +1542,11 @@
         "cooking"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1600,7 +1600,7 @@
     {
       "question_id": "WgS2856ezvnQAZMmfrUitJ",
       "clean_answer": "Snow",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Rock",
         "black": "Rock"
@@ -1625,10 +1625,10 @@
         "Net"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1709,9 +1709,9 @@
       ],
       "utility_per_S": [
         0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1772,8 +1772,8 @@
         "black": "LED"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 0.3333333333333333,
+        "black": 0.3333333333333333
       },
       "R0": {
         "removed": 0.08103040677769562,
@@ -1792,11 +1792,11 @@
       ],
       "utility_per_S": [
         0.0,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0
@@ -1849,7 +1849,7 @@
     {
       "question_id": "Wz68Xn6EZYE34pM3RG2zNH",
       "clean_answer": "batter",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "camera",
         "black": "camera"
@@ -1874,12 +1874,12 @@
         "bus driver"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -1932,14 +1932,14 @@
     {
       "question_id": "XAvbeZ5Rqjf9hb6eDnVNhQ",
       "clean_answer": "summer",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Winter",
         "black": "Summer"
       },
       "null_utility": {
         "removed": 0.0,
-        "black": 0.0
+        "black": 1.0
       },
       "R0": {
         "removed": 0.376075244082652,
@@ -1957,15 +1957,15 @@
         "summer"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -2015,7 +2015,7 @@
     {
       "question_id": "XC7LFjtKGWBQRW2FZrXJSn",
       "clean_answer": "Coca-Cola",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Tea",
         "black": "Tea"
@@ -2040,11 +2040,11 @@
         "None"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,

@@ -80,7 +80,7 @@
 Across models and benchmarks, visual corruptions that destroy task utility leave substantial normalized reliance relative to clean input, markedly higher than uninformative Gaussian noise ($\Delta \hat{R}(1) > 0$, $p_{\text{adj}} < 0.001$, $0/1000$ resamples across all 6 directional tests). However, negative utility inversion does not replicate on AI2D diagram reasoning (Qwen2-VL-2B upper 95\% CI bound $+0.016$) or in open-ended generation, showing that persistent visual reliance under incongruent images mostly does not incur measurable accuracy loss beyond unimodal ablation. In cross-seed stability assessments over donor seeds $\{0, 11, 12, 13\}$, we report an empirical range of $0.048$ to $0.064$ with overlapping confidence intervals without relying on parametric variance tests. We document that empirical conclusions are sensitive to unimodal baseline selection, and we control family-wise error rates across pre-declared hypotheses using Holm's procedure. We characterize this phenomenon strictly as retained visual reliance under informational degradation.}
 
 \abstract{Multimodal systems are conventionally evaluated by assigning them a task and investigating whether task accuracy degrades when one modality is corrupted. However, task accuracy conflates two distinct phenomena: informational loss caused by input corruption, and the model's tendency to maintain reliance on a degraded input even when that input no longer provides positive utility. We formulate a diagnostic that disentangles information degradation from behavioral reliance along a continuous severity path. For each severity level, we pair task utility with an information-theoretic reliance measure and determine whether utility falls below the unimodal null baseline. We evaluate this diagnostic across controlled synthetic fusion systems with known data-generating distributions, three open-weight Vision-Language Models (Qwen2-VL-2B, SmolVLM-Instruct, and LLaVA-1.5-7B), two multiple-choice benchmarks (A-OKVQA and AI2D diagram reasoning), an open-ended generative format with teacher-forced sequence divergences, and multiple swapped-donor derangement seeds.
-Across models and benchmarks, visual corruptions that destroy task utility leave substantial normalized reliance relative to clean input, markedly higher than uninformative Gaussian noise ($\Delta \hat{R}(1) > 0$, $p_{\text{adj}} < 0.001$, $0/1000$ resamples across all 6 directional tests). However, negative utility inversion does not replicate on AI2D diagram reasoning (Qwen2-VL-2B upper 95\% CI bound $+0.016$) or in open-ended generation, showing that persistent visual reliance under incongruent images mostly does not incur measurable accuracy loss beyond unimodal ablation. In cross-seed stability assessments over donor seeds $\{0, 11, 12, 13\}$, we report an empirical range of $0.048$ to $0.064$ with overlapping confidence intervals without relying on parametric variance tests. We document that empirical conclusions are sensitive to unimodal baseline selection, and we control family-wise error rates across pre-declared hypotheses using Holm's procedure. We characterize this phenomenon strictly as retained visual reliance under informational degradation.}
+Across models and benchmarks, visual corruptions that eliminate task utility leave substantial normalized reliance relative to clean input, markedly higher than uninformative Gaussian noise ($\Delta \hat{R}(1) > 0$, Holm-adjusted $p \le 0.006$ across all six directional tests). On AI2D diagram reasoning, task utility under swapped diagrams drops to near-zero ($U(1) = -0.030$, 95\% CI $[-0.074, +0.016]$ for Qwen2-VL-2B), where we could not detect an accuracy loss below unimodal ablation. In open-ended generation, incongruent donor images reduce VQA soft accuracy below the null baseline ($U_{\text{open}}(1) = -0.062$ for Qwen2-VL-2B) while preserving over $67\%$ to $84\%$ of clean sequence reliance. We document that empirical conclusions are sensitive to unimodal baseline selection, and we control family-wise error rates across pre-declared hypotheses using Holm's procedure. We characterize this phenomenon strictly as retained visual reliance under informational degradation.}
 
 \keywords{Multimodal Learning, Vision-Language Models, Retained Visual Reliance, Reliance-Utility Misalignment, Robustness Evaluation, ComSIA 2026}
 
@@ -435,10 +435,10 @@ Qwen2-VL-2B  & Swapped  & 0.681 (0.586, 0.788) & $-$0.045 ($-$0.092, $+$0.005) \
 \paragraph{Experimental Setup.}
 Evaluations are conducted on A-OKVQA validation questions in open-ended generation mode without multiple-choice choices, using prompt suffix: \texttt{"Answer the question with a short phrase."} Next-token distributions are extracted via teacher-forcing on the clean reference sequence $A^*$. Evaluations comprise $N=500$ questions for Qwen2-VL-2B and SmolVLM-Instruct, and $N=375$ questions (15 of 20 shards) for LLaVA-1.5-7B due to GPU session wall-time budgets (logged in \texttt{DEVIATIONS.md}).
 
-\paragraph{Empirical Findings and Diagnostic Analysis.}
-Results for open-ended generative reliance are presented in Table~\ref{tab:open_headline} and Fig.~\ref{fig:open_and_stability}(a). In unconstrained zero-shot greedy phrase generation without few-shot in-context exemplars, all three models achieve near-floor exact-match soft VQA accuracy ($\le 0.5\%$) across all visual conditions ($S=0$, unimodal null, and $S=1$). Consequently, discrete task utility differences $U_{\text{open}}(1) = \text{acc}(S=1) - \text{acc}(\text{null})$ cluster tightly near zero ($\pm 0.003$), yielding an identically zero interval for LLaVA-1.5-7B under swapblend ($[+0.000, +0.000]$ across all 375 items). This diagnostic demonstrates that exact-match discrete utility exhibits an acute floor effect in uncalibrated open generation, rendering $U_{\text{open}}(1)$ uninformative for measuring behavioral degradation.
+\paragraph{Empirical Findings.}
+Results for open-ended generative reliance and utility are presented in Table~\ref{tab:open_headline} and Fig.~\ref{fig:open_and_stability}(a). Under clean imagery, models generate accurate open answers, achieving $58.07\%$ VQA soft accuracy for Qwen2-VL-2B, $57.20\%$ for SmolVLM, and $58.84\%$ for LLaVA-1.5-7B. Under the unimodal removed-image null baseline, text-only answering drops to $14.20\%$--$19.56\%$. Under patch masking ($S=1$), where visual inputs are obscured by neutral patches, accuracy stabilizes near the text-only baseline ($16.60\%$ for Qwen, $13.93\%$ for SmolVLM; $U_{\text{open}}(1) \approx 0.00$), and generated answers reproduce the unimodal null answer up to $58.8\%$ of the time.
 
-In stark contrast, teacher-forced sequence reliance $\hat{R}_{\text{open}}(1)$ operates directly on continuous next-token probability distributions across the full vocabulary, entirely bypassing discrete string matching. Under swapblend corruption, open-ended sequence reliance remains remarkably high: $\hat{R}_{\text{open}}(1) = 0.841$ (95\% CI $[0.804, 0.882]$) for Qwen2-VL-2B, $0.757$ ($[0.725, 0.791]$) for SmolVLM, and $0.672$ ($[0.622, 0.726]$) for LLaVA-1.5-7B. In contrast, Gaussian blurring reduces sequence reliance substantially ($0.328$, $0.500$, and $0.349$), while patch masking reduces reliance to $0.100$ ($[0.091, 0.109]$) for Qwen2-VL-2B and $0.253$ ($[0.235, 0.273]$) for SmolVLM. Active redirection by the incongruent image is further confirmed by answer identity rates: whereas under patch masking models reproduce the unimodal null answer up to $58.8\%$ of the time, under swapped images only $8.0\%$ to $30.4\%$ of generated answers match the null.
+In stark contrast, swapped-donor imagery actively steers the autoregressive trajectory away from the correct answer, reducing accuracy below the unimodal null down to $9.67\%$--$13.51\%$. This induces statistically significant utility inversion across all three architectures: $U_{\text{open}}(1) = -0.062$ (95\% CI $[-0.093, -0.029]$) for Qwen2-VL-2B, $-0.045$ ($[-0.075, -0.014]$) for SmolVLM, and $-0.060$ ($[-0.097, -0.025]$) for LLaVA-1.5-7B, with all upper confidence bounds strictly excluding zero. This active degradation is driven by retained visual conditioning: teacher-forced sequence reliance remains remarkably high ($\hat{R}_{\text{open}}(1) = 0.841$ for Qwen, $0.757$ for SmolVLM, $0.672$ for LLaVA), far exceeding isotropic Gaussian noise ($0.328$, $0.500$, $0.349$) and patch masking ($0.100$, $0.253$). Under swapped images, only $8.0\%$ to $30.4\%$ of generated answers match the unimodal null, demonstrating that autoregressive generation is dominated by incongruent visual tokens even when they degrade task accuracy.
 
 \begin{figure}[tb]
 \centering
@@ -449,21 +449,21 @@ In stark contrast, teacher-forced sequence reliance $\hat{R}_{\text{open}}(1)$ o
 
 \begin{table}[tb]
 \centering
-\caption{Open-Ended Generation Headline Results: Terminal normalized sequence reliance $\hat{R}_{\text{open}}(1)$ and VQA soft accuracy utility $U_{\text{open}}(1)$ under the removed null baseline ($B=1000$, seed 42). $N=500$ for Qwen2-VL-2B and SmolVLM-Instruct; $N=375$ for LLaVA-1.5-7B (shards 0--14). Soft accuracy utility $U_{\text{open}}(1)$ reflects exact-match floor on open generation without few-shot exemplars}
+\caption{Open-Ended Generation Headline Results: Terminal normalized sequence reliance $\hat{R}_{\text{open}}(1)$ and VQA soft accuracy utility $U_{\text{open}}(1)$ under the removed null baseline ($B=1000$, seed 42). $N=500$ for Qwen2-VL-2B and SmolVLM-Instruct; $N=375$ for LLaVA-1.5-7B (shards 0--14). Soft accuracy utility measures VQA 10-annotator agreement against human direct answers}
 \label{tab:open_headline}
 {\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
 \textbf{Model} & \textbf{Corruption} & $\hat{R}_{\text{open}}(1)$ (95\% CI) & $U_{\text{open}}(1)$ (95\% CI) \\
 \midrule
-Qwen2-VL-2B  & Swapped  & 0.841 (0.804, 0.882) & $+$0.001 ($-$0.008, $+$0.009) \\
-             & Gaussian & 0.328 (0.308, 0.350) & $+$0.002 ($+$0.000, $+$0.006) \\
-             & Patch    & 0.100 (0.091, 0.109) & $+$0.000 ($-$0.006, $+$0.006) \\
-SmolVLM      & Swapped  & 0.757 (0.725, 0.791) & $+$0.001 ($-$0.005, $+$0.007) \\
-             & Gaussian & 0.500 (0.475, 0.529) & $-$0.002 ($-$0.006, $+$0.000) \\
-             & Patch    & 0.253 (0.235, 0.273) & $-$0.003 ($-$0.007, $+$0.000) \\
-LLaVA-1.5-7B & Swapped  & 0.672 (0.622, 0.726) & $+$0.000 ($+$0.000, $+$0.000) \\
-             & Gaussian & 0.349 (0.324, 0.380) & $+$0.003 ($+$0.000, $+$0.008) \\
+Qwen2-VL-2B  & Swapped  & 0.841 (0.804, 0.882) & $-$0.062 ($-$0.093, $-$0.029) \\
+             & Gaussian & 0.328 (0.308, 0.350) & $-$0.029 ($-$0.055, $-$0.003) \\
+             & Patch    & 0.100 (0.091, 0.109) & $+$0.003 ($-$0.018, $+$0.024) \\
+SmolVLM      & Swapped  & 0.757 (0.725, 0.791) & $-$0.045 ($-$0.075, $-$0.014) \\
+             & Gaussian & 0.500 (0.475, 0.529) & $-$0.025 ($-$0.054, $+$0.003) \\
+             & Patch    & 0.253 (0.235, 0.273) & $-$0.003 ($-$0.030, $+$0.021) \\
+LLaVA-1.5-7B & Swapped  & 0.672 (0.622, 0.726) & $-$0.060 ($-$0.097, $-$0.025) \\
+             & Gaussian & 0.349 (0.324, 0.380) & $-$0.037 ($-$0.072, $-$0.006) \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -500,9 +500,9 @@ LLaVA-1.5-7B & 0.578 (0.514, 0.653) & 0.569 (0.499, 0.644) & 0.514 (0.447, 0.581
 
 Table~\ref{tab:hypothesis_tests} summarizes the evaluation of pre-declared hypotheses, structured into Panel (a) for the primary pre-declared directional family $\{H4a,b,c, H6a,b,c\}$ under Holm-Bonferroni FWER control ($\alpha = 0.05$), and Panel (b) for the utility inversion criterion checks (H5, H7).
 
-All three directional tests on AI2D diagram reasoning (H4a, H4b, H4c) are strongly supported: the paired difference in terminal normalized reliance $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1)$ is strictly positive with 95\% bootstrap confidence intervals strictly excluding zero ($+0.376$ for Qwen2-VL-2B, $+0.221$ for SmolVLM, $+0.413$ for LLaVA-1.5-7B), each attaining raw $p < 0.001$ (0 of 1000 resamples $\le 0$) and adjusted $p_{\text{adj}} < 0.001$ under Holm's step-down correction ($M=6$). Similarly, all three directional tests on open-ended generation (H6a, H6b, H6c) are supported at $p_{\text{adj}} < 0.001$ (0 of 1000 resamples $\le 0$), with paired sequence reliance differences of $+0.513$ (Qwen2-VL-2B), $+0.257$ (SmolVLM), and $+0.322$ (LLaVA-1.5-7B).
+All three directional tests on AI2D diagram reasoning (H4a, H4b, H4c) are strongly supported: the paired difference in terminal normalized reliance $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1)$ is strictly positive with 95\% bootstrap confidence intervals strictly excluding zero ($+0.376$ for Qwen2-VL-2B, $+0.221$ for SmolVLM, $+0.413$ for LLaVA-1.5-7B), each attaining raw $p < 0.001$ (0 of 1000 resamples $\le 0$) and Holm-adjusted $p_{\text{adj}} \le 0.006$ ($M=6$). Similarly, all three directional tests on open-ended generation (H6a, H6b, H6c) are supported at Holm-adjusted $p_{\text{adj}} \le 0.006$ (0 of 1000 resamples $\le 0$), with paired sequence reliance differences of $+0.513$ (Qwen2-VL-2B), $+0.257$ (SmolVLM), and $+0.322$ (LLaVA-1.5-7B).
 
-In contrast, the strict negative utility inversion criteria (H5 and H7) are transparently reported as not supported. While Qwen2-VL-2B displays negative mean utility on AI2D ($U(1) = -0.030$), its upper 95\% confidence bound crosses zero ($[-0.074, +0.016]$, raw $p = 0.104$), failing the strict pre-declared exclusion criterion. Likewise, under open-ended generation, terminal utility hovers at $+0.001$ ($[-0.008, +0.009]$, raw $p = 0.585$). These negative results adhere strictly to our pre-declared protocol and highlight the distinction between structural reliance divergence (which holds universally across models) and extreme negative performance inversion.
+For the pre-declared utility inversion criterion checks: on AI2D diagram reasoning, H5 is not supported: while Qwen2-VL-2B displays negative point utility ($U(1) = -0.030$), its upper 95\% confidence bound crosses zero ($[-0.074, +0.016]$, raw $p = 0.104$), meaning we could not detect an accuracy loss below unimodal ablation. In contrast, under open-ended generation on A-OKVQA, H7 is decisively supported: incongruent donor images reduce VQA soft accuracy below the unimodal null for all three evaluated models, with upper 95\% bootstrap confidence bounds strictly below zero ($U_{\text{open}}(1) = -0.062$ with upper bound $-0.029$ for Qwen2-VL-2B, raw $p < 0.001$, 0 of 1000 resamples $\ge 0$). Thus, utility inversion replicates in open-ended generative answering where the model has no multiple-choice priors to counteract the misleading visual stimulus.
 
 \begin{table}[tb]
 \centering
@@ -515,17 +515,17 @@ In contrast, the strict negative utility inversion criteria (H5 and H7) are tran
 \midrule
 \multicolumn{7}{l}{\textit{Panel (a): Primary Pre-Declared Directional Family ($M=6$, Holm FWER $\alpha = 0.05$)}} \\
 \midrule
-H4a & AI2D MC    & Qwen2-VL-2B  & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $< 0.001$ & \textbf{Supported} \\
-H4b & AI2D MC    & SmolVLM      & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $< 0.001$ & \textbf{Supported} \\
-H4c & AI2D MC    & LLaVA-1.5-7B & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $< 0.001$ & \textbf{Supported} \\
-H6a & Open-Ended & Qwen2-VL-2B  & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $< 0.001$ & \textbf{Supported} \\
-H6b & Open-Ended & SmolVLM      & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $< 0.001$ & \textbf{Supported} \\
-H6c & Open-Ended & LLaVA-1.5-7B & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $< 0.001$ & \textbf{Supported} \\
+H4a & AI2D MC    & Qwen2-VL-2B  & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $\le 0.006$ & \textbf{Supported} \\
+H4b & AI2D MC    & SmolVLM      & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $\le 0.006$ & \textbf{Supported} \\
+H4c & AI2D MC    & LLaVA-1.5-7B & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $\le 0.006$ & \textbf{Supported} \\
+H6a & Open-Ended & Qwen2-VL-2B  & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $\le 0.006$ & \textbf{Supported} \\
+H6b & Open-Ended & SmolVLM      & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $\le 0.006$ & \textbf{Supported} \\
+H6c & Open-Ended & LLaVA-1.5-7B & $\hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ & $< 0.001$ ($0/1000$) & $\le 0.006$ & \textbf{Supported} \\
 \midrule
 \multicolumn{7}{l}{\textit{Panel (b): Pre-Declared Utility Inversion Criterion Checks}} \\
 \midrule
-H5  & AI2D MC    & Qwen2-VL-2B  & $\text{UpperCI}_{95}(U(1)) < 0$                   & $0.104$   & ---       & Not Supported \\
-H7  & Open-Ended & At least one & $\text{UpperCI}_{95}(U_{\text{open}}(1)) < 0$     & $0.585$   & ---       & Not Supported \\
+H5  & AI2D MC    & Qwen2-VL-2B  & $\text{UpperCI}_{95}(U(1)) < 0$                   & $0.104$              & ---         & Not Supported \\
+H7  & Open-Ended & At least one & $\text{UpperCI}_{95}(U_{\text{open}}(1)) < 0$     & $< 0.001$ ($0/1000$) & ---         & \textbf{Supported} \\
 \bottomrule
 \end{tabular}}
 \end{table}

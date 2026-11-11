@@ -23,7 +23,7 @@
     {
       "question_id": "BwNg9mG4uXsALtLg2ztFgz",
       "clean_answer": "Yeast",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Baking powder",
         "black": "Baking powder"
@@ -48,15 +48,15 @@
         "Yeast"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -106,14 +106,14 @@
     {
       "question_id": "C4iGaNrPm4zXWRgxL2XdRF",
       "clean_answer": "Dinner",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Dinner",
         "black": "Dinner"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.017056006887537035,
@@ -131,13 +131,13 @@
         "Lunch"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -189,7 +189,7 @@
     {
       "question_id": "C9AXp35Pm8iw5MANqbWmyR",
       "clean_answer": "Wii",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Nothing",
         "black": "Nothing"
@@ -214,8 +214,8 @@
         "Skis"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -272,13 +272,13 @@
     {
       "question_id": "CKoy38QkqTRSirL8yyeimY",
       "clean_answer": "Plastic",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Ceramic",
         "black": "Plate"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.3333333333333333,
         "black": 0.0
       },
       "R0": {
@@ -297,13 +297,13 @@
         "Glass"
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
         0.0,
         0.0
       ],
@@ -381,8 +381,8 @@
       ],
       "utility_per_S": [
         0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -438,13 +438,13 @@
     {
       "question_id": "CTrTbwL2BtnQqY9vjiEiFF",
       "clean_answer": "Wine",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Wine",
         "black": "Alcohol"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -463,10 +463,10 @@
         "Water"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -521,7 +521,7 @@
     {
       "question_id": "CVVWeSyTpmWdozRWra6qbu",
       "clean_answer": "Kitchen",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Tropical",
         "black": "Black"
@@ -546,15 +546,15 @@
         "Italy"
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
       "answer_changed_per_S": [
         false,
@@ -604,7 +604,7 @@
     {
       "question_id": "Ce788SudmyHCPCCvyXs2kW",
       "clean_answer": "Tokyo",
-      "clean_utility": 0.0,
+      "clean_utility": 0.3333333333333333,
       "null_answers": {
         "removed": "New york",
         "black": "New york"
@@ -629,14 +629,14 @@
         "New york"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
         0.0
       ],
       "answer_changed_per_S": [
@@ -853,7 +853,7 @@
     {
       "question_id": "D5wkZcANAvQPLDQHLMV2TQ",
       "clean_answer": "Talk show",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Game show",
         "black": "Circus"
@@ -878,9 +878,9 @@
         "Tennis"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -936,7 +936,7 @@
     {
       "question_id": "D6DfPGuGowm35cTuQhvw4s",
       "clean_answer": "Horses",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "None",
         "black": "None"
@@ -961,11 +961,11 @@
         "None"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1019,7 +1019,7 @@
     {
       "question_id": "D6q9dXSUpTBgDkWi7e7dYS",
       "clean_answer": "Banana split",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Fruit salad",
         "black": "Fruit salad"
@@ -1044,9 +1044,9 @@
         "Fruit salad"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1102,7 +1102,7 @@
     {
       "question_id": "DKLAWnnRuvz8p7UrHGzQzK",
       "clean_answer": "Airport",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Construction site",
         "black": "In dark"
@@ -1127,9 +1127,9 @@
         "Bus"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1185,7 +1185,7 @@
     {
       "question_id": "DR94rYWve8KwpGjAtovqZt",
       "clean_answer": "Spiderman",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "None",
         "black": "None"
@@ -1210,10 +1210,10 @@
         "None"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1268,13 +1268,13 @@
     {
       "question_id": "DX4bBD5XMPxQuu3hqWAdDW",
       "clean_answer": "Weight",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Weight",
         "black": "Fat"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -1293,7 +1293,7 @@
         "Fat"
       ],
       "utility_per_S": [
-        0.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1351,7 +1351,7 @@
     {
       "question_id": "DbQuf7wY2JtaK4aonapJXt",
       "clean_answer": "Singing",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Talking",
         "black": "Talking"
@@ -1376,9 +1376,9 @@
         "Playing rugby"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1440,7 +1440,7 @@
         "black": "Tea light"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.6666666666666666,
         "black": 0.0
       },
       "R0": {
@@ -1546,8 +1546,8 @@
         0.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -1600,13 +1600,13 @@
     {
       "question_id": "E2Vuut5upXHFFVxEk8kHvM",
       "clean_answer": "Students",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "Students",
         "black": "Hackers"
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.6666666666666666,
         "black": 0.0
       },
       "R0": {
@@ -1625,12 +1625,12 @@
         "Teenager"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
         0.0,
         0.0,
         0.0
@@ -1690,7 +1690,7 @@
       },
       "null_utility": {
         "removed": 0.0,
-        "black": 0.0
+        "black": 1.0
       },
       "R0": {
         "removed": 0.0018923394794065668,
@@ -1711,12 +1711,12 @@
         0.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1796,7 +1796,7 @@
         0.0,
         0.0,
         0.0,
-        0.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -1849,14 +1849,14 @@
     {
       "question_id": "EAHmczQURaep8SJkvhYCje",
       "clean_answer": "Fence",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Fence",
         "black": "Fence"
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.045385864187629556,
@@ -1874,15 +1874,15 @@
         "Fence"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1932,14 +1932,14 @@
     {
       "question_id": "EAWGdocBoaqPxLQuJ3UJb6",
       "clean_answer": "Winter",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Summer",
         "black": "Winter"
       },
       "null_utility": {
         "removed": 0.0,
-        "black": 0.0
+        "black": 1.0
       },
       "R0": {
         "removed": 0.23684573393733452,
@@ -1957,11 +1957,11 @@
         "Summer"
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,

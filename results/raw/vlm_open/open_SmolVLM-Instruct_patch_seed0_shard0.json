@@ -106,7 +106,7 @@
     {
       "question_id": "2LCLpdpD3yy2dgH5tQbcFe",
       "clean_answer": "Drying hair.",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "Cooking.",
         "black": "Cooking."
@@ -131,7 +131,7 @@
         "Cooking."
       ],
       "utility_per_S": [
-        0.0,
+        0.6666666666666666,
         0.0,
         0.0,
         0.0,
@@ -189,7 +189,7 @@
     {
       "question_id": "2U3SiXdyEgJBHNThL4YbPz",
       "clean_answer": "Candle.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Reading.",
         "black": "Cars."
@@ -214,12 +214,12 @@
         "Reading."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        0.3333333333333333,
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0
@@ -272,7 +272,7 @@
     {
       "question_id": "2YfYkRjcnnsVzjycPehWPA",
       "clean_answer": "Tomato.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Apple.",
         "black": "Apple."
@@ -297,12 +297,12 @@
         "Apple."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0
@@ -382,7 +382,7 @@
       "utility_per_S": [
         0.0,
         0.0,
-        0.0,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0,
@@ -438,7 +438,7 @@
     {
       "question_id": "2xDeTCXSRqdhvREBDhHsMx",
       "clean_answer": "Fondant.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Sugar.",
         "black": "Chocolate."
@@ -463,12 +463,12 @@
         "Chocolate."
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
         0.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        0.3333333333333333,
         0.0,
         0.0,
         0.0
@@ -521,7 +521,7 @@
     {
       "question_id": "2xn24MrfJ2mLJC7xDBGUJA",
       "clean_answer": "Chef.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Warm.",
         "black": "Cold."
@@ -546,11 +546,11 @@
         "Cold."
       ],
       "utility_per_S": [
+        1.0,
         0.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -687,7 +687,7 @@
     {
       "question_id": "34ah8AmQenWUyH2fZvJH7a",
       "clean_answer": "Ski.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Luxury.",
         "black": "Luxury."
@@ -712,14 +712,14 @@
         "Beach."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0
       ],
       "answer_changed_per_S": [
@@ -776,7 +776,7 @@
         "black": "Parking."
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.3333333333333333,
         "black": 0.0
       },
       "R0": {
@@ -936,7 +936,7 @@
     {
       "question_id": "3cCvfCWnLfrmqYEaFzb2Xm",
       "clean_answer": "Market.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "We are at the moon.",
         "black": "End."
@@ -961,14 +961,14 @@
         "End."
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
+        0.3333333333333333,
+        1.0,
+        0.3333333333333333,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
         0.0
       ],
       "answer_changed_per_S": [
@@ -1019,7 +1019,7 @@
     {
       "question_id": "3echacwmLBUByWpjh85Mfv",
       "clean_answer": "Bag.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Chair.",
         "black": "Nothing."
@@ -1044,11 +1044,11 @@
         "Nothing."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1108,8 +1108,8 @@
         "black": "Baseball."
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.18257393921449064,
@@ -1128,14 +1128,14 @@
       ],
       "utility_per_S": [
         0.0,
+        1.0,
         0.0,
         0.0,
         0.0,
         0.0,
         0.0,
         0.0,
-        0.0,
-        0.0
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1185,7 +1185,7 @@
     {
       "question_id": "45ZJiwQ8E4sqUTyJSUzEN3",
       "clean_answer": "Metal.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Plastic.",
         "black": "Plastic."
@@ -1210,14 +1210,14 @@
         "Cardboard."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        1.0,
+        0.3333333333333333,
+        1.0,
         0.0
       ],
       "answer_changed_per_S": [
@@ -1268,14 +1268,14 @@
     {
       "question_id": "49CisPCc2LiA5TUAdHZgXe",
       "clean_answer": "Dog.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Dog.",
         "black": "Dog."
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.037604489207135515,
@@ -1293,15 +1293,15 @@
         "Dog."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        1.0,
+        0.6666666666666666,
+        1.0,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1351,7 +1351,7 @@
     {
       "question_id": "4BFN6MtJcaFzpccm3UwZva",
       "clean_answer": "Bathroom.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Bedroom.",
         "black": "Bedroom."
@@ -1376,14 +1376,14 @@
         "Bedroom."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0
       ],
       "answer_changed_per_S": [
@@ -1549,7 +1549,7 @@
         0.0,
         0.0,
         0.0,
-        1.0,
+        0.0,
         0.0
       ],
       "answer_changed_per_S": [
@@ -1600,7 +1600,7 @@
     {
       "question_id": "4UrYfZMUToiF5f7GK6eMaz",
       "clean_answer": "Safety.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "To make them stand out.",
         "black": "For the game."
@@ -1625,14 +1625,14 @@
         "For the game."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0
       ],
       "answer_changed_per_S": [
@@ -1683,13 +1683,13 @@
     {
       "question_id": "4YvFMFoDw46kzXhajSgc9W",
       "clean_answer": "Eat.",
-      "clean_utility": 0.0,
+      "clean_utility": 0.6666666666666666,
       "null_answers": {
         "removed": "To eat.",
         "black": "No."
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 0.6666666666666666,
         "black": 0.0
       },
       "R0": {
@@ -1708,15 +1708,15 @@
         "To eat."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666,
+        0.6666666666666666
       ],
       "answer_changed_per_S": [
         false,
@@ -1766,13 +1766,13 @@
     {
       "question_id": "4iV8UfNJs7Wy6XAt9SHMVJ",
       "clean_answer": "Bedroom.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Bedroom.",
         "black": "Kitchen."
       },
       "null_utility": {
-        "removed": 0.0,
+        "removed": 1.0,
         "black": 0.0
       },
       "R0": {
@@ -1791,15 +1791,15 @@
         "Bedroom."
       ],
       "utility_per_S": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -1875,10 +1875,10 @@
       ],
       "utility_per_S": [
         0.0,
+        1.0,
         0.0,
         0.0,
-        0.0,
-        0.0,
+        1.0,
         0.0,
         0.0,
         0.0,
@@ -1938,8 +1938,8 @@
         "black": "Left."
       },
       "null_utility": {
-        "removed": 0.0,
-        "black": 0.0
+        "removed": 1.0,
+        "black": 1.0
       },
       "R0": {
         "removed": 0.054215110283255,
@@ -1958,14 +1958,14 @@
       ],
       "utility_per_S": [
         0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
+        1.0,
+        0.3333333333333333,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
       ],
       "answer_changed_per_S": [
         false,
@@ -2015,7 +2015,7 @@
     {
       "question_id": "4yd2xqYxWenwSYEucHnNXR",
       "clean_answer": "France.",
-      "clean_utility": 0.0,
+      "clean_utility": 1.0,
       "null_answers": {
         "removed": "Russia.",
         "black": "Canada."
@@ -2040,10 +2040,10 @@
         "Canada."
       ],
       "utility_per_S": [
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         0.0,
         0.0,
         0.0,
