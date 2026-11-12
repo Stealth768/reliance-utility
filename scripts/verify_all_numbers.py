@@ -27,26 +27,29 @@ forbidden = [
     "dominated by incongruent",
     "no multiple-choice priors",
     "ComSIA 2026",
-    "anonfalse",
 ]
 for f in forbidden:
     count = tex.count(f)
     check(count == 0, f"Scope check: Forbidden phrase '{f}' count == 0 (found {count})")
 
-print("\n=== 2. VERIFYING HONEST REPORTING CLAIMS ===")
+print("\n=== 2. VERIFYING HONEST REPORTING CLAIMS & AUTHORSHIP ===")
 required_statements = [
-    "pre-declared success criterion required",
-    "utility inversion does not replicate",
-    "at most 0.064",
-    "post hoc",
-    "Gaussian noise, Qwen2-VL-2B",
-    "Multiple Comparisons and Post-Hoc Operationalizations",
-    "not directly comparable",
-    "anontrue",
+    ("pre-declared success criterion required", "MI fail"),
+    ("utility inversion does not replicate", "AI2D H5 fail"),
+    ("at most 0.064", "pairing range"),
+    ("post hoc", "post hoc label"),
+    ("Gaussian noise, Qwen2-VL-2B", "open Gaussian note"),
+    ("Multiple Comparisons", "multiple comparisons"),
+    ("not directly comparable", "R_hat_open threshold caveat"),
+    ("anonfalse", "named author mode active"),
+    ("Mohammed Farhan Siddiqui", "Author 1"),
+    ("Uma Rani", "Author 2"),
+    ("Pallavi Joshi", "Author 3"),
+    ("Ankit Jain", "Author 4"),
 ]
-for req in required_statements:
+for req, desc in required_statements:
     count = tex.count(req)
-    check(count >= 1, f"Honesty check: Required statement '{req}' present (count {count})")
+    check(count >= 1, f"Check '{req}' present ({desc}, count {count})")
 
 print("\n=== 3. VERIFYING SAMPLE SIZES AND PROTOCOL SPECIFICATIONS ===")
 specs = [

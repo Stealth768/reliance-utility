@@ -11,7 +11,6 @@ bad = [
     "dominated by incongruent",
     "no multiple-choice priors",
     "ComSIA 2026",
-    "anonfalse",
 ]
 for p in bad:
     n = tex.count(p)
@@ -28,7 +27,11 @@ good = [
     ("Multiple Comparisons", "limitations: multiple comparisons"),
     ("0.008", "H7 Holm note"),
     ("not directly comparable", "R_hat_open threshold caveat"),
-    ("anontrue", "anonymous mode"),
+    ("anonfalse", "named author mode"),
+    ("Mohammed Farhan Siddiqui", "Author 1"),
+    ("Uma Rani", "Author 2"),
+    ("Pallavi Joshi", "Author 3"),
+    ("Ankit Jain", "Author 4"),
 ]
 for phrase, label in good:
     n = tex.count(phrase)
