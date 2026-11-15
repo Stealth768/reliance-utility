@@ -19,7 +19,7 @@ for p in bad:
 print()
 print("=== HONEST STATEMENTS (should be >=1) ===")
 good = [
-    ("pre-declared success criterion required", "Synthetic MI criterion fail"),
+    ("pre-defined criterion for success", "Synthetic MI criterion fail"),
     ("post hoc", "post-hoc bootstrap label"),
     ("at most 0.064", "donor pairing range claim"),
     ("utility inversion does not replicate", "AI2D H5 fail statement"),

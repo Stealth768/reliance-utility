@@ -34,7 +34,7 @@ for f in forbidden:
 
 print("\n=== 2. VERIFYING HONEST REPORTING CLAIMS & AUTHORSHIP ===")
 required_statements = [
-    ("pre-declared success criterion required", "MI fail"),
+    ("pre-defined criterion for success", "MI fail"),
     ("utility inversion does not replicate", "AI2D H5 fail"),
     ("at most 0.064", "pairing range"),
     ("post hoc", "post hoc label"),
