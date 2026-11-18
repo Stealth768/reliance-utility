@@ -23,7 +23,6 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
 \usepackage{xcolor}
-\usepackage[compact]{titlesec}
 \usepackage{enumitem}
 
 % Graphicspath
@@ -47,6 +46,15 @@
   {-4\p@ \@plus -1\p@ \@minus -1\p@}%
   {-0.5em}%
   {\normalfont\normalsize\bfseries}}
+% Tighten section/subsection spacing natively (safe with svmult)
+\renewcommand\section{\@startsection{section}{1}{\z@}%
+  {-14\p@ \@plus -4\p@ \@minus -4\p@}%
+  {6\p@ \@plus 2\p@ \@minus 2\p@}%
+  {\normalfont\large\bfseries\boldmath}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+  {-10\p@ \@plus -3\p@ \@minus -3\p@}%
+  {4\p@ \@plus 1\p@ \@minus 1\p@}%
+  {\normalfont\normalsize\bfseries\boldmath}}
 \makeatother
 
 % Spacing adjustments to guarantee 12-page ceiling without modifying text
@@ -60,10 +68,6 @@
 \setlength{\abovedisplayshortskip}{1pt plus 1pt minus 1pt}
 \setlength{\belowdisplayshortskip}{1pt plus 1pt minus 1pt}
 \renewcommand{\arraystretch}{0.90}
-% Tighten titlesec section spacing
-\titlespacing*{\section}{0pt}{6pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
-\titlespacing*{\subsection}{0pt}{4pt plus 1pt minus 1pt}{2pt plus 1pt minus 1pt}
-\titlespacing*{\subsubsection}{0pt}{3pt plus 1pt minus 1pt}{1pt plus 1pt minus 1pt}
 % Tighten enumerate/itemize globally
 \setlist{nosep, topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt, leftmargin=*}
 
