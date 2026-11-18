@@ -23,6 +23,8 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
 \usepackage{xcolor}
+\usepackage[compact]{titlesec}
+\usepackage{enumitem}
 
 % Graphicspath
 \graphicspath{{figures/}{{../figures/}{{./}}}}
@@ -46,6 +48,24 @@
   {-0.5em}%
   {\normalfont\normalsize\bfseries}}
 \makeatother
+
+% Spacing adjustments to guarantee 12-page ceiling without modifying text
+\setlength{\floatsep}{4pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{6pt plus 1pt minus 1pt}
+\setlength{\intextsep}{4pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{3pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{1pt plus 1pt minus 1pt}
+\setlength{\abovedisplayskip}{3pt plus 1pt minus 2pt}
+\setlength{\belowdisplayskip}{3pt plus 1pt minus 2pt}
+\setlength{\abovedisplayshortskip}{1pt plus 1pt minus 1pt}
+\setlength{\belowdisplayshortskip}{1pt plus 1pt minus 1pt}
+\renewcommand{\arraystretch}{0.90}
+% Tighten titlesec section spacing
+\titlespacing*{\section}{0pt}{6pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+\titlespacing*{\subsection}{0pt}{4pt plus 1pt minus 1pt}{2pt plus 1pt minus 1pt}
+\titlespacing*{\subsubsection}{0pt}{3pt plus 1pt minus 1pt}{1pt plus 1pt minus 1pt}
+% Tighten enumerate/itemize globally
+\setlist{nosep, topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt, leftmargin=*}
 
 \makeindex
 
@@ -175,7 +195,7 @@ We validate the diagnostic on a synthetic fusion benchmark with known datagenera
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=\textwidth]{figures/fig1_synthetic_two_panel.pdf}
+\includegraphics[width=0.85\textwidth]{figures/fig1_synthetic_two_panel.pdf}
 \caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The Oracle receives the severity and serves as a positive control; among the other models, Gated has the lowest MI}
 \label{fig:synthetic}
 \end{figure}
@@ -193,7 +213,7 @@ We evaluate three open-weight VLMs: Qwen2-VL-2B-Instruct [15], SmolVLM-Instruct 
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=\textwidth]{figures/fig2_vlm_two_panel.pdf}
+\includegraphics[width=0.82\textwidth]{figures/fig2_vlm_two_panel.pdf}
 \caption{Utility (left) and normalized reliance (right) as a function of corruption severity for three VLMs under swapped (solid) and Gaussian (dashed) corruptions ($N = 500$ main sample, removedimage null baseline, bootstrap $B = 1000$, seed 42). Shaded bands are 95\% bootstrap intervals}
 \label{fig:vlm_curves}
 \end{figure}
@@ -283,7 +303,7 @@ Results for open ended generative reliance and utility are presented in Table~\r
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=\textwidth]{figures/fig4_open_and_stability.pdf}
+\includegraphics[width=0.82\textwidth]{figures/fig4_open_and_stability.pdf}
 \caption{Extension evaluations on A-OKVQA: (a) Open-ended teacher-forced sequence reliance $\hat{R}_{\text{open}}(S)$ under swapped (solid) and Gaussian (dashed) corruptions; $y$-axis extends to 1.45 because Qwen2-VL-2B Gaussian reliance peaks at $\approx 1.34$ near $S = 0.125$ before decaying; (b) Donor derangement stability of terminal normalized reliance $\hat{R}(1)$ across permutation seeds $\{0,11,12,13\}$ with 95\% bootstrap confidence intervals}
 \label{fig:open_and_stability}
 \end{figure}
