@@ -48,18 +48,18 @@
   {\normalfont\normalsize\bfseries}}
 % Tighten section/subsection spacing natively (safe with svmult)
 \renewcommand\section{\@startsection{section}{1}{\z@}%
-  {-10\p@ \@plus -2\p@ \@minus -2\p@}%
-  {4\p@ \@plus 1\p@ \@minus 1\p@}%
+  {-9\p@ \@plus -2\p@ \@minus -1\p@}%
+  {3\p@ \@plus 1\p@ \@minus 1\p@}%
   {\normalfont\large\bfseries\boldmath}}
 \renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-  {-8\p@ \@plus -2\p@ \@minus -2\p@}%
-  {3\p@ \@plus 1\p@ \@minus 1\p@}%
+  {-7\p@ \@plus -2\p@ \@minus -1\p@}%
+  {2.5\p@ \@plus 1\p@ \@minus 1\p@}%
   {\normalfont\normalsize\bfseries\boldmath}}
 \makeatother
 
 % Spacing adjustments to guarantee 12-page ceiling without modifying text
 \setlength{\floatsep}{3pt plus 1pt minus 1pt}
-\setlength{\textfloatsep}{5pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{4pt plus 1pt minus 1pt}
 \setlength{\intextsep}{3pt plus 1pt minus 1pt}
 \setlength{\abovecaptionskip}{2pt plus 1pt minus 1pt}
 \setlength{\belowcaptionskip}{0pt}
@@ -67,7 +67,16 @@
 \setlength{\belowdisplayskip}{2pt plus 1pt minus 1pt}
 \setlength{\abovedisplayshortskip}{0pt plus 1pt}
 \setlength{\belowdisplayshortskip}{0pt plus 1pt}
-\renewcommand{\arraystretch}{0.84}
+\renewcommand{\arraystretch}{0.81}
+
+% Standard float-packing
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{4}
+\setcounter{totalnumber}{8}
 % Tighten enumerate/itemize globally
 \setlist{nosep, topsep=1pt, partopsep=0pt, parsep=0pt, itemsep=0.5pt, leftmargin=*}
 
@@ -199,7 +208,7 @@ We validate the diagnostic on a synthetic fusion benchmark with known datagenera
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.68\textwidth]{figures/fig1_synthetic_two_panel.pdf}
+\includegraphics[width=0.60\textwidth]{figures/fig1_synthetic_two_panel.pdf}
 \caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The Oracle receives the severity and serves as a positive control; among the other models, Gated has the lowest MI}
 \label{fig:synthetic}
 \end{figure}
@@ -217,7 +226,7 @@ We evaluate three open-weight VLMs: Qwen2-VL-2B-Instruct~\cite{wang2024qwen2vl},
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.65\textwidth]{figures/fig2_vlm_two_panel.pdf}
+\includegraphics[width=0.58\textwidth]{figures/fig2_vlm_two_panel.pdf}
 \caption{Utility (left) and normalized reliance (right) as a function of corruption severity for three VLMs under swapped (solid) and Gaussian (dashed) corruptions ($N = 500$ main sample, removedimage null baseline, bootstrap $B = 1000$, seed 42). Shaded bands are 95\% bootstrap intervals}
 \label{fig:vlm_curves}
 \end{figure}
