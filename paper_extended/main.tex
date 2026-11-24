@@ -105,6 +105,7 @@
 \fi
 
 \maketitle
+\vspace*{-16pt}
 
 % ======================================================================
 % Abstract & Keywords
@@ -114,6 +115,7 @@
 \abstract{We create a diagnostic which combines task utility with an information theoretic measure of reliance, tracking it along a severity path $S$ in the range $[0,1]$. We then went on to evaluate this diagnostic on synthetic fusion systems and three open weight Vision-Language Models (Qwen2-VL-2B, SmolVLM-Instruct and Llava-1.5-7 B). The tasks are A-OKVQA and AI2D diagram reasoning. We also use the open ended generative format and run experiments with multiple donor pairing seeds. Our main result is that reliance is stable when the image is swapped (across datasets and formats). The difference in reliance is positive and significant ($\Delta \hat{R}(1) > 0$) with a Holm-adjusted p-value of 0.006 or less across six tests. We do however see a drop in accuracy during ended generation (utility inversion is $U_{\text{open}}(1) = -0.062$ for Qwen2-VL-2B). On the other hand while running the AI2D multiple choice tasks there was no measurable loss in accuracy found. The evidence does not support hypothesis H5 (95\% CI bound at $+0.016$). Our results are going to be dependent on how the unimodal baseline is defined. The degree of reliance in the ended tasks is also highly affected by the clean image generation paths.}
 
 \keywords{Multimodal Learning, Vision-Language Models, Retained Visual Reliance, Reliance-Utility Misalignment, Robustness Evaluation}
+\vspace*{-6pt}
 
 % ======================================================================
 % Section 1: Introduction
