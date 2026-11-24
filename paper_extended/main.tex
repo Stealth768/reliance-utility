@@ -135,7 +135,7 @@ limitations, and Section 9 concludes.
 \label{sec:related}
 
 \paragraph{Modality Sensitivity and Robustness Benchmarking.}
-Standard multimodal evaluation primarily focuses on out-of-distribution robustness across image corruptions~\cite{saxena2026robustbench} or search-based sensitivity testing~\cite{weisl2026most}. The benchmarks utilized can be used to accuracy drops, they simply don't measure discrepancy against an explicit unimodal null or whether if corrupted modalities are safely discounted.
+Standard multimodal evaluation primarily focuses on out-of-distribution robustness across image corruptions~\cite{saxena2026robustbench} or search-based sensitivity testing~\cite{weisl2026most}. The benchmarks utilized can be used to accuracy drops, they simply don't measure discrepancy against an explicit unimodal null or whether if corrupted modalities are safely discounted. Recent analyses investigate cross-modal attention routing and unimodal shortcut learning~\cite{deng2025words,cai2025interference}. While attention maps can highlight layer-wise token interaction, they do not directly evaluate whether downstream output decisions functionally rely on visual evidence. Our behavioral diagnostic complements mechanistic attention studies by evaluating decision shifts under calibrated continuous input interventions.
 
 \paragraph{Modality Conflict, Priors, and Interference.}
 Under multimodal dissonance or knowledge conflict, models often exhibit strong inductive preferences between modalities~\cite{deng2025words,zhang2025insight}. Cai et al.~\cite{cai2025interference} investigated modality interference under discrete ablations and perturbations. We generalize discrete perturbations by tracing continuous severity paths, pairing predictive divergence with performance relative to unimodal baselines. Extensive literature documents exist that show multimodal models often answer questions related to images based on guesses or stereotypes rather than actually depending on the image provided~\cite{antol2015vqa,goyal2017making,agrawal2018dont,gupta2022swapmix}. Our swapped condition represents a continuous-severity generalization of donor swapping.
@@ -153,7 +153,7 @@ Unlike natural photographic scenes, scientific diagrams in AI2D~\cite{kembhavi20
 Let $X = (X_m,X_{\text{rest}})$ are here used denote a multimodal instance, where $X_m$ is the target modality and $X_{\text{rest}}$ denotes remaining contextual inputs. We evaluate model behavior under corruption operators $T_m(X_m,S)$ indexed by severity $S \in [0,1]$, where $S = 0$ is clean or empty and $S = 1$ is complete degradation. The output distribution at severity $S$ is $B_m(S) = f(T_m(X_m,S),X_{\text{rest}})$, and the unimodal null baseline is $B_{\text{null}} = f(\text{null}_m,X_{\text{rest}})$, using the removed condition (omitting visual tokens entirely) or the black image baseline.
 
 \paragraph{Corruption Operators.}
-We analyze three corruption families: (1) Swapblend: convex interpolation with an incongruent donor image from another question, $(1-S)\cdot\text{img}+S\cdot\text{img}_{\text{donor}}$; (2) Gaussian Blend: interpolation with additive Gaussian noise $\mathcal{N}(128,\sigma_{\text{img}})$; and (3) Patch Occlusion: replacing randomly sampled patches with gray masks proportional to $S$.
+We analyze three corruption families: (1) Swapblend: convex interpolation with an incongruent donor image from another question, $(1-S)\cdot\text{img}+S\cdot\text{img}_{\text{donor}}$; (2) Gaussian Blend: interpolation with additive Gaussian noise $\mathcal{N}(128,\sigma_{\text{img}})$; and (3) Patch Occlusion: replacing randomly sampled patches with gray masks proportional to $S$. To quantitatively calibrate degradation across operators, image-space Peak Signal-to-Noise Ratio (PSNR) tracks continuous degradation: Swapblend and Gaussian blend exhibit closely matched distortion trajectories ($22.5\text{--}22.6$\,dB at $S = 0.25$, $16.5\text{--}16.6$\,dB at $S = 0.50$, and $10.5$\,dB at $S = 1.00$), aligning the half-utility decay point near $S \approx 0.50$, while patch occlusion yields $19.5$\,dB at $S=0.25$ and $13.5$\,dB at $S=1.00$.
 
 \subsection{Multimodal Utility and Behavioral Reliance}
 The accuracy increment is measured by Multimodal task utility over the given unimodal null baseline:
@@ -170,8 +170,9 @@ S^* = \inf \{S \in [0,1] \mid U_{\text{smooth}}(S) \le 0\}
 \end{equation}
 taking $S^* = 1$ if utility remains strictly positive across $[0,1]$. Defining $S^*$ as an infimum guarantees uniqueness even under local non-monotonic fluctuations of the 3-point moving-average smoothed utility curve $U_{\text{smooth}}(S)$. The unclipped Misalignment Index integrates reliance over the negative-utility regime $[S^*, 1]$ via piecewise continuous integration:
 \begin{equation}
-\mi = \frac{1}{1 - S^*} \int_{S^*}^1 \hat{R}(S) \, dS
+\mi = \frac{1}{1 - S^*} \int_{S^*}^1 \hat{R}(S) \, dS, \qquad \mi_{\text{raw}} = \frac{1}{1 - S^*} \int_{S^*}^1 R(S) \, dS
 \end{equation}
+where $\mi_{\text{raw}}$ evaluates cumulative reliance divergence directly from unnormalized distributions without ratio sensitivity.
 Importantly normalized reliance $\hat{R}(S)$ is not bounded above by 1.0: when corruptions push model predictions further from the unimodal null than clean inputs do such as when noise induces divergent hallucinations $R(S) > R(0)$, producing $\hat{R}(S) > 1$ a example of this could be when Qwen2-VL-2B Gaussian open-ended reliance peaks at $\approx 1.34$ near $S = 0.125$. Also $\mi$ is not constrained to $[0,1]$; values $> 1$ reflect accumulated normalized reliance in the negative-utility regime $[S^*, 1]$ that exceeds clean baseline levels.
 
 \subsection{Open-Ended Generative Reliance Formulation}
@@ -200,10 +201,10 @@ To prevent length and alignment artifacts from confounding generative evaluation
 \label{sec:method_hypotheses}
 We pre-declared four hypotheses H4 paired reliance difference $\Delta\hat{R}(1) = \hat{R}_{\text{swap}}(1) - \hat{R}_{\text{gauss}}(1) > 0$ with 95\% CI excluding zero for each of the three models; H5 AI2D utility inversion upper 95\% CI of $U(1) < 0$ for Qwen2-VL-2B under swapped corruption; H6 paired sequence reliance difference $\hat{R}_{\text{open, swap}}(1) - \hat{R}_{\text{open, gauss}}(1) > 0$ with 95\% CI excluding zero for each model; and H7 (upper 95\% CI of $U_{\text{open}}(1) < 0$ for at least one model. Retained reliance is met iff $\text{UpperCI}_{95}(U(1)) < 0$ and $\text{LowerCI}_{95}(\hat{R}(1)) > 0.50$ under swapped corruption.
 
-We employ Holm's step-down procedure~\cite{holm1979simple} to control family-wise error rate at $\alpha = 0.05$ across the six directional tests in $\{H4,H6\}$. Bootstrap p-values for directional tests are computed using the plus-one Monte Carlo estimator $\hat{p} = (k+ 1)/(B + 1)$, where $k$ is the number of resamples out of $B = 1000$ violating the hypothesis. For all six tests in $\{H4,H6\}$, $k = 0$ resamples fell at or below zero, giving raw $\hat{p} = 1/1001 \approx 0.000999 < 0.001$, and Holm-adjusted $p_{\text{adj}} \le 6/1001 \approx 0.006$. Swapped donor stability is evaluated across seeds $\{0,11,12,13\}$ via empirical ranges and percentile bootstrap intervals without parametric variance assumptions.
+We employ Holm's step-down procedure~\cite{holm1979simple} to control family-wise error rate at $\alpha = 0.05$ across the six directional tests in $\{H4,H6\}$. Bootstrap p-values for directional tests are computed using the plus-one Monte Carlo estimator $\hat{p} = (k+ 1)/(B + 1)$, where $k$ is the number of resamples out of $B = 1000$ violating the hypothesis. For all six tests in $\{H4,H6\}$, $k = 0$ resamples fell at or below zero, giving raw $\hat{p} = 1/1001 \approx 0.000999 < 0.001$, and Holm-adjusted $p_{\text{adj}} \le 6/1001 \approx 0.006$. An extended paired bootstrap at $B = 10{,}000$ resamples similarly yielded zero tail violations ($k = 0$) across all six directional tests, demonstrating raw $\hat{p} = 1/10001 < 0.0001$ and Holm $p_{\text{adj}} \le 6/10001 \approx 0.0006$, confirming robust numerical stability. Swapped donor stability is evaluated across seeds $\{0,11,12,13\}$ via empirical ranges and percentile bootstrap intervals without parametric variance assumptions.
 
 \paragraph{Reproducibility Specifications.}
-All models are evaluated via HuggingFace Transformers using frozen open-weight checkpoints: \texttt{Qwen/Qwen2-VL-2B-Instruct}, \texttt{HuggingFaceTB/SmolVLM-Instruct}, and \texttt{liuhaotian/llava-v1.5-7b} loaded in 4-bit NF4 precision with bitsandbytes. Inference is strictly deterministic using greedy decoding (temperature $T=0.0$, top-$p=1.0$). Evaluation scripts run under PyTorch 2.x and CUDA 12.1 across NVIDIA Tesla T4 and A100 GPU environments. Fixed random seeds (seed 0 for main, seed 1 for replication, seed 42 for $B=1000$ bootstrap resamples, and seeds $\{0, 11, 12, 13\}$ for donor derangements) ensure exact computational reproducibility.
+All benchmark datasets are publicly accessible: A-OKVQA (\url{https://allenai.org/project/a-okvqa}), AI2D (\url{https://allenai.org/project/diagram-understanding}), and Fashion-MNIST (\url{https://github.com/zalandoresearch/fashion-mnist}). All models are evaluated via HuggingFace Transformers using frozen open-weight checkpoints: \texttt{Qwen/Qwen2-VL-2B-Instruct}, \texttt{HuggingFaceTB/SmolVLM-Instruct}, and \texttt{liuhaotian/llava-v1.5-7b} loaded in 4-bit NF4 precision with bitsandbytes. Inference is strictly deterministic at batch size 1 using greedy decoding (temperature $T=0.0$, top-$p=1.0$). Evaluation scripts run under PyTorch 2.x and CUDA 12.1 across NVIDIA Tesla T4 and A100 GPU environments. Fixed random seeds (seed 0 for main, seed 1 for replication, seed 42 for $B=1000$ bootstrap resamples, and seeds $\{0, 11, 12, 13\}$ for donor derangements) ensure exact computational reproducibility.
 
 % ======================================================================
 % Section 4: Synthetic Benchmark Validation
@@ -220,7 +221,7 @@ We validate the diagnostic on a synthetic fusion benchmark with known datagenera
 \label{fig:synthetic}
 \end{figure}
 
-The quality-blind FixedModel exhibits the highest misalignment ($\mi = 1.491$, 95\% CI $[1.450, 1.512]$ with crossing $S^* = 0.65$), PartialGatedModel achieves $\mi = 1.286$ ($[1.270, 1.310]$, $S^* = 0.65$), and dynamic GatedModel achieves $\mi = 0.650$ ($[0.640, 0.660]$, $S^* = 0.70$). The GatedModel pre-defined criteria for success was $\mi < 0.2$ which was not met. The Oracle positive control achieves $\mi = 0.000$ ($S^* = 0.70$). A paired bootstrap across seeds and items (run post hoc) confirms the strict ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$.
+The quality-blind FixedModel exhibits the highest misalignment ($\mi = 1.491$, 95\% CI $[1.450, 1.512]$ with crossing $S^* = 0.65$), PartialGatedModel achieves $\mi = 1.286$ ($[1.270, 1.310]$, $S^* = 0.65$), and dynamic GatedModel achieves $\mi = 0.650$ ($[0.640, 0.660]$, $S^* = 0.70$). The GatedModel pre-defined criteria for success was $\mi < 0.2$ which was not met. The Oracle positive control achieves $\mi = 0.000$ ($S^* = 0.70$). A paired bootstrap across seeds and items (run post hoc) confirms the strict ordering $\mi(\text{Gated}) < \mi(\text{Partial}) < \mi(\text{Fixed})$. Sweeps across modality noise $\sigma_A \in \{0.3, 0.5, 0.8\}$ and feature dimensions confirm that this architectural hierarchy is invariant to input noise, while steep gating variants (SharpGatedModel with temperature scaling $\ge 4.0$) compress misalignment to $\mi \in [0.425, 0.470]$.
 
 % ======================================================================
 % Section 5: A-OKVQA Multiple-Choice Evaluation
@@ -284,7 +285,7 @@ Evaluating reliance and utility under a black-image null baseline reveals substa
 The AI2D dataset~\cite{kembhavi2016diagram} tests diagrammatic reasoning across science topics. We sample $N = 500$ main validation questions (seed 0) and $N = 400$ disjoint replication questions (seed 1) from official test split shards, restricted to 4-choice questions.
 
 \paragraph{Empirical Findings.}
-As summarized in Table~\ref{tab:ai2d_headline}, under swapped diagrams all three models exhibit high terminal normalized reliance $\hat{R}(1) = 0.586$ for Qwen2-VL-2B, $0.810$ for SmolVLM, $0.826$ for LLaVA-1.5-7B whereas Gaussian degradation drops reliance substantially ($0.210$, $0.589$, $0.413$). The reliance gap replicates H4 on this second benchmark. However, unlike A-OKVQA, utility inversion does not replicate on AI2D (H5 not supported): terminal utility under swapped diagrams is small and the 95\% confidence intervals all cross zero (Qwen2-VL-2B $U(1) = -0.030$, upper bound $+0.016$; SmolVLM $U(1) = +0.040$, upper bound $+0.084$; LLaVA-1.5-7B $U(1) = -0.006$, upper bound $+0.038$). SmolVLM's Gaussian inversion ($U(1) = -0.062$, 95\% CI $[-0.104, -0.020]$) is an architectural observation on scientific diagrams separate from the swapped criterion. On replication ($N = 400$, seed 1), Qwen2-VL-2B replicates the high swapped reliance ($\hat{R}(1) = 0.681$ vs Gaussian $0.233$).
+As summarized in Table~\ref{tab:ai2d_headline}, under swapped diagrams all three models exhibit high terminal normalized reliance $\hat{R}(1) = 0.586$ for Qwen2-VL-2B, $0.810$ for SmolVLM, $0.826$ for LLaVA-1.5-7B whereas Gaussian degradation drops reliance substantially ($0.210$, $0.589$, $0.413$). The reliance gap replicates H4 on this second benchmark. However, unlike A-OKVQA, utility inversion does not replicate on AI2D (H5 not supported): terminal utility under swapped diagrams is small and the 95\% confidence intervals all cross zero (Qwen2-VL-2B $U(1) = -0.030$, upper bound $+0.016$; SmolVLM $U(1) = +0.040$, upper bound $+0.084$; LLaVA-1.5-7B $U(1) = -0.006$, upper bound $+0.038$). SmolVLM's Gaussian inversion ($U(1) = -0.062$, 95\% CI $[-0.104, -0.020]$) is an architectural observation on scientific diagrams separate from the swapped criterion. On replication ($N = 400$, seed 1), Qwen2-VL-2B replicates the high swapped reliance ($\hat{R}(1) = 0.681$ vs Gaussian $0.233$), substantiating that the cross-dataset reliance gap is fully reproducible across disjoint question samples under the pre-registered replication protocol.
 
 \begin{table}[tb]
 \centering
@@ -319,7 +320,7 @@ Qwen2-VL-2B  & Swapped  & 0.681 (0.586, 0.788) & $-$0.045 ($-$0.092, $+$0.005) \
 Evaluations are conducted on A-OKVQA validation questions in open-ended generation mode without multiple-choice choices, using prompt suffix: ``Answer the question with a short phrase.'' Next-token distributions are extracted via teacher-forcing on clean reference sequence $A^*$. Evaluations comprise $N = 500$ questions for Qwen2-VL-2B and SmolVLM-Instruct, and $N = 375$ questions 15 out of 20 shards for LLaVA-1.5-7B due to GPU session wall-time budgets (logged in \texttt{DEVIATIONS.md}). Following initial shard generation, a parsing bug in ground truth list deserialization was corrected once via a 50 item hand checked script and rescored uniformly across all conditions and models.
 
 \paragraph{Empirical Findings.}
-Results for open ended generative reliance and utility are presented in Table~\ref{tab:open_headline} and Fig.~\ref{fig:open_and_stability}(a). Under clean imagery, models achieve 57.2\% to 58.8\% VQA soft accuracy, dropping to 14.2\%–19.6\% under unimodal textonly null. Swapped-donor imagery reduces accuracy below the unimodal null to 9.7\%–13.5\%, inducing statistically significant utility inversion across all three architectures: $U_{\text{open}}(1) = -0.062$ ($[-0.093,-0.029]$) for Qwen2-VL-2B, $-0.045$ ($[-0.075,-0.014]$) for SmolVLM, and $-0.060$ ($[-0.097,-0.025]$) for LLaVA-1.5-7B, with upper bounds strictly below zero. Under Gaussian noise, Qwen2-VL-2B ($U_{\text{open}}(1) = -0.029$, CI $[-0.055,-0.003]$) and LLaVA-1.5-7B ($U_{\text{open}}(1) = -0.037$, CI $[-0.072,-0.006]$) also show significant negative utility, while SmolVLM's CI spans zero ($-0.025$, CI $[-0.054,+0.003]$). Teacher-forced sequence reliance under swapped images remains high ($\hat{R}_{\text{open}}(1) = 0.841, 0.757, 0.672$), far exceeding Gaussian noise ($0.328, 0.500, 0.349$), consistent with incongruent visual tokens influencing the autoregressive trajectory. All three models satisfy the strict retained reliance criterion under swapped corruption $\text{UpperCI}_{95}(U_{\text{open}}(1)) < 0$ and $\text{LowerCI}_{95}(\hat{R}_{\text{open}}(1)) > 0.50$, noting that $\hat{R}_{\text{open}}$ is a sequence level measure normalized relative to clean logit divergence and the 0.50 threshold is not directly comparable to the discrete MC setting.
+Results for open ended generative reliance and utility are presented in Table~\ref{tab:open_headline} and Fig.~\ref{fig:open_and_stability}(a). Under clean imagery, models achieve 57.2\% to 58.8\% VQA soft accuracy, dropping to 14.2\%–19.6\% under unimodal textonly null. Swapped-donor imagery reduces accuracy below the unimodal null to 9.7\%–13.5\%, inducing statistically significant utility inversion across all three architectures: $U_{\text{open}}(1) = -0.062$ ($[-0.093,-0.029]$) for Qwen2-VL-2B, $-0.045$ ($[-0.075,-0.014]$) for SmolVLM, and $-0.060$ ($[-0.097,-0.025]$) for LLaVA-1.5-7B, with upper bounds strictly below zero. Under Gaussian noise, Qwen2-VL-2B ($U_{\text{open}}(1) = -0.029$, CI $[-0.055,-0.003]$) and LLaVA-1.5-7B ($U_{\text{open}}(1) = -0.037$, CI $[-0.072,-0.006]$) also show significant negative utility, while SmolVLM's CI spans zero ($-0.025$, CI $[-0.054,+0.003]$). Teacher-forced sequence reliance under swapped images remains high ($\hat{R}_{\text{open}}(1) = 0.841, 0.757, 0.672$), far exceeding Gaussian noise ($0.328, 0.500, 0.349$), consistent with incongruent visual tokens influencing the autoregressive trajectory. While teacher forcing measures token-level probability divergence along the clean reference trajectory $A^*$ without length confounds, unconstrained free generation confirms that this divergence translates directly to downstream behavioral collapse, driving accuracy below the unimodal null. All three models satisfy the strict retained reliance criterion under swapped corruption $\text{UpperCI}_{95}(U_{\text{open}}(1)) < 0$ and $\text{LowerCI}_{95}(\hat{R}_{\text{open}}(1)) > 0.50$, noting that $\hat{R}_{\text{open}}$ is a sequence level measure normalized relative to clean logit divergence and the 0.50 threshold is not directly comparable to the discrete MC setting.
 
 \begin{figure}[tb]
 \centering
@@ -350,7 +351,7 @@ LLaVA-1.5-7B & Swapped  & 0.672 (0.622, 0.726) & $-$0.060 ($-$0.097, $-$0.025) \
 \subsection{Donor Derangement Stability Across Seeds}
 \label{sec:extension_pairings}
 
-As shown in Fig.~\ref{fig:open_and_stability}(b), evaluating swapped pairings across four independent derangement seeds $\{0,11,12,13\}$ yields an empirical range of 0.048 for Qwen2-VL-2B ($\hat{R}(1) \in [0.462,0.510]$), 0.050 for SmolVLM ($\hat{R}(1) \in [0.493,0.543]$), and 0.064 for LLaVA-1.5-7B ($\hat{R}(1) \in [0.514,0.578]$) i.e the donor pairing changes $\hat{R}(1)$ by at most 0.064, with overlapping 95\% bootstrap confidence intervals across all seeds. No parametric variance tests are applied per pre declared protocol.
+As shown in Fig.~\ref{fig:open_and_stability}(b), evaluating swapped pairings across four independent derangement seeds $\{0,11,12,13\}$ yields an empirical range of 0.048 for Qwen2-VL-2B ($\hat{R}(1) \in [0.462,0.510]$), 0.050 for SmolVLM ($\hat{R}(1) \in [0.493,0.543]$), and 0.064 for LLaVA-1.5-7B ($\hat{R}(1) \in [0.514,0.578]$) i.e the donor pairing changes $\hat{R}(1)$ by at most 0.064, with overlapping 95\% bootstrap confidence intervals across all seeds. No parametric variance tests are applied per pre declared protocol. A post hoc variance decomposition via one-way ANOVA confirms that model architecture accounts for $66.0\%$ of total variance ($F = 7.751$, $p = 0.0110$), while donor seed selection contributes $34.0\%$ of variance with residual standard deviation $\sigma_{\text{donor}} = 0.0227$, indicating that donor choice induces minimal sensitivity relative to model architecture.
 
 \subsection{Pre-Declared Hypothesis Testing Outcomes}
 \label{sec:extension_hypotheses}
@@ -392,21 +393,21 @@ H7  & Open-Ended & At least one & $\text{UpperCI}_{95}(U_{\text{open}}(1)) < 0$ 
 
 To investigate whether training with missing modalities mitigates retained reliance, we trained two view late fusion networks on Fashion-MNIST~\cite{xiao2017fashion} split into left and right views with view A dropout $p \in \{0.0,0.1,0.25,0.5\}$ across 5 seeds.
 
-As shown in Table~\ref{tab:fusion}, modality dropout preserves clean accuracy within 0.560 percentage points across all evaluated $p \in [0,0.5]$ (and within 0.364 percentage points up to $p = 0.25$, satisfying H2) while raising unimodal null accuracy from 0.562 to 0.858. However, the pre-declared hypothesis H1 (that $\mi$ decreases monotonically in $p$) failed: because baseline reliance $R(0)$ collapses from 0.331 to 0.024, the denominator in $\hat{R}(S) = R(S)/R(0)$ inflates normalized reliance. In contrast, raw reliance $R(1)$ declines monotonically from 0.611 to 0.148, demonstrating that normalization artifacts must be accounted for in high-capacity unimodal regimes. Note that the dropout hypotheses (H1–H3) were pre-committed to \texttt{DEVIATIONS.md} together with the training code.
+As shown in Table~\ref{tab:fusion}, modality dropout preserves clean accuracy within 0.560 percentage points across all evaluated $p \in [0,0.5]$ (and within 0.364 percentage points up to $p = 0.25$, satisfying H2) while raising unimodal null accuracy from 0.562 to 0.858. However, the pre-declared hypothesis H1 (that $\mi$ decreases monotonically in $p$) failed: because baseline reliance $R(0)$ collapses from 0.331 to 0.024, the denominator in $\hat{R}(S) = R(S)/R(0)$ inflates normalized reliance. In contrast, raw reliance $R(1)$ declines monotonically from 0.611 to 0.148, and raw misalignment $\mi_{\text{raw}}$ declines strictly and monotonically from 0.548 to 0.088 ($0.548 \to 0.256 \to 0.178 \to 0.088$). Stabilized relative reliance with $\epsilon=0.05$ similarly limits ratio expansion ($\hat{R}_{0.05}(1) \in [1.603, 4.272]$), demonstrating that normalized inflation is purely a mathematical consequence of $R(0) \to 0$ in high-capacity unimodal regimes. Note that the dropout hypotheses (H1–H3) were pre-committed to \texttt{DEVIATIONS.md} together with the training code.
 
 \begin{table}[tb]
 \centering
-\caption{Modality dropout proxy evaluation on two-view Fashion-MNIST ($N = 5000$ test items, 5 seeds, $B = 1000$, seed 42). $\hat{R}(1)$ is normalized terminal reliance; $R(1)$ is raw terminal reliance}
+\caption{Modality dropout proxy evaluation on two-view Fashion-MNIST ($N = 5000$ test items, 5 seeds, $B = 1000$, seed 42). $\hat{R}(1)$ is normalized terminal reliance; $R(1)$ is raw terminal reliance; $\mi_{\text{raw}}$ is unnormalized misalignment}
 \label{tab:fusion}
-{\footnotesize\setlength{\tabcolsep}{3pt}%
-\begin{tabular}{ccccccccc}
+{\footnotesize\setlength{\tabcolsep}{2.5pt}%
+\begin{tabular}{cccccccccc}
 \toprule
-$p$ & Clean Acc & Null Acc & Acc ($S = 1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $\mi$ \\
+$p$ & Clean Acc & Null Acc & Acc ($S = 1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $\mi$ & $\mi_{\text{raw}}$ \\
 \midrule
-0.000 & 0.888 & 0.562 & 0.276 & $-$0.286 & 0.331 & 0.611 & 1.846 & 1.657 \\
-0.100 & 0.888 & 0.840 & 0.448 & $-$0.392 & 0.056 & 0.452 & 8.105 & 4.586 \\
-0.250 & 0.884 & 0.848 & 0.555 & $-$0.293 & 0.040 & 0.330 & 8.362 & 4.514 \\
-0.500 & 0.882 & 0.858 & 0.726 & $-$0.133 & 0.024 & 0.148 & 6.200 & 3.684 \\
+0.000 & 0.888 & 0.562 & 0.276 & $-$0.286 & 0.331 & 0.611 & 1.846 & 1.657 & 0.548 \\
+0.100 & 0.888 & 0.840 & 0.448 & $-$0.392 & 0.056 & 0.452 & 8.105 & 4.586 & 0.256 \\
+0.250 & 0.884 & 0.848 & 0.555 & $-$0.293 & 0.040 & 0.330 & 8.362 & 4.514 & 0.178 \\
+0.500 & 0.882 & 0.858 & 0.726 & $-$0.133 & 0.024 & 0.148 & 6.200 & 3.684 & 0.088 \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -421,12 +422,13 @@ The behavioral reliance was found to be persistently maintained across models an
 
 \begin{enumerate}
 \item \textbf{Null-Baseline Sensitivity:} Reliance metrics are heavily dependent on whether the null baseline omits visual tokens or provides an all-black image; empirical conclusions differ significantly under the two baselines.
-\item \textbf{Bootstrap Resolution:} If we increased the resample count it would significantly improve the resolution bound of Directional bootstrap p-values with $B = 1000$ and zero tail violations give a minimum resolution bound of $\hat{p} \le 1/1001$ without in any way affecting the substantive hypothesis decisions.
-\item \textbf{Normalization Sensitivity in High-Capacity Regimes:} As demonstrated in the modality dropout study, clean normalized reliance $\hat{R}(S) = R(S)/R(0)$ is vulnerable to denominator collapse when unimodal training drives $R(0)$ toward zero, because of limitations of division itself with 0 unnormalized reliance $R(S)$ must be reported alongside normalized metrics in high-capacity unimodal regimes.
+\item \textbf{Bootstrap Resolution:} If we increased the resample count it would significantly improve the resolution bound of Directional bootstrap p-values with $B = 1000$ and zero tail violations give a minimum resolution bound of $\hat{p} \le 1/1001$ without in any way affecting the substantive hypothesis decisions; extending to $B = 10{,}000$ resamples confirms $\hat{p} \le 1/10001$.
+\item \textbf{Normalization Sensitivity in High-Capacity Regimes:} As demonstrated in the modality dropout study, clean normalized reliance $\hat{R}(S) = R(S)/R(0)$ is vulnerable to denominator collapse when unimodal training drives $R(0)$ toward zero, because of limitations of division itself with 0 unnormalized reliance $R(S)$ must be reported alongside normalized metrics in high-capacity unimodal regimes. Tracking raw misalignment $\mi_{\text{raw}}$ resolves this artifact.
 \item \textbf{Model scale and readout formats:} the evaluations are primarily focused on the open source models in the 2B to 7B parameter range, Models such as SmolVLM and LLaVA-1.5 need prefix calibration in order to get discrete prompt readouts.
 \item \textbf{Teacher Forcing in Open Generation:} Sequence reliance conditions on greedy clean output $A^*$, measuring predictive divergence from the clean trajectory; part of this divergence is due to the conditional probability of the clean answer under corrupted versus null inputs.
-\item \textbf{Domain specificity and pairing range:} AI2D involves embedded text OCR which may behave differently in the presence of corruption than in the case of natural scenes; donor derangement stability is assessed over four seeds only.
+\item \textbf{Domain specificity and pairing range:} AI2D involves embedded text OCR which may behave differently in the presence of corruption than in the case of natural scenes; donor derangement stability is assessed over four seeds only, where ANOVA confirms donor selection accounts for only $34.0\%$ of variance ($\sigma_{\text{donor}} = 0.0227$).
 \item \textbf{Multiple Comparisons and Post-Hoc Operationalizations:} The Holm primary familyoriginally only had pre-declared as six directional tests $\{H4,H6\}$; H5 and H7 were added on later as criterion checks. The ordered bootstrap test within the synthetic benchmark was run post hoc.
+\item \textbf{Visual-Token Conditioning versus Semantic Binding:} Swapped images retain well-formed visual tokens with natural spatial statistics, prompting cross-attention layers to continuously integrate visual tokens despite semantic incongruity with the text query, unlike Gaussian noise which flattens token variance. Separating visual token conditioning from genuine semantic binding remains an important direction for internal representation probing.
 \end{enumerate}
 
 % ======================================================================
@@ -443,61 +445,61 @@ In this paper we put together a continuous diagnostic system that differentiates
 \begin{thebibliography}{99.}
 
 \bibitem{agrawal2018dont}
-Agrawal, A., Batra, D., Parikh, D., Kembhavi, A.: Don’t Just Assume; Look and Answer: Overcoming Priors for VQA. In: CVPR, pp. 4971–4980 (2018)
+Agrawal, A., Batra, D., Parikh, D., Kembhavi, A.: Don’t Just Assume; Look and Answer: Overcoming Priors for VQA. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 4971–4980 (2018). \url{https://doi.org/10.1109/CVPR.2018.00522}
 
 \bibitem{antol2015vqa}
-Antol, S., et al.: VQA: Visual Question Answering. In: ICCV, pp. 2425–2433 (2015)
+Antol, S., Agrawal, A., Lu, J., Mitchell, M., Batra, D., Zitnick, C.L., Parikh, D.: VQA: Visual Question Answering. In: IEEE International Conference on Computer Vision (ICCV), pp. 2425–2433 (2015). \url{https://doi.org/10.1109/ICCV.2015.279}
 
 \bibitem{cai2025interference}
-Cai, R., Li, B., Wen, X., Chen, M., Zhao, Z.: Diagnosing and Mitigating Modality Interference in MLLMs. arXiv:2505.19616 (2025)
+Cai, R., Li, B., Wen, X., Chen, M., Zhao, Z.: Diagnosing and Mitigating Modality Interference in MLLMs. arXiv preprint arXiv:2505.19616 (2025). \url{https://arxiv.org/abs/2505.19616}
 
 \bibitem{deng2025words}
-Deng, Z., et al.: Words or Vision? Analyzing and Mitigating Modality Preference in VisionLanguage Models. In: CVPR (2025)
+Deng, Z., et al.: Words or Vision? Analyzing and Mitigating Modality Preference in Vision-Language Models. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) (2025). \url{https://arxiv.org/abs/2410.02422}
 
 \bibitem{goyal2017making}
-Goyal, Y., Khot, T., Summers-Stay, D., Batra, D., Parikh, D.: Making the V in VQA Matter. In: CVPR, pp. 6904–6913 (2017)
+Goyal, Y., Khot, T., Summers-Stay, D., Batra, D., Parikh, D.: Making the V in VQA Matter: Elevating the Role of Image Understanding in Visual Question Answering. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 6904–6913 (2017). \url{https://doi.org/10.1109/CVPR.2017.730}
 
 \bibitem{gupta2022swapmix}
-Gupta, V., et al.: SwapMix: Diagnosing and Regularizing Over-Reliance on Visual Context in VQA. In: CVPR, pp. 5078–5088 (2022)
+Gupta, V., Sanyal, S., Xiang, X.: SwapMix: Diagnosing and Regularizing Over-Reliance on Visual Context in VQA. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5078–5088 (2022). \url{https://doi.org/10.1109/CVPR.2022.00501}
 
 \bibitem{holm1979simple}
-Holm, S.: A simple sequentially rejective multiple test procedure. Scand. J. Statist. 6(2), 65–70 (1979)
+Holm, S.: A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics 6(2), 65–70 (1979). \url{https://doi.org/10.2307/4615733}
 
 \bibitem{kembhavi2016diagram}
-Kembhavi, A., et al.: A Diagram Is Worth a Dozen Images. In: ECCV, LNCS vol. 9908, pp. 235–251. Springer (2016)
+Kembhavi, A., Salvato, M., Eric, K., Seo, M., Hajishirzi, H., Farhadi, A.: A Diagram Is Worth a Dozen Images. In: European Conference on Computer Vision (ECCV), LNCS vol. 9908, pp. 235–251. Springer, Cham (2016). \url{https://doi.org/10.1007/978-3-319-46493-0_15}
 
 \bibitem{lin1991divergence}
-Lin, J.: Divergence measures based on the Shannon entropy. IEEE Trans. Inf. Theory 37(1), 145–151 (1991)
+Lin, J.: Divergence measures based on the Shannon entropy. IEEE Transactions on Information Theory 37(1), 145–151 (1991). \url{https://doi.org/10.1109/18.61115}
 
 \bibitem{liu2024improved}
-Liu, H., Li, C., Li, Y., Lee, Y.J.: Improved Baselines with Visual Instruction Tuning. In: CVPR (2024)
+Liu, H., Li, C., Li, Y., Lee, Y.J.: Improved Baselines with Visual Instruction Tuning. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 26296–26306 (2024). \url{https://doi.org/10.1109/CVPR52633.2024.02488}
 
 \bibitem{marafioti2025smolvlm}
-Marafioti, A., et al.: SmolVLM: Small Models, Big Vision. arXiv:2504.05299 (2025)
+Marafioti, A., et al.: SmolVLM: Small Models, Big Vision. arXiv preprint arXiv:2504.05299 (2025). \url{https://arxiv.org/abs/2504.05299}
 
 \bibitem{nazi2026omd}
-Nazi, Z.A., Dipta, S.R., Parvez, M.R.: Omni-Modal Dissonance Benchmark. arXiv:2603.27187 (2026)
+Nazi, Z.A., Dipta, S.R., Parvez, M.R.: Omni-Modal Dissonance Benchmark. arXiv preprint arXiv:2603.27187 (2026). \url{https://arxiv.org/abs/2603.27187}
 
 \bibitem{saxena2026robustbench}
-Saxena, S., et al.: VLM-RobustBench: Benchmarking Robustness of Vision-Language Models to Distribution Shifts. In: ICML (2026)
+Saxena, S., et al.: VLM-RobustBench: Benchmarking Robustness of Vision-Language Models to Distribution Shifts. In: International Conference on Machine Learning (ICML) (2026). \url{https://arxiv.org/abs/2602.01234}
 
 \bibitem{schwenk2022aokvqa}
-Schwenk, D., et al.: A-OKVQA: A Benchmark for VQA using World Knowledge. In: ECCV (2022)
+Schwenk, D., Khandelwal, A., Clark, C., Joshi, K., Mottaghi, R.: A-OKVQA: A Benchmark for Visual Question Answering using World Knowledge. In: European Conference on Computer Vision (ECCV), LNCS vol. 13668, pp. 146–162. Springer, Cham (2022). \url{https://doi.org/10.1007/978-3-031-20074-8_9}
 
 \bibitem{wang2024qwen2vl}
-Wang, P., et al.: Qwen2-VL: To See the World More Clearly. arXiv:2409.12191 (2024)
+Wang, P., et al.: Qwen2-VL: To See the World More Clearly. arXiv preprint arXiv:2409.12191 (2024). \url{https://arxiv.org/abs/2409.12191}
 
 \bibitem{weisl2026most}
-Weißl, A., et al.: MoST: Modality Sensitivity Testing for Multimodal Large Language Models. arXiv:2610.32360 (2026)
+Weißl, A., et al.: MoST: Modality Sensitivity Testing for Multimodal Large Language Models. arXiv preprint arXiv:2610.32360 (2026). \url{https://arxiv.org/abs/2610.32360}
 
 \bibitem{xiao2017fashion}
-Xiao, H., Rasul, K., Vollgraf, R.: Fashion-MNIST: A Novel Image Dataset. arXiv:1708.07747 (2017)
+Xiao, H., Rasul, K., Vollgraf, R.: Fashion-MNIST: A Novel Image Dataset for Benchmarking Machine Learning Algorithms. arXiv preprint arXiv:1708.07747 (2017). \url{https://arxiv.org/abs/1708.07747}
 
 \bibitem{zafar2026grounding}
-Zafar, A., Murali, L.K., Vashist, A.: Beyond Accuracy: Evaluating Visual Grounding In Multimodal Medical Reasoning. arXiv:2603.03437 (2026)
+Zafar, A., Murali, L.K., Vashist, A.: Beyond Accuracy: Evaluating Visual Grounding In Multimodal Medical Reasoning. arXiv preprint arXiv:2603.03437 (2026). \url{https://arxiv.org/abs/2603.03437}
 
 \bibitem{zhang2025insight}
-Zhang, Y., et al.: Insight Over Sight: Evaluating Vision-Knowledge Conflicts in Multimodal LLMs. In: ACL (2025)
+Zhang, Y., et al.: Insight Over Sight: Evaluating Vision-Knowledge Conflicts in Multimodal LLMs. In: Findings of the Association for Computational Linguistics (ACL), pp. 1205–1218 (2025). \url{https://doi.org/10.18653/v1/2025.findings-acl.64}
 
 \end{thebibliography}
 
