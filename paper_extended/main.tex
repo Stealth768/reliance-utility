@@ -59,7 +59,7 @@
 
 % Spacing adjustments to guarantee 12-page ceiling without modifying text
 \setlength{\floatsep}{3pt plus 1pt minus 1pt}
-\setlength{\textfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{5pt plus 1pt minus 1pt}
 \setlength{\intextsep}{3pt plus 1pt minus 1pt}
 \setlength{\abovecaptionskip}{2pt plus 1pt minus 1pt}
 \setlength{\belowcaptionskip}{0pt}
@@ -67,17 +67,7 @@
 \setlength{\belowdisplayskip}{2pt plus 1pt minus 1pt}
 \setlength{\abovedisplayshortskip}{0pt plus 1pt}
 \setlength{\belowdisplayshortskip}{0pt plus 1pt}
-\renewcommand{\arraystretch}{0.80}
-
-% Aggressive float-packing to prevent empty float pages
-\renewcommand{\topfraction}{0.95}
-\renewcommand{\bottomfraction}{0.95}
-\renewcommand{\textfraction}{0.05}
-\renewcommand{\floatpagefraction}{0.85}
-\setcounter{topnumber}{4}
-\setcounter{bottomnumber}{4}
-\setcounter{totalnumber}{8}
-
+\renewcommand{\arraystretch}{0.84}
 % Tighten enumerate/itemize globally
 \setlist{nosep, topsep=1pt, partopsep=0pt, parsep=0pt, itemsep=0.5pt, leftmargin=*}
 
@@ -209,7 +199,7 @@ We validate the diagnostic on a synthetic fusion benchmark with known datagenera
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.60\textwidth]{figures/fig1_synthetic_two_panel.pdf}
+\includegraphics[width=0.68\textwidth]{figures/fig1_synthetic_two_panel.pdf}
 \caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The Oracle receives the severity and serves as a positive control; among the other models, Gated has the lowest MI}
 \label{fig:synthetic}
 \end{figure}
@@ -227,37 +217,34 @@ We evaluate three open-weight VLMs: Qwen2-VL-2B-Instruct~\cite{wang2024qwen2vl},
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.60\textwidth]{figures/fig2_vlm_two_panel.pdf}
+\includegraphics[width=0.65\textwidth]{figures/fig2_vlm_two_panel.pdf}
 \caption{Utility (left) and normalized reliance (right) as a function of corruption severity for three VLMs under swapped (solid) and Gaussian (dashed) corruptions ($N = 500$ main sample, removedimage null baseline, bootstrap $B = 1000$, seed 42). Shaded bands are 95\% bootstrap intervals}
 \label{fig:vlm_curves}
 \end{figure}
 
 \begin{table}[tb]
 \centering
-\caption{Multiple-Choice Headline Results: Terminal normalized reliance $\hat{R}(1)$ and utility $U(1)$ across A-OKVQA and AI2D Diagram Reasoning under removed null baseline ($B = 1000$, seed 42). Intervals denote 95\% bootstrap CIs}
-\label{tab:headline}\label{tab:ai2d_headline}
-{\scriptsize\setlength{\tabcolsep}{1.8pt}%
-\begin{tabular}{llcccc}
+\caption{A-OKVQA Multiple-Choice headline results: terminal normalized reliance $\hat{R}(1)$ and terminal utility $U(1)$ across corruptions under removed-image null baseline ($B = 1000$, seed 42). Replication rows report swapped corruption}
+\label{tab:headline}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
+\begin{tabular}{llcc}
 \toprule
-\textbf{Model} & \textbf{Corruption} & \multicolumn{2}{c}{\textbf{A-OKVQA Multiple Choice}} & \multicolumn{2}{c}{\textbf{AI2D Diagram Reasoning}} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}
- & & $\hat{R}(1)$ (95\% CI) & $U(1)$ (95\% CI) & $\hat{R}(1)$ (95\% CI) & $U(1)$ (95\% CI) \\
+\textbf{Model} & \textbf{Corruption} & $\hat{R}(1)$ (95\% CI) & $U(1)$ (95\% CI) \\
 \midrule
-\multicolumn{6}{l}{\textit{Main Sample ($N=500$, seed 0)}} \\
+\multicolumn{4}{l}{\textit{Main Sample ($N=500$, seed 0)}} \\
 \midrule
-Qwen2-VL-2B  & Swapped  & 0.487 (0.437, 0.542) & $-$0.064 ($-$0.114, $-$0.018) & 0.586 (0.512, 0.676) & $-$0.030 ($-$0.074, $+$0.016) \\
-              & Gaussian & 0.168 (0.147, 0.189) & $-$0.030 ($-$0.068, $+$0.006) & 0.210 (0.174, 0.257) & $-$0.028 ($-$0.064, $+$0.006) \\
-SmolVLM      & Swapped  & 0.493 (0.446, 0.547) & $-$0.016 ($-$0.062, $+$0.030) & 0.810 (0.731, 0.896) & $+$0.040 ($-$0.006, $+$0.084) \\
-              & Gaussian & 0.381 (0.337, 0.424) & $-$0.022 ($-$0.068, $+$0.022) & 0.589 (0.515, 0.669) & $-$0.062 ($-$0.104, $-$0.020) \\
-LLaVA-1.5-7B & Swapped  & 0.578 (0.514, 0.653) & $-$0.048 ($-$0.092, $-$0.004) & 0.826 (0.734, 0.932) & $-$0.006 ($-$0.050, $+$0.038) \\
-              & Gaussian & 0.295 (0.255, 0.336) & $-$0.022 ($-$0.058, $+$0.014) & 0.413 (0.363, 0.469) & $-$0.022 ($-$0.056, $+$0.008) \\
+Qwen2-VL-2B  & Swapped  & 0.487 (0.437, 0.542) & $-$0.064 ($-$0.114, $-$0.018) \\
+              & Gaussian & 0.168 (0.147, 0.189) & $-$0.030 ($-$0.068, $+$0.006) \\
+SmolVLM      & Swapped  & 0.493 (0.446, 0.547) & $-$0.016 ($-$0.062, $+$0.030) \\
+              & Gaussian & 0.381 (0.337, 0.424) & $-$0.022 ($-$0.068, $+$0.022) \\
+LLaVA-1.5-7B & Swapped  & 0.578 (0.514, 0.653) & $-$0.048 ($-$0.092, $-$0.004) \\
+              & Gaussian & 0.295 (0.255, 0.336) & $-$0.022 ($-$0.058, $+$0.014) \\
 \midrule
-\multicolumn{6}{l}{\textit{Replication Sample (A-OKVQA $N=445$, AI2D $N=400$, seed 1)}} \\
+\multicolumn{4}{l}{\textit{Replication Sample ($N=445$, seed 1)}} \\
 \midrule
-Qwen2-VL-2B  & Swapped  & 0.470 (0.418, 0.523) & $-$0.103 ($-$0.153, $-$0.052) & 0.681 (0.586, 0.788) & $-$0.045 ($-$0.092, $+$0.005) \\
-              & Gaussian & --- & --- & 0.233 (0.183, 0.289) & $-$0.040 ($-$0.075, $-$0.003) \\
-SmolVLM      & Swapped  & 0.553 (0.491, 0.620) & $-$0.038 ($-$0.090, $+$0.013) & --- & --- \\
-LLaVA-1.5-7B & Swapped  & 0.563 (0.497, 0.638) & $-$0.025 ($-$0.072, $+$0.022) & --- & --- \\
+Qwen2-VL-2B  & Swapped  & 0.470 (0.418, 0.523) & $-$0.103 ($-$0.153, $-$0.052) \\
+SmolVLM      & Swapped  & 0.553 (0.491, 0.620) & $-$0.038 ($-$0.090, $+$0.013) \\
+LLaVA-1.5-7B & Swapped  & 0.563 (0.497, 0.638) & $-$0.025 ($-$0.072, $+$0.022) \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -283,6 +270,32 @@ The AI2D dataset~\cite{kembhavi2016diagram} tests diagrammatic reasoning across 
 \paragraph{Empirical Findings.}
 As summarized in Table~\ref{tab:ai2d_headline}, under swapped diagrams all three models exhibit high terminal normalized reliance $\hat{R}(1) = 0.586$ for Qwen2-VL-2B, $0.810$ for SmolVLM, $0.826$ for LLaVA-1.5-7B whereas Gaussian degradation drops reliance substantially ($0.210$, $0.589$, $0.413$). The reliance gap replicates H4 on this second benchmark. However, unlike A-OKVQA, utility inversion does not replicate on AI2D (H5 not supported): terminal utility under swapped diagrams is small and the 95\% confidence intervals all cross zero (Qwen2-VL-2B $U(1) = -0.030$, upper bound $+0.016$; SmolVLM $U(1) = +0.040$, upper bound $+0.084$; LLaVA-1.5-7B $U(1) = -0.006$, upper bound $+0.038$). SmolVLM's Gaussian inversion ($U(1) = -0.062$, 95\% CI $[-0.104, -0.020]$) is an architectural observation on scientific diagrams separate from the swapped criterion. On replication ($N = 400$, seed 1), Qwen2-VL-2B replicates the high swapped reliance ($\hat{R}(1) = 0.681$ vs Gaussian $0.233$), substantiating that the cross-dataset reliance gap is fully reproducible across disjoint question samples under the pre-registered replication protocol.
 
+\begin{table}[tb]
+\centering
+\caption{AI2D Diagram Reasoning Headline Results: Terminal normalized reliance $\hat{R}(1)$ and utility $U(1)$ under removed null baseline ($B = 1000$, seed 42). Intervals denote 95\% bootstrap CIs}
+\label{tab:ai2d_headline}
+{\footnotesize\setlength{\tabcolsep}{3pt}%
+\begin{tabular}{llcc}
+\toprule
+\textbf{Model} & \textbf{Corruption} & $\hat{R}(1)$ (95\% CI) & $U(1)$ (95\% CI) \\
+\midrule
+\multicolumn{4}{l}{\textit{Main Sample ($N=500$, seed 0)}} \\
+\midrule
+Qwen2-VL-2B  & Swapped  & 0.586 (0.512, 0.676) & $-$0.030 ($-$0.074, $+$0.016) \\
+              & Gaussian & 0.210 (0.174, 0.257) & $-$0.028 ($-$0.064, $+$0.006) \\
+SmolVLM      & Swapped  & 0.810 (0.731, 0.896) & $+$0.040 ($-$0.006, $+$0.084) \\
+              & Gaussian & 0.589 (0.515, 0.669) & $-$0.062 ($-$0.104, $-$0.020) \\
+LLaVA-1.5-7B & Swapped  & 0.826 (0.734, 0.932) & $-$0.006 ($-$0.050, $+$0.038) \\
+              & Gaussian & 0.413 (0.363, 0.469) & $-$0.022 ($-$0.056, $+$0.008) \\
+\midrule
+\multicolumn{4}{l}{\textit{Replication Sample ($N=400$, seed 1)}} \\
+\midrule
+Qwen2-VL-2B  & Swapped  & 0.681 (0.586, 0.788) & $-$0.045 ($-$0.092, $+$0.005) \\
+              & Gaussian & 0.233 (0.183, 0.289) & $-$0.040 ($-$0.075, $-$0.003) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \subsection{Open-Ended Free Generation Evaluation}
 \label{sec:extension_open}
 
@@ -294,7 +307,7 @@ Results for open ended generative reliance and utility are presented in Table~\r
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.60\textwidth]{figures/fig4_open_and_stability.pdf}
+\includegraphics[width=0.65\textwidth]{figures/fig4_open_and_stability.pdf}
 \caption{Extension evaluations on A-OKVQA: (a) Open-ended teacher-forced sequence reliance $\hat{R}_{\text{open}}(S)$ under swapped (solid) and Gaussian (dashed) corruptions; $y$-axis extends to 1.45 because Qwen2-VL-2B Gaussian reliance peaks at $\approx 1.34$ near $S = 0.125$ before decaying; (b) Donor derangement stability of terminal normalized reliance $\hat{R}(1)$ across permutation seeds $\{0,11,12,13\}$ with 95\% bootstrap confidence intervals}
 \label{fig:open_and_stability}
 \end{figure}
@@ -303,7 +316,7 @@ Results for open ended generative reliance and utility are presented in Table~\r
 \centering
 \caption{Open-Ended Generation Headline Results: Terminal normalized sequence reliance $\hat{R}_{\text{open}}(1)$ and VQA soft accuracy utility $U_{\text{open}}(1)$ under removed null baseline ($B = 1000$, seed 42). $N = 500$ for Qwen2-VL-2B and SmolVLM-Instruct; $N = 375$ for LLaVA-1.5-7B (shards 0–14)}
 \label{tab:open_headline}
-{\scriptsize\setlength{\tabcolsep}{2.2pt}%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{llcc}
 \toprule
 \textbf{Model} & \textbf{Corruption} & $\hat{R}_{\text{open}}(1)$ (95\% CI) & $U_{\text{open}}(1)$ (95\% CI) \\
@@ -332,7 +345,7 @@ Table~\ref{tab:hypothesis_tests} summarizes the evaluation of pre-declared hypot
 \centering
 \caption{Evaluation of Pre-Declared Hypotheses with Holm-Bonferroni FWER Control ($\alpha = 0.05$, $B = 1000$, seed 42)}
 \label{tab:hypothesis_tests}
-{\scriptsize\setlength{\tabcolsep}{2.2pt}%
+{\footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lllcccc}
 \toprule
 \textbf{ID} & \textbf{Benchmark} & \textbf{Target Model} & \textbf{Metric / Test} & \textbf{Raw $p$} & \textbf{Holm $p_{\text{adj}}$} & \textbf{Outcome} \\
@@ -352,7 +365,7 @@ H5  & AI2D MC    & Qwen2-VL-2B  & $\text{UpperCI}_{95}(U(1)) < 0$               
 H7  & Open-Ended & At least one & $\text{UpperCI}_{95}(U_{\text{open}}(1)) < 0$     & $< 0.001$ ($0/1000$) & $\approx 0.008$$^\dagger$ & \textbf{Supported} \\
 \bottomrule
 \end{tabular}}
-{\scriptsize $^\dagger$ H7 is a criterion check outside the primary Holm family of six. If all eight tests are treated jointly under Holm's procedure, the adjusted value for H7 is approximately $0.008 < \alpha$.}
+{\footnotesize $^\dagger$ H7 is a criterion check outside the primary Holm family of six. If all eight tests are treated jointly under Holm's procedure, the adjusted value for H7 is approximately $0.008 < \alpha$.}
 \end{table}
 
 % ======================================================================
@@ -369,7 +382,7 @@ As shown in Table~\ref{tab:fusion}, modality dropout preserves clean accuracy wi
 \centering
 \caption{Modality dropout proxy evaluation on two-view Fashion-MNIST ($N = 5000$ test items, 5 seeds, $B = 1000$, seed 42). $\hat{R}(1)$ is normalized terminal reliance; $R(1)$ is raw terminal reliance; $\mi_{\text{raw}}$ is unnormalized misalignment}
 \label{tab:fusion}
-{\scriptsize\setlength{\tabcolsep}{2.2pt}%
+{\footnotesize\setlength{\tabcolsep}{2.5pt}%
 \begin{tabular}{cccccccccc}
 \toprule
 $p$ & Clean Acc & Null Acc & Acc ($S = 1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}(1)$ & $\mi$ & $\mi_{\text{raw}}$ \\
