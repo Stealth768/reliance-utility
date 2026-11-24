@@ -58,18 +58,18 @@
 \makeatother
 
 % Spacing adjustments to guarantee 12-page ceiling without modifying text
-\setlength{\floatsep}{4pt plus 1pt minus 1pt}
-\setlength{\textfloatsep}{6pt plus 1pt minus 1pt}
-\setlength{\intextsep}{4pt plus 1pt minus 1pt}
-\setlength{\abovecaptionskip}{3pt plus 1pt minus 1pt}
-\setlength{\belowcaptionskip}{1pt plus 1pt minus 1pt}
-\setlength{\abovedisplayskip}{3pt plus 1pt minus 2pt}
-\setlength{\belowdisplayskip}{3pt plus 1pt minus 2pt}
-\setlength{\abovedisplayshortskip}{1pt plus 1pt minus 1pt}
-\setlength{\belowdisplayshortskip}{1pt plus 1pt minus 1pt}
-\renewcommand{\arraystretch}{0.90}
+\setlength{\floatsep}{3pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{5pt plus 1pt minus 1pt}
+\setlength{\intextsep}{3pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\abovedisplayskip}{2pt plus 1pt minus 1pt}
+\setlength{\belowdisplayskip}{2pt plus 1pt minus 1pt}
+\setlength{\abovedisplayshortskip}{0pt plus 1pt}
+\setlength{\belowdisplayshortskip}{0pt plus 1pt}
+\renewcommand{\arraystretch}{0.84}
 % Tighten enumerate/itemize globally
-\setlist{nosep, topsep=2pt, partopsep=0pt, parsep=0pt, itemsep=1pt, leftmargin=*}
+\setlist{nosep, topsep=1pt, partopsep=0pt, parsep=0pt, itemsep=0.5pt, leftmargin=*}
 
 \makeindex
 
@@ -156,19 +156,11 @@ Let $X = (X_m,X_{\text{rest}})$ are here used denote a multimodal instance, wher
 We analyze three corruption families: (1) Swapblend: convex interpolation with an incongruent donor image from another question, $(1-S)\cdot\text{img}+S\cdot\text{img}_{\text{donor}}$; (2) Gaussian Blend: interpolation with additive Gaussian noise $\mathcal{N}(128,\sigma_{\text{img}})$; and (3) Patch Occlusion: replacing randomly sampled patches with gray masks proportional to $S$. To quantitatively calibrate degradation across operators, image-space Peak Signal-to-Noise Ratio (PSNR) tracks continuous degradation: Swapblend and Gaussian blend exhibit closely matched distortion trajectories ($22.5\text{--}22.6$\,dB at $S = 0.25$, $16.5\text{--}16.6$\,dB at $S = 0.50$, and $10.5$\,dB at $S = 1.00$), aligning the half-utility decay point near $S \approx 0.50$, while patch occlusion yields $19.5$\,dB at $S=0.25$ and $13.5$\,dB at $S=1.00$.
 
 \subsection{Multimodal Utility and Behavioral Reliance}
-The accuracy increment is measured by Multimodal task utility over the given unimodal null baseline:
-\begin{equation}
-U(S) = \text{acc}(B_m(S)) - \text{acc}(B_{\text{null}})
-\end{equation}
-Absolute behavioral reliance quantifies output distribution shift via base-2 JensenShannon Divergence (JSD)~\cite{lin1991divergence}:
+The accuracy increment is measured by Multimodal task utility over the given unimodal null baseline: $U(S) = \text{acc}(B_m(S)) - \text{acc}(B_{\text{null}})$. Absolute behavioral reliance quantifies output distribution shift via base-2 JensenShannon Divergence (JSD)~\cite{lin1991divergence}:
 \begin{equation}
 R(S) = \mathbb{E}_X [\jsd(B_m(S) \parallel B_{\text{null}})], \qquad \hat{R}(S) = \frac{R(S)}{R(0)}
 \end{equation}
-where $\hat{R}(S)$ denotes clean-normalized relative reliance with baseline $R(0) > 0$. In high-capacity unimodal regimes where $R(0) \to 0$, ratio normalization exhibits denominator sensitivity; unnormalized raw reliance $R(S)$ and stabilized relative reliance $\hat{R}_{\epsilon}(S) = R(S)/(R(0) + \epsilon)$ are tracked alongside $\hat{R}(S)$. This operational metric captures predictive discrepancies as a proxy for behavioral reliance under the controlled intervention it doesn't sufficienctly and independently establish that the model acutally relies onmeaningful semantic visual content. The utility crossing point is formally defined as the infimum zero-crossing:
-\begin{equation}
-S^* = \inf \{S \in [0,1] \mid U_{\text{smooth}}(S) \le 0\}
-\end{equation}
-taking $S^* = 1$ if utility remains strictly positive across $[0,1]$. Defining $S^*$ as an infimum guarantees uniqueness even under local non-monotonic fluctuations of the 3-point moving-average smoothed utility curve $U_{\text{smooth}}(S)$. The unclipped Misalignment Index integrates reliance over the negative-utility regime $[S^*, 1]$ via piecewise continuous integration:
+where $\hat{R}(S)$ denotes clean-normalized relative reliance with baseline $R(0) > 0$. In high-capacity unimodal regimes where $R(0) \to 0$, ratio normalization exhibits denominator sensitivity; unnormalized raw reliance $R(S)$ and stabilized relative reliance $\hat{R}_{\epsilon}(S) = R(S)/(R(0) + \epsilon)$ are tracked alongside $\hat{R}(S)$. This operational metric captures predictive discrepancies as a proxy for behavioral reliance under the controlled intervention it doesn't sufficienctly and independently establish that the model acutally relies onmeaningful semantic visual content. The utility crossing point is formally defined as the infimum zero-crossing $S^* = \inf \{S \in [0,1] \mid U_{\text{smooth}}(S) \le 0\}$, taking $S^* = 1$ if utility remains strictly positive across $[0,1]$. Defining $S^*$ as an infimum guarantees uniqueness even under local non-monotonic fluctuations of the 3-point moving-average smoothed utility curve $U_{\text{smooth}}(S)$. The unclipped Misalignment Index integrates reliance over the negative-utility regime $[S^*, 1]$ via piecewise continuous integration:
 \begin{equation}
 \mi = \frac{1}{1 - S^*} \int_{S^*}^1 \hat{R}(S) \, dS, \qquad \mi_{\text{raw}} = \frac{1}{1 - S^*} \int_{S^*}^1 R(S) \, dS
 \end{equation}
@@ -187,15 +179,10 @@ We compute task utility using VQA soft accuracy~\cite{antol2015vqa} against 10 h
 following standard answer normalization (lowercasing, punctuation stripping, article removal).
 
 \paragraph{Teacher-Forced Sequence Reliance.}
-To prevent length and alignment artifacts from confounding generative evaluations, we measure sequence reliance via teacher-forced forward passes:
-\begin{enumerate}
-    \item Greedy decoding under clean input ($S = 0$) yields reference sequence $A^* = (a_1^*, \dots, a_{|A^*|}^*)$.
-    \item For each corruption $(T_m(X_m,S),X_{\text{rest}})$ and null $(\text{null}_m,X_{\text{rest}})$, a teacher-forced forward pass over $[X_{\text{rest}},A^*]$ extracts next-token distributions $P_{\text{deg},t}$ and $P_{\text{null},t}$ over full vocabulary $\mathcal{V}$.
-    \item Sequence reliance is the mean JSD across items and positions:
-    \begin{equation}
-    R_{\text{open}}(S) = \mathbb{E}_X \left[ \frac{1}{|A^*|} \sum_{t=1}^{|A^*|} \jsd(P_{\text{deg},t} \parallel P_{\text{null},t}) \right], \qquad \hat{R}_{\text{open}}(S) = \frac{R_{\text{open}}(S)}{R_{\text{open}}(0)}
-    \end{equation}
-\end{enumerate}
+To prevent length and alignment artifacts from confounding generative evaluations, we measure sequence reliance via teacher-forced forward passes: (1) greedy decoding under clean input ($S = 0$) yields reference sequence $A^* = (a_1^*, \dots, a_{|A^*|}^*)$; (2) for each corruption $(T_m(X_m,S),X_{\text{rest}})$ and null $(\text{null}_m,X_{\text{rest}})$, a teacher-forced forward pass over $[X_{\text{rest}},A^*]$ extracts next-token distributions $P_{\text{deg},t}$ and $P_{\text{null},t}$ over full vocabulary $\mathcal{V}$; and (3) sequence reliance is the mean JSD across items and positions:
+\begin{equation}
+R_{\text{open}}(S) = \mathbb{E}_X \left[ \frac{1}{|A^*|} \sum_{t=1}^{|A^*|} \jsd(P_{\text{deg},t} \parallel P_{\text{null},t}) \right], \qquad \hat{R}_{\text{open}}(S) = \frac{R_{\text{open}}(S)}{R_{\text{open}}(0)}
+\end{equation}
 
 \subsection{Pre-Declared Hypotheses and Multiple Comparisons Procedure}
 \label{sec:method_hypotheses}
@@ -216,7 +203,7 @@ We validate the diagnostic on a synthetic fusion benchmark with known datagenera
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig1_synthetic_two_panel.pdf}
+\includegraphics[width=0.74\textwidth]{figures/fig1_synthetic_two_panel.pdf}
 \caption{Synthetic benchmark ($N=2000$ test items per seed, 5 seeds, removed null baseline, bootstrap $B=1000$, seed 42). Left: utility $U(S)$ versus severity for Fixed, Partial, Gated, and Oracle models. Right: normalized reliance $\hat R(S)$. The Oracle receives the severity and serves as a positive control; among the other models, Gated has the lowest MI}
 \label{fig:synthetic}
 \end{figure}
@@ -234,7 +221,7 @@ We evaluate three open-weight VLMs: Qwen2-VL-2B-Instruct~\cite{wang2024qwen2vl},
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.82\textwidth]{figures/fig2_vlm_two_panel.pdf}
+\includegraphics[width=0.72\textwidth]{figures/fig2_vlm_two_panel.pdf}
 \caption{Utility (left) and normalized reliance (right) as a function of corruption severity for three VLMs under swapped (solid) and Gaussian (dashed) corruptions ($N = 500$ main sample, removedimage null baseline, bootstrap $B = 1000$, seed 42). Shaded bands are 95\% bootstrap intervals}
 \label{fig:vlm_curves}
 \end{figure}
@@ -324,7 +311,7 @@ Results for open ended generative reliance and utility are presented in Table~\r
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.82\textwidth]{figures/fig4_open_and_stability.pdf}
+\includegraphics[width=0.72\textwidth]{figures/fig4_open_and_stability.pdf}
 \caption{Extension evaluations on A-OKVQA: (a) Open-ended teacher-forced sequence reliance $\hat{R}_{\text{open}}(S)$ under swapped (solid) and Gaussian (dashed) corruptions; $y$-axis extends to 1.45 because Qwen2-VL-2B Gaussian reliance peaks at $\approx 1.34$ near $S = 0.125$ before decaying; (b) Donor derangement stability of terminal normalized reliance $\hat{R}(1)$ across permutation seeds $\{0,11,12,13\}$ with 95\% bootstrap confidence intervals}
 \label{fig:open_and_stability}
 \end{figure}
@@ -420,7 +407,7 @@ $p$ & Clean Acc & Null Acc & Acc ($S = 1$) & $U(1)$ & $R(0)$ & $R(1)$ & $\hat{R}
 
 The behavioral reliance was found to be persistently maintained across models and benchmarks, open-weight VLMs under incongruent visual inputs which we know as strictly as retained visual reliance. The key result that was found to be consistent across all six directional tests is a robust swapped-minus-Gaussian reliance gap across separate datasets and formats. Utility inversion is present in open-ended generation and in some A-OKVQA multiple choice conditions, but was not detectable on AI2D diagram reasoning due to having H5 as not supported. A few of the key limitations that should be taken in consideration are as follows::
 
-\begin{enumerate}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=0.5pt, parsep=0pt, topsep=1pt]
 \item \textbf{Null-Baseline Sensitivity:} Reliance metrics are heavily dependent on whether the null baseline omits visual tokens or provides an all-black image; empirical conclusions differ significantly under the two baselines.
 \item \textbf{Bootstrap Resolution:} If we increased the resample count it would significantly improve the resolution bound of Directional bootstrap p-values with $B = 1000$ and zero tail violations give a minimum resolution bound of $\hat{p} \le 1/1001$ without in any way affecting the substantive hypothesis decisions; extending to $B = 10{,}000$ resamples confirms $\hat{p} \le 1/10001$.
 \item \textbf{Normalization Sensitivity in High-Capacity Regimes:} As demonstrated in the modality dropout study, clean normalized reliance $\hat{R}(S) = R(S)/R(0)$ is vulnerable to denominator collapse when unimodal training drives $R(0)$ toward zero, because of limitations of division itself with 0 unnormalized reliance $R(S)$ must be reported alongside normalized metrics in high-capacity unimodal regimes. Tracking raw misalignment $\mi_{\text{raw}}$ resolves this artifact.
@@ -443,6 +430,10 @@ In this paper we put together a continuous diagnostic system that differentiates
 % References (Springer spmpsci style)
 % ======================================================================
 \begin{thebibliography}{99.}
+\setlength{\itemsep}{0pt plus 0.2pt}
+\setlength{\parsep}{0pt}
+\setlength{\parskip}{0pt}
+\small
 
 \bibitem{agrawal2018dont}
 Agrawal, A., Batra, D., Parikh, D., Kembhavi, A.: Don’t Just Assume; Look and Answer: Overcoming Priors for VQA. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 4971–4980 (2018). \url{https://doi.org/10.1109/CVPR.2018.00522}
