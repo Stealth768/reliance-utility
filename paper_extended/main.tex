@@ -120,7 +120,13 @@ Substituting or removing input modalities to probe dependence is a widely establ
 We formalize a continuous reliance-utility diagnostic framework and examine it on synthetic fusion systems with known data-generating distributions. We evaluate three open-weight Vision-Language Models (Qwen2-VL-2B, SmolVLMInstruct, LLaVA-1.5-7B) on A-OKVQA multiple choice, extend the evaluation to AI2D diagram reasoning ($N = 500$ main, $N = 400$ replication), design an openended generative VLM evaluation with teacher-forced sequence divergences, verify donor derangement stability across seeds $\{0,11,12,13\}$, and evaluate pre-declared hypotheses under Holm-Bonferroni family-wise error rate control.
 
 \paragraph{Paper Organization.}
-The remainder of this paper is organized as follows: Section~\ref{sec:related} outlines related work. Section~\ref{sec:method} introduces our reliance-utility diagnostic framework and hypothesis testing protocol. Section~\ref{sec:synthetic} validates the diagnostic on synthetic fusion systems. Section~\ref{sec:results_aokvqa} reports VLM evaluations on A-OKVQA, and Section~\ref{sec:extension} extends evaluations to AI2D diagram reasoning, open-ended generation, and donor stability. Section~\ref{sec:fusion} presents the modality dropout case study. Section~\ref{sec:discussion} discusses findings and core limitations, and Section~\ref{sec:conclusion} concludes.
+The paper after this section is organized in the following manner: Section 2
+outlines the related work. Section 3 introduces our reliance-utility diagnostic framework
+and hypothesis testing protocol. Section 4 goes on to run the diagnostic on synthetic fusion
+systems. Section 5 reports the results of  VLM evaluations on A-OKVQA, and Section 6 extends that
+evaluation to AI2D diagram reasoning, open-ended generation, and donor stability.
+Section 7 exhibits the case study on modality dropout. Section 8 encompasses core findings and
+limitations, and Section 9 concludes.
 
 % ======================================================================
 % Section 2: Related Work
