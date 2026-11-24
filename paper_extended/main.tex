@@ -145,13 +145,13 @@ limitations, and Section 9 concludes.
 \label{sec:related}
 
 \paragraph{Modality Sensitivity and Robustness Benchmarking.}
-Standard multimodal evaluation primarily focuses on out-of-distribution robustness across image corruptions~\cite{saxena2026robustbench} or search-based sensitivity testing~\cite{weisl2026most}. The benchmarks utilized can be used to accuracy drops, they simply don't measure discrepancy against an explicit unimodal null or whether if corrupted modalities are safely discounted. Recent analyses investigate cross-modal attention routing and unimodal shortcut learning~\cite{deng2025words,cai2025interference}. While attention maps can highlight layer-wise token interaction, they do not directly evaluate whether downstream output decisions functionally rely on visual evidence. Our behavioral diagnostic complements mechanistic attention studies by evaluating decision shifts under calibrated continuous input interventions.
+Standard multimodal evaluation primarily focuses on out-of-distribution robustness across image corruptions and search-based sensitivity testing~\cite{saxena2026robustbench}. These benchmarks measure accuracy drops but do not capture discrepancy against an explicit unimodal null or whether corrupted modalities are safely discounted. Recent analyses investigate cross-modal attention routing and unimodal shortcut learning~\cite{deng2025words,cai2025interference}. While attention maps can highlight layer-wise token interaction, they do not directly evaluate whether downstream output decisions functionally rely on visual evidence. Our behavioral diagnostic complements mechanistic attention studies by evaluating decision shifts under calibrated continuous input interventions.
 
 \paragraph{Modality Conflict, Priors, and Interference.}
-Under multimodal dissonance or knowledge conflict, models often exhibit strong inductive preferences between modalities~\cite{deng2025words,zhang2025insight}. Cai et al.~\cite{cai2025interference} investigated modality interference under discrete ablations and perturbations. We generalize discrete perturbations by tracing continuous severity paths, pairing predictive divergence with performance relative to unimodal baselines. Extensive literature documents exist that show multimodal models often answer questions related to images based on guesses or stereotypes rather than actually depending on the image provided~\cite{antol2015vqa,goyal2017making,agrawal2018dont,gupta2022swapmix}. Our swapped condition represents a continuous-severity generalization of donor swapping.
+Under multimodal dissonance or knowledge conflict, models often exhibit strong inductive preferences between modalities~\cite{deng2025words}. Cai et al.~\cite{cai2025interference} investigated modality interference under discrete ablations and perturbations. We generalize discrete perturbations by tracing continuous severity paths, pairing predictive divergence with performance relative to unimodal baselines. Extensive literature documents exist that show multimodal models often answer questions related to images based on guesses or stereotypes rather than actually depending on the image provided~\cite{antol2015vqa,gupta2022swapmix}. Our swapped condition represents a continuous-severity generalization of donor swapping.
 
 \paragraph{Diagrammatic Reasoning and Counterfactual Grounding.}
-Unlike natural photographic scenes, scientific diagrams in AI2D~\cite{kembhavi2016diagram} feature dense relational logic for example graphs ,arrows, labels that cannot be inferred from linguistic priors alone. Substituting blank or mismatched images to test visual grounding is established across domain-specific benchmarks: Zafar et al.~\cite{zafar2026grounding} evaluated clean, blank, and shuffled images in medical reasoning, while OMD-Bench~\cite{nazi2026omd} replaced entire modality channels to probe calibrated abstention under catastrophic dissonance. In open-ended generative VQA~\cite{antol2015vqa}, evaluating answer distributions relies on human agreement soft accuracy, which we extend via teacher-forced token-level sequence divergence over clean answer trajectories.
+Unlike natural photographic scenes, scientific diagrams in AI2D~\cite{kembhavi2016diagram} feature dense relational logic for example graphs, arrows, labels that cannot be inferred from linguistic priors alone. Substituting blank or mismatched images to test visual grounding is established across domain-specific benchmarks including medical and multimodal abstention settings. In open-ended generative VQA~\cite{antol2015vqa}, evaluating answer distributions relies on human agreement soft accuracy, which we extend via teacher-forced token-level sequence divergence over clean answer trajectories.
 
 % ======================================================================
 % Section 3: Methodology
@@ -415,16 +415,12 @@ In this paper we put together a continuous diagnostic system that differentiates
 \setlength{\parsep}{0pt}
 \setlength{\parskip}{0pt}
 \footnotesize
-\bibitem{agrawal2018dont}
-Agrawal, A., Batra, D., Parikh, D., Kembhavi, A.: Don’t Just Assume; Look and Answer: Overcoming Priors for VQA. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 4971–4980 (2018). \url{https://doi.org/10.1109/CVPR.2018.00522}
 \bibitem{antol2015vqa}
 Antol, S., Agrawal, A., Lu, J., Mitchell, M., Batra, D., Zitnick, C.L., Parikh, D.: VQA: Visual Question Answering. In: IEEE International Conference on Computer Vision (ICCV), pp. 2425–2433 (2015). \url{https://doi.org/10.1109/ICCV.2015.279}
 \bibitem{cai2025interference}
 Cai, R., Li, B., Wen, X., Chen, M., Zhao, Z.: Diagnosing and Mitigating Modality Interference in MLLMs. arXiv preprint arXiv:2505.19616 (2025). \url{https://arxiv.org/abs/2505.19616}
 \bibitem{deng2025words}
 Deng, Z., et al.: Words or Vision? Analyzing and Mitigating Modality Preference in Vision-Language Models. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) (2025). \url{https://arxiv.org/abs/2410.02422}
-\bibitem{goyal2017making}
-Goyal, Y., Khot, T., Summers-Stay, D., Batra, D., Parikh, D.: Making the V in VQA Matter: Elevating the Role of Image Understanding in Visual Question Answering. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 6904–6913 (2017). \url{https://doi.org/10.1109/CVPR.2017.730}
 \bibitem{gupta2022swapmix}
 Gupta, V., Sanyal, S., Xiang, X.: SwapMix: Diagnosing and Regularizing Over-Reliance on Visual Context in VQA. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5078–5088 (2022). \url{https://doi.org/10.1109/CVPR.2022.00501}
 \bibitem{holm1979simple}
@@ -437,22 +433,14 @@ Lin, J.: Divergence measures based on the Shannon entropy. IEEE Transactions on 
 Liu, H., Li, C., Li, Y., Lee, Y.J.: Improved Baselines with Visual Instruction Tuning. In: IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 26296–26306 (2024). \url{https://doi.org/10.1109/CVPR52633.2024.02488}
 \bibitem{marafioti2025smolvlm}
 Marafioti, A., et al.: SmolVLM: Small Models, Big Vision. arXiv preprint arXiv:2504.05299 (2025). \url{https://arxiv.org/abs/2504.05299}
-\bibitem{nazi2026omd}
-Nazi, Z.A., Dipta, S.R., Parvez, M.R.: Omni-Modal Dissonance Benchmark. arXiv preprint arXiv:2603.27187 (2026). \url{https://arxiv.org/abs/2603.27187}
 \bibitem{saxena2026robustbench}
 Saxena, S., et al.: VLM-RobustBench: Benchmarking Robustness of Vision-Language Models to Distribution Shifts. In: International Conference on Machine Learning (ICML) (2026). \url{https://arxiv.org/abs/2602.01234}
 \bibitem{schwenk2022aokvqa}
 Schwenk, D., Khandelwal, A., Clark, C., Joshi, K., Mottaghi, R.: A-OKVQA: A Benchmark for Visual Question Answering using World Knowledge. In: European Conference on Computer Vision (ECCV), LNCS vol. 13668, pp. 146–162. Springer, Cham (2022). \url{https://doi.org/10.1007/978-3-031-20074-8_9}
 \bibitem{wang2024qwen2vl}
 Wang, P., et al.: Qwen2-VL: To See the World More Clearly. arXiv preprint arXiv:2409.12191 (2024). \url{https://arxiv.org/abs/2409.12191}
-\bibitem{weisl2026most}
-Weißl, A., et al.: MoST: Modality Sensitivity Testing for Multimodal Large Language Models. arXiv preprint arXiv:2610.32360 (2026). \url{https://arxiv.org/abs/2610.32360}
 \bibitem{xiao2017fashion}
 Xiao, H., Rasul, K., Vollgraf, R.: Fashion-MNIST: A Novel Image Dataset for Benchmarking Machine Learning Algorithms. arXiv preprint arXiv:1708.07747 (2017). \url{https://arxiv.org/abs/1708.07747}
-\bibitem{zafar2026grounding}
-Zafar, A., Murali, L.K., Vashist, A.: Beyond Accuracy: Evaluating Visual Grounding In Multimodal Medical Reasoning. arXiv preprint arXiv:2603.03437 (2026). \url{https://arxiv.org/abs/2603.03437}
-\bibitem{zhang2025insight}
-Zhang, Y., et al.: Insight Over Sight: Evaluating Vision-Knowledge Conflicts in Multimodal LLMs. In: Findings of the Association for Computational Linguistics (ACL), pp. 1205–1218 (2025). \url{https://doi.org/10.18653/v1/2025.findings-acl.64}
 \end{thebibliography}
 
 \end{document}
